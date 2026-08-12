@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create account — Kitman</title>
+  <meta name="description" content="Kitman — the modern multi-vendor marketplace of Ethiopia. Shop authentic Ethiopian goods, tech, fashion and more. Pay with Telebirr, CBE Birr, ArifPay or Cash on Delivery." />
+
+  <!-- Tailwind CSS (v3 CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans (EN), Noto Sans Ethiopic (AM), Cairo (AR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Swiper.js (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // ---- Tailwind theme configuration -------------------------------------
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            forest: { light: '#0e9c60', DEFAULT: '#0b7a4b', dark: '#075c38', deep: '#043b24' },
+            gold:   { light: '#ffce4d', DEFAULT: '#f5b301', dark: '#c98f00' },
+            crimson:{ light: '#f04455', DEFAULT: '#d81e2c', dark: '#a8121e' },
+            cream:  '#fbf6ec',
+            sand:   '#f4ecdd',
+            ink:    '#0f172a',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            ethiopic: ['Noto Sans Ethiopic', 'sans-serif'],
+            arabic: ['Cairo', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 24px -6px rgba(15,23,42,0.12)',
+            card: '0 10px 30px -12px rgba(15,23,42,0.18)',
+            glow: '0 8px 30px -8px rgba(11,122,75,0.45)',
+          },
+          borderRadius: { '2xl': '1.1rem', '3xl': '1.6rem' },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Warm base + smooth theme transition */
+    html { scroll-behavior: smooth; }
+    body { transition: background-color .3s ease, color .3s ease; }
+    [x-cloak] { display: none !important; }
+
+    /* Language-driven fonts */
+    body.lang-en { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    body.lang-am { font-family: 'Noto Sans Ethiopic', sans-serif; }
+    body.lang-ar { font-family: 'Cairo', sans-serif; }
+
+    /* Subtle Ethiopian-inspired geometric motif for hero backdrops */
+    .motif {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(245,179,1,.18) 0, transparent 22%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.14) 0, transparent 20%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 10px, transparent 10px 20px);
+    }
+    /* Thin scrollbar for story rails */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Swiper theme */
+    .swiper-pagination-bullet { background: #ffffff; opacity: .5; }
+    .swiper-pagination-bullet-active { background: #f5b301; opacity: 1; width: 22px; border-radius: 4px; }
+    .hero-swiper .swiper-button-next, .hero-swiper .swiper-button-prev { color: #fff; }
+    .hero-swiper .swiper-button-next:after, .hero-swiper .swiper-button-prev:after { font-size: 20px; }
+
+    /* Gradient text accent */
+    .text-gradient { background: linear-gradient(90deg,#0b7a4b,#0e9c60); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  </style>
+
+  <script>
+    // ---- Global image fallback: no broken-image icons, ever ---------------
+    (function () {
+      var FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="#0b7a4b"/><stop offset="1" stop-color="#f5b301"/>' +
+        '</linearGradient></defs><rect width="400" height="400" fill="url(#g)"/>' +
+        '<text x="50%" y="56%" font-size="190" fill="rgba(255,255,255,.35)" ' +
+        'text-anchor="middle" font-family="sans-serif">ኪ</text></svg>'
+      );
+      document.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t.tagName === 'IMG' && t.src.indexOf('data:image') !== 0) { t.src = FALLBACK; }
+      }, true);
+    })();
+  </script>
+
+  <script>
+    // =====================================================================
+    //  Kitman — shared Alpine state, trilingual i18n engine + dark mode
+    //  This same kitman() root will power every page in the marketplace.
+    // =====================================================================
+    function kitman() {
+      return {
+        // --- global state --------------------------------------------------
+        lang: 'en',              // 'en' | 'am' | 'ar'
+        dark: false,
+        city: 'Addis Ababa',
+        cartCount: 3,
+        wishCount: 2,
+        // UI toggles
+        langModal: false,
+        searchFocused: false,
+        catOpen: false,
+        mobileMenu: false,
+
+        // --- notifications (demo) ------------------------------------------
+        notifOpen: false,
+        notifs: [
+          { icon:'truck',        unread:true,  en:'Your order KTM-90312 is on its way', am:'ትዕዛዝዎ KTM-90312 በመንገድ ላይ ነው', ar:'طلبك KTM-90312 في الطريق', time:'2m' },
+          { icon:'tag',          unread:true,  en:'Flash sale — up to 40% off tech',     am:'ፍላሽ ሽያጭ — እስከ 40% ቅናሽ',        ar:'تخفيضات — حتى 40٪ على التقنية',  time:'1h' },
+          { icon:'star',         unread:false, en:'You received a new 5-star review',     am:'አዲስ 5 ኮከብ ግምገማ ደርሶዎታል',        ar:'حصلت على تقييم 5 نجوم',          time:'3h' },
+          { icon:'wallet',       unread:false, en:'Payout of ETB 84,200 was processed',   am:'ክፍያ ETB 84,200 ተከናውኗል',          ar:'تمت تسوية ETB 84,200',           time:'1d' }
+        ],
+        get unread() { return this.notifs.filter(n => n.unread).length; },
+        markAllRead() { this.notifs.forEach(n => n.unread = false); },
+
+        // --- chat with seller (demo) ---------------------------------------
+        chatOpen: false, chatWith: '', chatInput: '', chatMsgs: [],
+        openChat(name) {
+          this.chatWith = name || 'Seller';
+          this.chatMsgs = [{ me:false, text:'Selam! Welcome to ' + this.chatWith + '. How can I help you today?' }];
+          this.chatOpen = true;
+          this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+        },
+        sendChat(text) {
+          const t = (text || this.chatInput).trim();
+          if (!t) return;
+          this.chatMsgs.push({ me:true, text:t });
+          this.chatInput = '';
+          this.$nextTick(() => this.chatScrollBottom());
+          setTimeout(() => {
+            this.chatMsgs.push({ me:false, text:"Thanks for reaching out! Yes, it's available. We deliver across Addis Ababa in 1-2 days and accept Telebirr, CBE Birr, ArifPay and Cash on Delivery." });
+            this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+          }, 900);
+        },
+        chatScrollBottom() { const el = this.$refs.chatScroll; if (el) el.scrollTop = el.scrollHeight; },
+
+        // --- write a review (demo) -----------------------------------------
+        reviewOpen: false, reviewFor: '', reviewStars: 5, reviewText: '', reviewSent: false,
+        openReview(name) { this.reviewFor = name || 'this product'; this.reviewStars = 5; this.reviewText = ''; this.reviewSent = false; this.reviewOpen = true; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        submitReview() { if (!this.reviewText.trim()) return; this.reviewSent = true; this.$nextTick(() => window.lucide && lucide.createIcons()); setTimeout(() => { this.reviewOpen = false; }, 1700); },
+
+        // --- Quick View + Compare (shared across every product card) -------
+        quickView: null,          // product object shown in modal
+        qvQty: 1,
+        compare: [],              // products staged for comparison (max 4)
+        compareOpen: false,       // comparison table modal
+        openQuickView(p) { this.quickView = p; this.qvQty = 1; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        toggleCompare(p) {
+          const i = this.compare.findIndex(x => x.name === p.name);
+          if (i > -1) { this.compare.splice(i, 1); }
+          else if (this.compare.length < 4) { this.compare.push(p); }
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        inCompare(p) { return this.compare.some(x => x.name === p.name); },
+        clearCompare() { this.compare = []; this.compareOpen = false; },
+        disc(p) { return p.was ? Math.round((1 - p.price / p.was) * 100) : 0; },
+        qvAddToCart() { this.cartCount += this.qvQty; this.quickView = null; },
+
+        cities: ['Addis Ababa', 'Adama', 'Hawassa', 'Bahir Dar', 'Dire Dawa', 'Mekelle', 'Gondar'],
+
+        // --- lifecycle -----------------------------------------------------
+        init() {
+          this.applyLang();
+          this.$watch('lang', () => this.applyLang());
+          this.$watch('dark', () => document.documentElement.classList.toggle('dark', this.dark));
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        applyLang() {
+          const rtl = this.lang === 'ar';
+          const el = document.documentElement;
+          el.lang = this.lang; el.dir = rtl ? 'rtl' : 'ltr';
+          document.body.classList.remove('lang-en','lang-am','lang-ar');
+          document.body.classList.add('lang-' + this.lang);
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        setLang(l) { this.lang = l; this.langModal = false; },
+
+        // --- translation helper -------------------------------------------
+        t(key) { return (this.dict[key] && this.dict[key][this.lang]) || (this.dict[key] && this.dict[key].en) || key; },
+
+        langName(l) { return { en: 'English', am: 'አማርኛ', ar: 'العربية' }[l]; },
+
+        // --- price formatter (Ethiopian Birr) -----------------------------
+        etb(v) {
+          const n = Number(v).toLocaleString('en-US');
+          return this.lang === 'am' ? (n + ' ብር') : ('ETB ' + n);
+        },
+
+        // --- dictionary ----------------------------------------------------
+        dict: {
+          ship_to:      { en: 'Deliver to', am: 'መድረሻ', ar: 'التوصيل إلى' },
+          support:      { en: 'Help & Support: 8556', am: 'እገዛ: 8556', ar: 'الدعم: 8556' },
+          seller_link:  { en: 'Sell on Kitman', am: 'በኪትማን ይሽጡ', ar: 'بِع على كِتمان' },
+          track_order:  { en: 'Track Order', am: 'ትዕዛዝ ይከታተሉ', ar: 'تتبع الطلب' },
+          search_ph:    { en: 'Search products, brands & vendors…', am: 'እቃዎችን፣ ብራንዶችን ይፈልጉ…', ar: 'ابحث عن المنتجات والبائعين…' },
+          all_cats:     { en: 'All Categories', am: 'ሁሉም ምድቦች', ar: 'كل الفئات' },
+          account:      { en: 'Account', am: 'መለያ', ar: 'الحساب' },
+          wishlist:     { en: 'Wishlist', am: 'ተመራጮች', ar: 'المفضلة' },
+          cart:         { en: 'Cart', am: 'ጋሪ', ar: 'السلة' },
+          home:         { en: 'Home', am: 'መነሻ', ar: 'الرئيسية' },
+          categories:   { en: 'Categories', am: 'ምድቦች', ar: 'الفئات' },
+          choose_lang:  { en: 'Choose your language', am: 'ቋንቋ ይምረጡ', ar: 'اختر لغتك' },
+          lang_note:    { en: 'Prices, layout and reading direction adapt automatically.', am: 'ዋጋና አቀማመጥ በራስ-ሰር ይስተካከላል።', ar: 'تتكيّف الأسعار والاتجاه تلقائياً.' },
+          hero1_tag:    { en: 'MADE IN ETHIOPIA', am: 'በኢትዮጵያ የተሰራ', ar: 'صُنع في إثيوبيا' },
+          hero1_title:  { en: 'Authentic Habesha, delivered to your door', am: 'እውነተኛ የሀበሻ ምርቶች እስከ በርዎ', ar: 'منتجات حبشية أصيلة حتى بابك' },
+          hero1_sub:    { en: 'Hand-woven Kemis, coffee & crafts from trusted local vendors.', am: 'በእጅ የተሰራ ቀሚስ፣ ቡና እና ጥበባት ከታማኝ ሻጮች።', ar: 'أزياء وبن وحِرف يدوية من بائعين موثوقين.' },
+          hero2_tag:    { en: 'MEGA TECH WEEK', am: 'የቴክ ሳምንት', ar: 'أسبوع التقنية' },
+          hero2_title:  { en: 'Up to 40% off phones & electronics', am: 'እስከ 40% ቅናሽ በስልኮች እና ኤሌክትሮኒክስ', ar: 'خصم حتى 40٪ على الهواتف والإلكترونيات' },
+          hero2_sub:    { en: 'Genuine warranty. Free delivery across Addis Ababa.', am: 'ዋስትና ያለው። በአዲስ አበባ ነፃ መላኪያ።', ar: 'ضمان أصلي وتوصيل مجاني في أديس أبابا.' },
+          hero3_tag:    { en: 'NEW SEASON', am: 'አዲስ ወቅት', ar: 'موسم جديد' },
+          hero3_title:  { en: 'Fashion that moves with the city', am: 'ከከተማዋ ጋር የሚራመድ ፋሽን', ar: 'أزياء تواكب المدينة' },
+          hero3_sub:    { en: 'Discover trending styles from Addis top boutiques.', am: 'ከአዲስ አበባ ምርጥ ሱቆች አዳዲስ ስታይሎች።', ar: 'اكتشف أحدث الصيحات من أرقى متاجر أديس.' },
+          shop_now:     { en: 'Shop now', am: 'አሁን ይግዙ', ar: 'تسوّق الآن' },
+          explore:      { en: 'Explore deals', am: 'ቅናሾችን ይመልከቱ', ar: 'استكشف العروض' },
+          trust_secure: { en: '100% Secure Payments', am: '100% ደህንነቱ የተጠበቀ ክፍያ', ar: 'مدفوعات آمنة 100٪' },
+          trust_cod:    { en: 'Cash on Delivery', am: 'በመቀበል ጊዜ ክፍያ', ar: 'الدفع عند الاستلام' },
+          trust_pay:    { en: 'Trusted local payments', am: 'የታመኑ የአገር ውስጥ ክፍያዎች', ar: 'وسائل دفع محلية موثوقة' },
+        },
+      }
+    }
+  </script>
+</head>
+
+<body class="lang-en bg-cream text-ink dark:bg-ink dark:text-slate-100 antialiased min-h-screen" x-data="kitman()" x-init="init()" x-cloak>
+  <!-- minimal top bar -->
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="grid place-items-center w-10 h-10 rounded-xl bg-forest text-white shadow-glow font-extrabold text-lg">ኪ</span>
+      <span class="text-xl font-extrabold tracking-tight text-forest dark:text-forest-light">Kitman</span>
+    </a>
+    <div class="flex items-center gap-1">
+      <button @click="langModal=true" class="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-medium"><i data-lucide="globe" class="w-4 h-4"></i><span x-text="langName(lang)"></span></button>
+      <button @click="dark=!dark" class="grid place-items-center w-10 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="moon" class="w-5 h-5" x-show="!dark"></i><i data-lucide="sun" class="w-5 h-5 text-gold" x-show="dark"></i></button>
+    </div>
+  </div>
+
+  <!-- auth layout -->
+  <main class="grid lg:grid-cols-2 min-h-[calc(100vh-4rem)]">
+    <!-- brand panel -->
+    <div class="hidden lg:flex flex-col justify-center gap-6 p-14 motif bg-gradient-to-br from-forest via-forest-dark to-forest-deep text-white relative overflow-hidden">
+      <div class="absolute -top-20 -end-20 w-72 h-72 rounded-full bg-gold/20 blur-3xl"></div>
+      <div class="relative z-10 max-w-md">
+        <h1 class="text-4xl font-extrabold leading-tight" x-text="lang==='am'?'ይግዙ። ይሽጡ። በኪትማን ያድጉ።':lang==='ar'?'تسوّق. بِع. انمُ مع كِتمان.':'Shop. Sell. Grow with Kitman.'"></h1>
+        <p class="mt-4 text-white/85 text-lg" x-text="lang==='am'?'የኢትዮጵያ ዘመናዊ ባለ ብዙ ሻጭ ገበያ።':lang==='ar'?'سوق إثيوبيا الحديث متعدد البائعين.':'Ethiopia’s modern multi-vendor marketplace.'"></p>
+        <div class="mt-8 space-y-3">
+          <template x-for="f in [
+              {en:'Thousands of products from trusted local vendors',am:'ከታመኑ ሻጮች ሺዎች ምርቶች',ar:'آلاف المنتجات من بائعين موثوقين',i:'package'},
+              {en:'Pay with Telebirr, CBE Birr, ArifPay or COD',am:'በTelebirr፣ CBE Birr፣ ArifPay ወይም COD',ar:'ادفع عبر Telebirr وCBE وArifPay',i:'wallet'},
+              {en:'Fast, tracked delivery across the country',am:'ፈጣንና የሚከታተል መላኪያ በመላ አገሪቱ',ar:'توصيل سريع ومتتبع في كل البلاد',i:'truck'}
+            ]" :key="f.i">
+            <div class="flex items-center gap-3"><span class="grid place-items-center w-9 h-9 rounded-xl bg-white/15"><i :data-lucide="f.i" class="w-5 h-5"></i></span><span class="text-white/90" x-text="lang==='am'?f.am:lang==='ar'?f.ar:f.en"></span></div>
+          </template>
+        </div>
+        <div class="mt-8 flex flex-wrap gap-2">
+          <span class="px-2.5 py-1 rounded-md bg-white/15 text-white text-[11px] font-bold">Telebirr</span>
+          <span class="px-2.5 py-1 rounded-md bg-white/15 text-white text-[11px] font-bold">CBE Birr</span>
+          <span class="px-2.5 py-1 rounded-md bg-white/15 text-white text-[11px] font-bold">ArifPay</span>
+          <span class="px-2.5 py-1 rounded-md bg-white/15 text-white text-[11px] font-bold">Cash on Delivery</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- form panel -->
+    <div class="flex items-center justify-center p-6" x-data="authPage()" x-init="$nextTick(()=>window.lucide&&lucide.createIcons())">
+      <div class="w-full max-w-sm">
+        <!-- tabs -->
+        <div class="flex gap-1 p-1 rounded-2xl bg-black/5 dark:bg-white/10 mb-6" x-show="step==='form'">
+          <button @click="switchMode('login')" :class="mode==='login'?'bg-white dark:bg-slate-800 shadow-soft text-forest':'text-ink/60 dark:text-slate-300'" class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition" x-text="lang==='am'?'ግባ':lang==='ar'?'تسجيل الدخول':'Sign in'"></button>
+          <button @click="switchMode('register')" :class="mode==='register'?'bg-white dark:bg-slate-800 shadow-soft text-forest':'text-ink/60 dark:text-slate-300'" class="flex-1 py-2.5 rounded-xl text-sm font-semibold transition" x-text="lang==='am'?'መለያ ፍጠር':lang==='ar'?'إنشاء حساب':'Create account'"></button>
+        </div>
+
+        <!-- FORM step -->
+        <div x-show="step==='form'">
+          <h2 class="text-2xl font-extrabold" x-text="mode==='login' ? (lang==='am'?'እንኳን ደህና መጡ':lang==='ar'?'مرحباً بعودتك':'Welcome back') : (lang==='am'?'መለያ ይፍጠሩ':lang==='ar'?'أنشئ حسابك':'Create your account')"></h2>
+          <p class="text-sm text-ink/60 dark:text-slate-400 mt-1" x-text="lang==='am'?'በስልክ ቁጥርዎ ይቀጥሉ':lang==='ar'?'تابع برقم هاتفك':'Continue with your phone number'"></p>
+
+          <div class="mt-5 space-y-3">
+            <div x-show="mode==='register'">
+              <label class="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5" x-text="lang==='am'?'ሙሉ ስም':lang==='ar'?'الاسم الكامل':'Full name'"></label>
+              <input type="text" x-model="name" placeholder="Abebe Kebede" class="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5" x-text="lang==='am'?'ስልክ ቁጥር':lang==='ar'?'رقم الهاتف':'Phone number'"></label>
+              <div class="flex rounded-xl ring-1 ring-black/10 dark:ring-white/15 focus-within:ring-2 focus-within:ring-forest bg-cream/40 dark:bg-slate-900 overflow-hidden">
+                <span class="grid place-items-center px-3 text-sm text-ink/60 border-e border-black/10 dark:border-white/10">+251</span>
+                <input type="tel" x-model="phone" placeholder="911 234 567" class="flex-1 px-3 py-3 bg-transparent outline-none" />
+              </div>
+            </div>
+            <div x-show="mode==='login' && usePassword">
+              <label class="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5" x-text="lang==='am'?'የይለፍ ቃል':lang==='ar'?'كلمة المرور':'Password'"></label>
+              <input type="password" x-model="password" placeholder="••••••••" class="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest" />
+              <a href="#" class="block text-xs text-forest font-semibold mt-1.5 text-end" x-text="lang==='am'?'የይለፍ ቃል ረሱ?':lang==='ar'?'نسيت كلمة المرور؟':'Forgot password?'"></a>
+            </div>
+          </div>
+
+          <button @click="submitForm()" :disabled="!canSubmit" :class="canSubmit?'':'opacity-40 cursor-not-allowed'" class="mt-5 w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-forest hover:bg-forest-dark text-white font-bold shadow-glow transition">
+            <span x-text="(mode==='login'&&usePassword) ? (lang==='am'?'ግባ':lang==='ar'?'دخول':'Sign in') : (lang==='am'?'ኮድ ላክ':lang==='ar'?'أرسل الرمز':'Send code')"></span><i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i>
+          </button>
+
+          <button @click="usePassword=!usePassword" x-show="mode==='login'" class="mt-3 w-full text-sm font-semibold text-forest hover:underline" x-text="usePassword ? (lang==='am'?'በOTP ኮድ ግባ':lang==='ar'?'الدخول برمز OTP':'Use OTP code instead') : (lang==='am'?'በይለፍ ቃል ግባ':lang==='ar'?'الدخول بكلمة المرور':'Use password instead')"></button>
+
+          <!-- divider -->
+          <div class="flex items-center gap-3 my-5"><span class="flex-1 h-px bg-black/10 dark:bg-white/10"></span><span class="text-xs text-ink/40" x-text="lang==='am'?'ወይም':lang==='ar'?'أو':'or'"></span><span class="flex-1 h-px bg-black/10 dark:bg-white/10"></span></div>
+          <div class="grid grid-cols-3 gap-2">
+            <button class="grid place-items-center h-11 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5 transition font-bold text-sm">G</button>
+            <button class="grid place-items-center h-11 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5 transition"><i data-lucide="facebook" class="w-5 h-5 text-[#1877f2]"></i></button>
+            <button class="grid place-items-center h-11 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5 transition"><i data-lucide="apple" class="w-5 h-5"></i></button>
+          </div>
+
+          <p class="text-[11px] text-ink/50 dark:text-slate-400 text-center mt-5" x-text="lang==='am'?'በመቀጠል የአገልግሎት ውሎችንና የግላዊነት ፖሊሲን ተስማምተዋል።':lang==='ar'?'بالمتابعة أنت توافق على الشروط وسياسة الخصوصية.':'By continuing you agree to our Terms & Privacy Policy.'"></p>
+          <a href="vendor-register.html" class="mt-4 flex items-center justify-center gap-1.5 text-sm font-semibold text-forest hover:underline"><i data-lucide="store" class="w-4 h-4"></i><span x-text="lang==='am'?'ሻጭ ነዎት? በኪትማን ይሽጡ':lang==='ar'?'بائع؟ بِع على كِتمان':'Are you a seller? Sell on Kitman'"></span></a>
+        </div>
+
+        <!-- OTP step -->
+        <div x-show="step==='otp'" style="display:none;">
+          <button @click="step='form'" class="inline-flex items-center gap-1 text-sm text-ink/60 hover:text-forest mb-4"><i data-lucide="arrow-left" class="w-4 h-4 rtl:rotate-180"></i><span x-text="lang==='am'?'ተመለስ':lang==='ar'?'رجوع':'Back'"></span></button>
+          <span class="grid place-items-center w-14 h-14 rounded-2xl bg-forest/10 text-forest mb-3"><i data-lucide="message-square-lock" class="w-7 h-7"></i></span>
+          <h2 class="text-2xl font-extrabold" x-text="lang==='am'?'ኮድ ያስገቡ':lang==='ar'?'أدخل الرمز':'Enter the code'"></h2>
+          <p class="text-sm text-ink/60 dark:text-slate-400 mt-1"><span x-text="lang==='am'?'ኮድ ወደ':lang==='ar'?'أرسلنا رمزاً إلى':'We sent a 5-digit code to'"></span> <span class="font-semibold text-ink dark:text-slate-200" x-text="'+251 '+phone"></span></p>
+          <input type="text" inputmode="numeric" maxlength="5" x-model="otp" placeholder="•••••" class="mt-5 w-full text-center text-2xl font-extrabold tracking-[0.6em] px-4 py-3.5 rounded-2xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest" />
+          <button @click="verifyOtp()" :disabled="otp.length<5" :class="otp.length<5?'opacity-40 cursor-not-allowed':''" class="mt-4 w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-forest hover:bg-forest-dark text-white font-bold shadow-glow transition"><i data-lucide="check" class="w-5 h-5"></i><span x-text="lang==='am'?'አረጋግጥ':lang==='ar'?'تحقق':'Verify & continue'"></span></button>
+          <p class="text-sm text-center text-ink/60 dark:text-slate-400 mt-4">
+            <span x-show="resend>0" x-text="(lang==='am'?'ኮድ በድጋሚ ላክ በ ':lang==='ar'?'إعادة الإرسال خلال ':'Resend code in ')+resend+'s'"></span>
+            <button x-show="resend===0" @click="startTimer()" class="text-forest font-semibold hover:underline" x-text="lang==='am'?'ኮድ በድጋሚ ላክ':lang==='ar'?'إعادة إرسال الرمز':'Resend code'"></button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- language modal (reused) -->
+    <!-- KITMAN:NOTIF -->
+  <div x-show="notifOpen" x-transition.opacity class="fixed inset-0 z-[75]" @click.self="notifOpen=false" x-cloak>
+    <div x-show="notifOpen" x-transition
+         class="absolute top-[4.75rem] end-3 md:end-6 w-80 max-w-[92vw] bg-white dark:bg-slate-800 rounded-2xl shadow-[0_24px_60px_-15px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-black/5 dark:border-white/10">
+        <span class="font-bold" x-text="lang==='am'?'ማሳወቂያዎች':lang==='ar'?'الإشعارات':'Notifications'"></span>
+        <button @click="markAllRead()" class="text-xs font-semibold text-forest hover:underline" x-text="lang==='am'?'ሁሉንም አንብብ':lang==='ar'?'تعليم الكل كمقروء':'Mark all read'"></button>
+      </div>
+      <div class="max-h-80 overflow-y-auto divide-y divide-black/5 dark:divide-white/10">
+        <template x-for="(n,i) in notifs" :key="i">
+          <div class="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.03] dark:hover:bg-white/5 transition">
+            <span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest shrink-0"><i :data-lucide="n.icon" class="w-[18px] h-[18px]"></i></span>
+            <div class="flex-1 min-w-0"><p class="text-sm leading-snug" x-text="lang==='am'?n.am:lang==='ar'?n.ar:n.en"></p><p class="text-[11px] text-black/40 dark:text-white/40 mt-0.5" x-text="n.time"></p></div>
+            <span x-show="n.unread" class="w-2 h-2 rounded-full bg-crimson mt-1.5 shrink-0"></span>
+          </div>
+        </template>
+      </div>
+      <a href="#" class="block text-center px-4 py-3 text-sm font-semibold text-forest hover:bg-black/[0.03] dark:hover:bg-white/5 border-t border-black/5 dark:border-white/10" x-text="lang==='am'?'ሁሉንም ማሳወቂያ ይመልከቱ':lang==='ar'?'عرض كل الإشعارات':'View all notifications'"></a>
+    </div>
+  </div>
+
+  <div x-show="langModal" x-transition.opacity class="fixed inset-0 z-[60] bg-ink/60 backdrop-blur-sm grid place-items-center p-4" @click.self="langModal=false" x-cloak>
+    <div x-show="langModal" x-transition.scale class="w-full max-w-sm bg-white dark:bg-slate-800 rounded-3xl shadow-card p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold" x-text="t('choose_lang')"></h3><button @click="langModal=false" class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="space-y-2">
+        <template x-for="l in ['en','am','ar']" :key="l">
+          <button @click="setLang(l)" :class="lang===l ? 'ring-2 ring-forest bg-forest/5' : 'ring-1 ring-black/10 dark:ring-white/10'" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition hover:bg-forest/5">
+            <span class="flex items-center gap-3"><span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest font-bold" x-text="l==='en'?'EN':l==='am'?'አ':'ع'"></span><span class="font-semibold" x-text="langName(l)"></span></span>
+            <i data-lucide="check" class="w-5 h-5 text-forest" x-show="lang===l"></i>
+          </button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Auth (login / register / OTP) -----------------------------------
+    function authPage() {
+      return {
+        mode: 'register',
+        step: 'form',
+        usePassword: false,
+        name: '', phone: '', password: '', otp: '',
+        resend: 30, _timer: null,
+        get canSubmit() {
+          if (this.mode === 'register') return this.name.trim() && this.phone.trim().length >= 9;
+          if (this.usePassword) return this.phone.trim().length >= 9 && this.password.length >= 4;
+          return this.phone.trim().length >= 9;
+        },
+        switchMode(m) { this.mode = m; this.step = 'form'; this.usePassword = false; },
+        submitForm() {
+          if (!this.canSubmit) return;
+          if (this.mode === 'login' && this.usePassword) { window.location.href = 'index.html'; return; }
+          this.step = 'otp'; this.startTimer(); this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        verifyOtp() { if (this.otp.length >= 5) window.location.href = 'index.html'; },
+        startTimer() { this.resend = 30; clearInterval(this._timer); this._timer = setInterval(() => { if (this.resend > 0) this.resend--; else clearInterval(this._timer); }, 1000); }
+      }
+    }
+  </script>
+
+  <script>document.addEventListener('DOMContentLoaded', () => { window.lucide && lucide.createIcons(); });</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

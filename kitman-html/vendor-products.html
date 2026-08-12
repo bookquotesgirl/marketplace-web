@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products — Kitman Seller</title>
+  <meta name="description" content="Kitman — the modern multi-vendor marketplace of Ethiopia. Shop authentic Ethiopian goods, tech, fashion and more. Pay with Telebirr, CBE Birr, ArifPay or Cash on Delivery." />
+
+  <!-- Tailwind CSS (v3 CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans (EN), Noto Sans Ethiopic (AM), Cairo (AR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Swiper.js (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // ---- Tailwind theme configuration -------------------------------------
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            forest: { light: '#0e9c60', DEFAULT: '#0b7a4b', dark: '#075c38', deep: '#043b24' },
+            gold:   { light: '#ffce4d', DEFAULT: '#f5b301', dark: '#c98f00' },
+            crimson:{ light: '#f04455', DEFAULT: '#d81e2c', dark: '#a8121e' },
+            cream:  '#fbf6ec',
+            sand:   '#f4ecdd',
+            ink:    '#0f172a',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            ethiopic: ['Noto Sans Ethiopic', 'sans-serif'],
+            arabic: ['Cairo', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 24px -6px rgba(15,23,42,0.12)',
+            card: '0 10px 30px -12px rgba(15,23,42,0.18)',
+            glow: '0 8px 30px -8px rgba(11,122,75,0.45)',
+          },
+          borderRadius: { '2xl': '1.1rem', '3xl': '1.6rem' },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Warm base + smooth theme transition */
+    html { scroll-behavior: smooth; }
+    body { transition: background-color .3s ease, color .3s ease; }
+    [x-cloak] { display: none !important; }
+
+    /* Language-driven fonts */
+    body.lang-en { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    body.lang-am { font-family: 'Noto Sans Ethiopic', sans-serif; }
+    body.lang-ar { font-family: 'Cairo', sans-serif; }
+
+    /* Subtle Ethiopian-inspired geometric motif for hero backdrops */
+    .motif {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(245,179,1,.18) 0, transparent 22%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.14) 0, transparent 20%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 10px, transparent 10px 20px);
+    }
+    /* Thin scrollbar for story rails */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Swiper theme */
+    .swiper-pagination-bullet { background: #ffffff; opacity: .5; }
+    .swiper-pagination-bullet-active { background: #f5b301; opacity: 1; width: 22px; border-radius: 4px; }
+    .hero-swiper .swiper-button-next, .hero-swiper .swiper-button-prev { color: #fff; }
+    .hero-swiper .swiper-button-next:after, .hero-swiper .swiper-button-prev:after { font-size: 20px; }
+
+    /* Gradient text accent */
+    .text-gradient { background: linear-gradient(90deg,#0b7a4b,#0e9c60); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  </style>
+
+  <script>
+    // ---- Global image fallback: no broken-image icons, ever ---------------
+    (function () {
+      var FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="#0b7a4b"/><stop offset="1" stop-color="#f5b301"/>' +
+        '</linearGradient></defs><rect width="400" height="400" fill="url(#g)"/>' +
+        '<text x="50%" y="56%" font-size="190" fill="rgba(255,255,255,.35)" ' +
+        'text-anchor="middle" font-family="sans-serif">ኪ</text></svg>'
+      );
+      document.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t.tagName === 'IMG' && t.src.indexOf('data:image') !== 0) { t.src = FALLBACK; }
+      }, true);
+    })();
+  </script>
+
+  <script>
+    // =====================================================================
+    //  Kitman — shared Alpine state, trilingual i18n engine + dark mode
+    //  This same kitman() root will power every page in the marketplace.
+    // =====================================================================
+    function kitman() {
+      return {
+        // --- global state --------------------------------------------------
+        lang: 'en',              // 'en' | 'am' | 'ar'
+        dark: false,
+        city: 'Addis Ababa',
+        cartCount: 3,
+        wishCount: 2,
+        // UI toggles
+        langModal: false,
+        searchFocused: false,
+        catOpen: false,
+        mobileMenu: false,
+
+        // --- notifications (demo) ------------------------------------------
+        notifOpen: false,
+        notifs: [
+          { icon:'truck',        unread:true,  en:'Your order KTM-90312 is on its way', am:'ትዕዛዝዎ KTM-90312 በመንገድ ላይ ነው', ar:'طلبك KTM-90312 في الطريق', time:'2m' },
+          { icon:'tag',          unread:true,  en:'Flash sale — up to 40% off tech',     am:'ፍላሽ ሽያጭ — እስከ 40% ቅናሽ',        ar:'تخفيضات — حتى 40٪ على التقنية',  time:'1h' },
+          { icon:'star',         unread:false, en:'You received a new 5-star review',     am:'አዲስ 5 ኮከብ ግምገማ ደርሶዎታል',        ar:'حصلت على تقييم 5 نجوم',          time:'3h' },
+          { icon:'wallet',       unread:false, en:'Payout of ETB 84,200 was processed',   am:'ክፍያ ETB 84,200 ተከናውኗል',          ar:'تمت تسوية ETB 84,200',           time:'1d' }
+        ],
+        get unread() { return this.notifs.filter(n => n.unread).length; },
+        markAllRead() { this.notifs.forEach(n => n.unread = false); },
+
+        // --- chat with seller (demo) ---------------------------------------
+        chatOpen: false, chatWith: '', chatInput: '', chatMsgs: [],
+        openChat(name) {
+          this.chatWith = name || 'Seller';
+          this.chatMsgs = [{ me:false, text:'Selam! Welcome to ' + this.chatWith + '. How can I help you today?' }];
+          this.chatOpen = true;
+          this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+        },
+        sendChat(text) {
+          const t = (text || this.chatInput).trim();
+          if (!t) return;
+          this.chatMsgs.push({ me:true, text:t });
+          this.chatInput = '';
+          this.$nextTick(() => this.chatScrollBottom());
+          setTimeout(() => {
+            this.chatMsgs.push({ me:false, text:"Thanks for reaching out! Yes, it's available. We deliver across Addis Ababa in 1-2 days and accept Telebirr, CBE Birr, ArifPay and Cash on Delivery." });
+            this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+          }, 900);
+        },
+        chatScrollBottom() { const el = this.$refs.chatScroll; if (el) el.scrollTop = el.scrollHeight; },
+
+        // --- write a review (demo) -----------------------------------------
+        reviewOpen: false, reviewFor: '', reviewStars: 5, reviewText: '', reviewSent: false,
+        openReview(name) { this.reviewFor = name || 'this product'; this.reviewStars = 5; this.reviewText = ''; this.reviewSent = false; this.reviewOpen = true; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        submitReview() { if (!this.reviewText.trim()) return; this.reviewSent = true; this.$nextTick(() => window.lucide && lucide.createIcons()); setTimeout(() => { this.reviewOpen = false; }, 1700); },
+
+        // --- Quick View + Compare (shared across every product card) -------
+        quickView: null,          // product object shown in modal
+        qvQty: 1,
+        compare: [],              // products staged for comparison (max 4)
+        compareOpen: false,       // comparison table modal
+        openQuickView(p) { this.quickView = p; this.qvQty = 1; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        toggleCompare(p) {
+          const i = this.compare.findIndex(x => x.name === p.name);
+          if (i > -1) { this.compare.splice(i, 1); }
+          else if (this.compare.length < 4) { this.compare.push(p); }
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        inCompare(p) { return this.compare.some(x => x.name === p.name); },
+        clearCompare() { this.compare = []; this.compareOpen = false; },
+        disc(p) { return p.was ? Math.round((1 - p.price / p.was) * 100) : 0; },
+        qvAddToCart() { this.cartCount += this.qvQty; this.quickView = null; },
+
+        cities: ['Addis Ababa', 'Adama', 'Hawassa', 'Bahir Dar', 'Dire Dawa', 'Mekelle', 'Gondar'],
+
+        // --- lifecycle -----------------------------------------------------
+        init() {
+          this.applyLang();
+          this.$watch('lang', () => this.applyLang());
+          this.$watch('dark', () => document.documentElement.classList.toggle('dark', this.dark));
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        applyLang() {
+          const rtl = this.lang === 'ar';
+          const el = document.documentElement;
+          el.lang = this.lang; el.dir = rtl ? 'rtl' : 'ltr';
+          document.body.classList.remove('lang-en','lang-am','lang-ar');
+          document.body.classList.add('lang-' + this.lang);
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        setLang(l) { this.lang = l; this.langModal = false; },
+
+        // --- translation helper -------------------------------------------
+        t(key) { return (this.dict[key] && this.dict[key][this.lang]) || (this.dict[key] && this.dict[key].en) || key; },
+
+        langName(l) { return { en: 'English', am: 'አማርኛ', ar: 'العربية' }[l]; },
+
+        // --- price formatter (Ethiopian Birr) -----------------------------
+        etb(v) {
+          const n = Number(v).toLocaleString('en-US');
+          return this.lang === 'am' ? (n + ' ብር') : ('ETB ' + n);
+        },
+
+        // --- dictionary ----------------------------------------------------
+        dict: {
+          ship_to:      { en: 'Deliver to', am: 'መድረሻ', ar: 'التوصيل إلى' },
+          support:      { en: 'Help & Support: 8556', am: 'እገዛ: 8556', ar: 'الدعم: 8556' },
+          seller_link:  { en: 'Sell on Kitman', am: 'በኪትማን ይሽጡ', ar: 'بِع على كِتمان' },
+          track_order:  { en: 'Track Order', am: 'ትዕዛዝ ይከታተሉ', ar: 'تتبع الطلب' },
+          search_ph:    { en: 'Search products, brands & vendors…', am: 'እቃዎችን፣ ብራንዶችን ይፈልጉ…', ar: 'ابحث عن المنتجات والبائعين…' },
+          all_cats:     { en: 'All Categories', am: 'ሁሉም ምድቦች', ar: 'كل الفئات' },
+          account:      { en: 'Account', am: 'መለያ', ar: 'الحساب' },
+          wishlist:     { en: 'Wishlist', am: 'ተመራጮች', ar: 'المفضلة' },
+          cart:         { en: 'Cart', am: 'ጋሪ', ar: 'السلة' },
+          home:         { en: 'Home', am: 'መነሻ', ar: 'الرئيسية' },
+          categories:   { en: 'Categories', am: 'ምድቦች', ar: 'الفئات' },
+          choose_lang:  { en: 'Choose your language', am: 'ቋንቋ ይምረጡ', ar: 'اختر لغتك' },
+          lang_note:    { en: 'Prices, layout and reading direction adapt automatically.', am: 'ዋጋና አቀማመጥ በራስ-ሰር ይስተካከላል።', ar: 'تتكيّف الأسعار والاتجاه تلقائياً.' },
+          hero1_tag:    { en: 'MADE IN ETHIOPIA', am: 'በኢትዮጵያ የተሰራ', ar: 'صُنع في إثيوبيا' },
+          hero1_title:  { en: 'Authentic Habesha, delivered to your door', am: 'እውነተኛ የሀበሻ ምርቶች እስከ በርዎ', ar: 'منتجات حبشية أصيلة حتى بابك' },
+          hero1_sub:    { en: 'Hand-woven Kemis, coffee & crafts from trusted local vendors.', am: 'በእጅ የተሰራ ቀሚስ፣ ቡና እና ጥበባት ከታማኝ ሻጮች።', ar: 'أزياء وبن وحِرف يدوية من بائعين موثوقين.' },
+          hero2_tag:    { en: 'MEGA TECH WEEK', am: 'የቴክ ሳምንት', ar: 'أسبوع التقنية' },
+          hero2_title:  { en: 'Up to 40% off phones & electronics', am: 'እስከ 40% ቅናሽ በስልኮች እና ኤሌክትሮኒክስ', ar: 'خصم حتى 40٪ على الهواتف والإلكترونيات' },
+          hero2_sub:    { en: 'Genuine warranty. Free delivery across Addis Ababa.', am: 'ዋስትና ያለው። በአዲስ አበባ ነፃ መላኪያ።', ar: 'ضمان أصلي وتوصيل مجاني في أديس أبابا.' },
+          hero3_tag:    { en: 'NEW SEASON', am: 'አዲስ ወቅት', ar: 'موسم جديد' },
+          hero3_title:  { en: 'Fashion that moves with the city', am: 'ከከተማዋ ጋር የሚራመድ ፋሽን', ar: 'أزياء تواكب المدينة' },
+          hero3_sub:    { en: 'Discover trending styles from Addis top boutiques.', am: 'ከአዲስ አበባ ምርጥ ሱቆች አዳዲስ ስታይሎች።', ar: 'اكتشف أحدث الصيحات من أرقى متاجر أديس.' },
+          shop_now:     { en: 'Shop now', am: 'አሁን ይግዙ', ar: 'تسوّق الآن' },
+          explore:      { en: 'Explore deals', am: 'ቅናሾችን ይመልከቱ', ar: 'استكشف العروض' },
+          trust_secure: { en: '100% Secure Payments', am: '100% ደህንነቱ የተጠበቀ ክፍያ', ar: 'مدفوعات آمنة 100٪' },
+          trust_cod:    { en: 'Cash on Delivery', am: 'በመቀበል ጊዜ ክፍያ', ar: 'الدفع عند الاستلام' },
+          trust_pay:    { en: 'Trusted local payments', am: 'የታመኑ የአገር ውስጥ ክፍያዎች', ar: 'وسائل دفع محلية موثوقة' },
+        },
+      }
+    }
+  </script>
+</head>
+
+<body class="lang-en text-ink dark:text-slate-100 antialiased min-h-screen" x-data="kitman()" x-init="init()" x-cloak>
+  <div class="fixed inset-0 -z-10 bg-[#eef1ef] dark:bg-[#0a0e0c]"></div>
+  <div class="fixed -top-24 start-1/4 -z-10 w-[32rem] h-[32rem] rounded-full bg-emerald-300/25 dark:bg-emerald-500/10 blur-[130px]"></div>
+  <div class="fixed bottom-0 end-1/4 -z-10 w-[28rem] h-[28rem] rounded-full bg-teal-200/25 dark:bg-teal-500/10 blur-[130px]"></div>
+
+  <div x-data="{ open:false, active:'products', nav:[
+      {id:'dashboard', href:'vendor-dashboard.html', icon:'layout-dashboard', en:'Dashboard', am:'ዳሽቦርድ', ar:'لوحة التحكم'},
+      {id:'products', href:'vendor-products.html', icon:'package', en:'Products', am:'ምርቶች', ar:'المنتجات'},
+      {id:'orders', href:'vendor-orders.html', icon:'shopping-bag', en:'Orders', am:'ትዕዛዞች', ar:'الطلبات', badge:7},
+      {id:'payouts', href:'vendor-payouts.html', icon:'wallet', en:'Payouts', am:'ክፍያዎች', ar:'المدفوعات'},
+      {id:'subscription', href:'vendor-subscription.html', icon:'badge-percent', en:'Subscription', am:'ደንበኝነት', ar:'الاشتراك'},
+      {id:'settings', href:'vendor-settings.html', icon:'settings', en:'Settings', am:'ቅንብሮች', ar:'الإعدادات'}
+    ] }">
+    <div class="min-h-screen p-3 sm:p-4 lg:p-6">
+      <div class="max-w-[1440px] mx-auto lg:flex lg:gap-6">
+        <div x-show="open" x-transition.opacity @click="open=false" class="lg:hidden fixed inset-0 bg-ink/30 backdrop-blur-sm z-50" x-cloak></div>
+
+        <aside :class="open ? 'translate-x-0' : '-translate-x-[110%] rtl:translate-x-[110%]'"
+               class="fixed lg:sticky top-3 lg:top-6 start-3 lg:start-0 bottom-3 lg:bottom-auto z-[60] lg:z-auto w-64 shrink-0 lg:self-start lg:h-[calc(100vh-3rem)]
+                      flex flex-col rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10
+                      shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] p-3.5 transition-transform duration-300 lg:translate-x-0">
+          <div class="flex items-center gap-2.5 px-2 py-2">
+            <span class="grid place-items-center w-9 h-9 rounded-2xl bg-forest text-white font-extrabold shadow-sm">ኪ</span>
+            <div class="leading-none"><div class="font-extrabold">Kitman</div><div class="text-[10px] tracking-[0.18em] text-ink/40 dark:text-slate-500 uppercase">Seller</div></div>
+            <button @click="open=false" class="lg:hidden ms-auto grid place-items-center w-8 h-8 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+          <div class="flex items-center gap-2.5 mt-2 mb-3 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/5">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&q=70" class="w-9 h-9 rounded-xl object-cover" alt="" />
+            <div class="min-w-0"><div class="flex items-center gap-1 text-sm font-bold truncate">Addis Tech<i data-lucide="badge-check" class="w-3.5 h-3.5 text-forest shrink-0"></i></div><div class="text-[11px] text-ink/45 dark:text-slate-500">Growth plan</div></div>
+          </div>
+          <nav class="flex-1 space-y-0.5 overflow-y-auto">
+            <template x-for="n in nav" :key="n.id">
+              <a :href="n.href" @click="open=false"
+                 :class="active===n.id ? 'bg-forest text-white shadow-[0_6px_20px_-6px_rgba(11,122,75,0.6)]' : 'text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5'"
+                 class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition">
+                <i :data-lucide="n.icon" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?n.am:lang==='ar'?n.ar:n.en"></span>
+                <span x-show="n.badge" :class="active===n.id?'bg-white/25':'bg-forest/10 text-forest'" class="ms-auto min-w-5 h-5 px-1.5 grid place-items-center text-[10px] font-bold rounded-full" x-text="n.badge"></span>
+              </a>
+            </template>
+          </nav>
+          <div class="mt-2 pt-2 border-t border-black/5 dark:border-white/10 space-y-0.5">
+            <a href="vendor-store.html" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition"><i data-lucide="external-link" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?'ሱቄን ይመልከቱ':lang==='ar'?'عرض متجري':'View my store'"></span></a>
+            <a href="login.html" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-crimson hover:bg-crimson/10 transition"><i data-lucide="log-out" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?'ውጣ':lang==='ar'?'خروج':'Log out'"></span></a>
+          </div>
+        </aside>
+
+        <div class="flex-1 min-w-0 space-y-5">
+          <div class="flex items-center gap-3 rounded-[1.5rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.2)] px-3 sm:px-4 h-16">
+            <button @click="open=true" class="lg:hidden grid place-items-center w-10 h-10 -ms-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            <div class="min-w-0"><h1 class="text-base sm:text-lg font-extrabold leading-none truncate">Products</h1><p class="text-[11px] text-ink/45 dark:text-slate-500 mt-1">Manage your catalogue</p></div>
+            <div class="ms-auto flex items-center gap-1.5">
+              <a href="vendor-add-product.html" class="inline-flex items-center gap-1.5 h-10 px-3 sm:px-4 rounded-2xl bg-forest text-white font-semibold text-sm shadow-[0_8px_20px_-8px_rgba(11,122,75,0.7)] hover:bg-forest-dark transition"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline" x-text="lang==='am'?'ምርት':lang==='ar'?'منتج':'Add'"></span></a>
+              <button @click="langModal=true" class="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="globe" class="w-5 h-5"></i></button>
+              <button @click="notifOpen=true" class="relative grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10" aria-label="Notifications"><i data-lucide="bell" class="w-5 h-5"></i><span x-show="unread>0" class="absolute top-2 end-2 w-2 h-2 rounded-full bg-crimson"></span></button><button @click="dark=!dark" class="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="moon" class="w-5 h-5" x-show="!dark"></i><i data-lucide="sun" class="w-5 h-5 text-gold" x-show="dark"></i></button>
+              <span class="grid place-items-center w-9 h-9 rounded-full bg-forest text-white text-sm font-extrabold ms-0.5">AT</span>
+            </div>
+          </div>
+<div x-data="productsPage()" x-init="init()">
+  <!-- summary chips -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+    <template x-for="s in [
+        {k:'all', icon:'package', label:{en:'Total products',am:'ጠቅላላ',ar:'الإجمالي'}, tint:'bg-forest/10 text-forest'},
+        {k:'active', icon:'check-circle-2', label:{en:'Active',am:'ንቁ',ar:'نشط'}, tint:'bg-emerald-500/10 text-emerald-600'},
+        {k:'out', icon:'package-x', label:{en:'Out of stock',am:'ያለቀ',ar:'نفد'}, tint:'bg-crimson/10 text-crimson'},
+        {k:'draft', icon:'file-edit', label:{en:'Drafts',am:'ረቂቆች',ar:'مسودات'}, tint:'bg-amber-500/10 text-amber-600'}
+      ]" :key="s.k">
+      <button @click="tab=s.k" :class="tab===s.k?'ring-forest/30':'ring-black/5 dark:ring-white/10'" class="text-start rounded-[1.5rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 shadow-[0_10px_40px_-24px_rgba(0,0,0,0.25)] p-4 transition hover:ring-forest/20">
+        <div class="flex items-center justify-between"><span :class="s.tint" class="grid place-items-center w-9 h-9 rounded-2xl"><i :data-lucide="s.icon" class="w-[18px] h-[18px]"></i></span></div>
+        <div class="text-2xl font-extrabold mt-3" x-text="count(s.k)"></div>
+        <div class="text-xs text-ink/45 dark:text-slate-500" x-text="lang==='am'?s.label.am:lang==='ar'?s.label.ar:s.label.en"></div>
+      </button>
+    </template>
+  </div>
+
+  <!-- table card -->
+  <div class="rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] overflow-hidden">
+    <!-- toolbar -->
+    <div class="flex flex-wrap items-center gap-3 p-4 border-b border-black/5 dark:border-white/10">
+      <div class="flex items-center gap-2 h-10 px-3 rounded-2xl bg-black/[0.04] dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10 flex-1 min-w-[180px] max-w-xs">
+        <i data-lucide="search" class="w-4 h-4 text-ink/40"></i>
+        <input type="text" x-model="search" :placeholder="lang==='am'?'ምርት ወይም SKU ፈልግ…':lang==='ar'?'ابحث…':'Search product or SKU…'" class="flex-1 bg-transparent text-sm outline-none placeholder:text-ink/40" />
+      </div>
+      <div class="hidden md:flex gap-1 p-1 rounded-2xl bg-black/[0.04] dark:bg-white/5">
+        <template x-for="t in [{k:'all',en:'All',am:'ሁሉም',ar:'الكل'},{k:'active',en:'Active',am:'ንቁ',ar:'نشط'},{k:'out',en:'Out of stock',am:'ያለቀ',ar:'نفد'},{k:'draft',en:'Draft',am:'ረቂቅ',ar:'مسودة'}]" :key="t.k">
+          <button @click="tab=t.k" :class="tab===t.k?'bg-white dark:bg-slate-800 shadow-sm text-forest':'text-ink/55 dark:text-slate-400'" class="px-3 py-1.5 rounded-xl text-sm font-semibold transition" x-text="lang==='am'?t.am:lang==='ar'?t.ar:t.en"></button>
+        </template>
+      </div>
+      <select x-model="sort" class="md:ms-auto h-10 px-3 rounded-2xl bg-black/[0.04] dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10 text-sm font-medium outline-none">
+        <option value="newest" x-text="lang==='am'?'አዲስ':lang==='ar'?'الأحدث':'Newest'"></option>
+        <option value="price" x-text="lang==='am'?'ዋጋ':lang==='ar'?'السعر':'Price'"></option>
+        <option value="sales" x-text="lang==='am'?'ሽያጭ':lang==='ar'?'المبيعات':'Best selling'"></option>
+        <option value="stock" x-text="lang==='am'?'ክምችት':lang==='ar'?'المخزون':'Low stock'"></option>
+      </select>
+    </div>
+
+    <!-- table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[820px]">
+        <thead class="text-ink/40 dark:text-slate-500 text-[11px] uppercase tracking-wide bg-black/[0.02] dark:bg-white/[0.03]">
+          <tr>
+            <th class="ps-4 py-3 w-10"><input type="checkbox" :checked="allSel" @change="toggleAll()" class="w-4 h-4 rounded accent-forest" /></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ምርት':lang==='ar'?'المنتج':'Product'"></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ምድብ':lang==='ar'?'الفئة':'Category'"></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ዋጋ':lang==='ar'?'السعر':'Price'"></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ክምችት':lang==='ar'?'المخزون':'Stock'"></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ሁኔታ':lang==='ar'?'الحالة':'Status'"></th>
+            <th class="text-start font-semibold py-3" x-text="lang==='am'?'ሽያጭ':lang==='ar'?'المبيعات':'Sales'"></th>
+            <th class="pe-4 py-3 text-end"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="p in filtered" :key="p.id">
+            <tr class="border-t border-black/5 dark:border-white/10 hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition">
+              <td class="ps-4 py-3"><input type="checkbox" :checked="selected.includes(p.id)" @change="toggleSel(p.id)" class="w-4 h-4 rounded accent-forest" /></td>
+              <td class="py-3"><div class="flex items-center gap-3"><img :src="p.img" class="w-11 h-11 rounded-xl object-cover" alt="" /><div class="min-w-0"><div class="font-semibold truncate max-w-[220px]" x-text="p.name"></div><div class="text-[11px] text-ink/40 dark:text-slate-500" x-text="p.sku"></div></div></div></td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/10 text-[11px] font-semibold" x-text="p.cat"></span></td>
+              <td class="py-3 font-semibold" x-text="etb(p.price)"></td>
+              <td class="py-3"><span :class="p.stock===0?'text-crimson':p.stock<10?'text-amber-600':''" class="font-semibold" x-text="p.stock"></span></td>
+              <td class="py-3"><span :class="stMeta(p).c" class="px-2 py-0.5 rounded-full text-[11px] font-bold" x-text="lang==='am'?stMeta(p).am:lang==='ar'?stMeta(p).ar:stMeta(p).en"></span></td>
+              <td class="py-3 text-ink/60 dark:text-slate-300" x-text="p.sales"></td>
+              <td class="pe-4 py-3">
+                <div class="flex items-center justify-end gap-1">
+                  <a href="vendor-add-product.html" class="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></a>
+                  <button @click="duplicate(p)" class="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60" title="Duplicate"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                  <button @click="toggleStatus(p)" class="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60" :title="p.status==='active'?'Unpublish':'Publish'"><i :data-lucide="p.status==='active'?'eye-off':'eye'" class="w-4 h-4"></i></button>
+                  <button @click="remove(p.id)" class="grid place-items-center w-8 h-8 rounded-lg hover:bg-crimson/10 text-crimson" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- empty -->
+    <div x-show="filtered.length===0" class="text-center py-16">
+      <span class="inline-grid place-items-center w-14 h-14 rounded-full bg-black/5 dark:bg-white/10 mb-3"><i data-lucide="package-search" class="w-7 h-7 text-ink/40"></i></span>
+      <p class="font-semibold" x-text="lang==='am'?'ምንም ምርት አልተገኘም':lang==='ar'?'لا توجد منتجات':'No products found'"></p>
+      <a href="vendor-add-product.html" class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-forest text-white text-sm font-semibold"><i data-lucide="plus" class="w-4 h-4"></i><span x-text="lang==='am'?'ምርት ጨምር':lang==='ar'?'أضف منتج':'Add product'"></span></a>
+    </div>
+
+    <!-- footer / pagination -->
+    <div x-show="filtered.length>0" class="flex items-center justify-between p-4 border-t border-black/5 dark:border-white/10 text-sm">
+      <span class="text-ink/50 dark:text-slate-400"><span x-text="filtered.length"></span> <span x-text="lang==='am'?'ምርቶች':lang==='ar'?'منتج':'products'"></span></span>
+      <div class="flex items-center gap-1">
+        <button class="grid place-items-center w-9 h-9 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5"><i data-lucide="chevron-left" class="w-4 h-4 rtl:rotate-180"></i></button>
+        <button class="grid place-items-center w-9 h-9 rounded-xl bg-forest text-white font-semibold">1</button>
+        <button class="grid place-items-center w-9 h-9 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5 font-semibold">2</button>
+        <button class="grid place-items-center w-9 h-9 rounded-xl ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/5"><i data-lucide="chevron-right" class="w-4 h-4 rtl:rotate-180"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- bulk action bar -->
+  <div x-show="selected.length>0" x-transition class="fixed bottom-4 inset-x-0 z-40 px-4 flex justify-center" x-cloak>
+    <div class="flex items-center gap-3 rounded-2xl bg-ink/90 dark:bg-slate-800/95 backdrop-blur-xl text-white ring-1 ring-white/10 shadow-2xl px-4 py-2.5">
+      <span class="text-sm font-semibold"><span x-text="selected.length"></span> <span x-text="lang==='am'?'ተመርጠዋል':lang==='ar'?'محدد':'selected'"></span></span>
+      <button @click="bulkDraft()" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold transition"><i data-lucide="eye-off" class="w-4 h-4"></i><span class="hidden sm:inline" x-text="lang==='am'?'ወደ ረቂቅ':lang==='ar'?'مسودة':'Unpublish'"></span></button>
+      <button @click="bulkDelete()" class="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-crimson hover:bg-crimson-dark text-sm font-semibold transition"><i data-lucide="trash-2" class="w-4 h-4"></i><span x-text="lang==='am'?'ሰርዝ':lang==='ar'?'حذف':'Delete'"></span></button>
+      <button @click="selected=[]" class="grid place-items-center w-9 h-9 rounded-xl hover:bg-white/10"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- KITMAN:NOTIF -->
+  <div x-show="notifOpen" x-transition.opacity class="fixed inset-0 z-[75]" @click.self="notifOpen=false" x-cloak>
+    <div x-show="notifOpen" x-transition
+         class="absolute top-[4.75rem] end-3 md:end-6 w-80 max-w-[92vw] bg-white dark:bg-slate-800 rounded-2xl shadow-[0_24px_60px_-15px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-black/5 dark:border-white/10">
+        <span class="font-bold" x-text="lang==='am'?'ማሳወቂያዎች':lang==='ar'?'الإشعارات':'Notifications'"></span>
+        <button @click="markAllRead()" class="text-xs font-semibold text-forest hover:underline" x-text="lang==='am'?'ሁሉንም አንብብ':lang==='ar'?'تعليم الكل كمقروء':'Mark all read'"></button>
+      </div>
+      <div class="max-h-80 overflow-y-auto divide-y divide-black/5 dark:divide-white/10">
+        <template x-for="(n,i) in notifs" :key="i">
+          <div class="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.03] dark:hover:bg-white/5 transition">
+            <span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest shrink-0"><i :data-lucide="n.icon" class="w-[18px] h-[18px]"></i></span>
+            <div class="flex-1 min-w-0"><p class="text-sm leading-snug" x-text="lang==='am'?n.am:lang==='ar'?n.ar:n.en"></p><p class="text-[11px] text-black/40 dark:text-white/40 mt-0.5" x-text="n.time"></p></div>
+            <span x-show="n.unread" class="w-2 h-2 rounded-full bg-crimson mt-1.5 shrink-0"></span>
+          </div>
+        </template>
+      </div>
+      <a href="#" class="block text-center px-4 py-3 text-sm font-semibold text-forest hover:bg-black/[0.03] dark:hover:bg-white/5 border-t border-black/5 dark:border-white/10" x-text="lang==='am'?'ሁሉንም ማሳወቂያ ይመልከቱ':lang==='ar'?'عرض كل الإشعارات':'View all notifications'"></a>
+    </div>
+  </div>
+
+  <div x-show="langModal" x-transition.opacity class="fixed inset-0 z-[70] bg-ink/40 backdrop-blur-sm grid place-items-center p-4" @click.self="langModal=false" x-cloak>
+    <div x-show="langModal" x-transition.scale class="w-full max-w-sm bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10 rounded-3xl shadow-card p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold" x-text="t('choose_lang')"></h3><button @click="langModal=false" class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="space-y-2">
+        <template x-for="l in ['en','am','ar']" :key="l">
+          <button @click="setLang(l)" :class="lang===l ? 'ring-2 ring-forest bg-forest/5' : 'ring-1 ring-black/10 dark:ring-white/10'" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition hover:bg-forest/5">
+            <span class="flex items-center gap-3"><span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest font-bold" x-text="l==='en'?'EN':l==='am'?'አ':'ع'"></span><span class="font-semibold" x-text="langName(l)"></span></span>
+            <i data-lucide="check" class="w-5 h-5 text-forest" x-show="lang===l"></i>
+          </button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function productsPage() {
+      return {
+        search: '', tab: 'all', sort: 'newest', selected: [],
+        products: [
+          { id:1, name:'Samsung Galaxy A55 5G', sku:'SG-A55-128', img:'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=120&q=70', cat:'Electronics', price:38900, stock:24, status:'active', sales:64 },
+          { id:2, name:'Wireless Earbuds Pro ANC', sku:'EB-PRO-01', img:'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=120&q=70', cat:'Audio', price:2240, stock:120, status:'active', sales:512 },
+          { id:3, name:'65W Fast Charger USB-C', sku:'CH-65W', img:'https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?w=120&q=70', cat:'Electronics', price:990, stock:8, status:'active', sales:289 },
+          { id:4, name:'Power Bank 20000mAh', sku:'PB-20K', img:'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=120&q=70', cat:'Electronics', price:1650, stock:0, status:'active', sales:321 },
+          { id:5, name:'Bluetooth Speaker X3', sku:'SP-X3', img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=120&q=70', cat:'Audio', price:1850, stock:42, status:'active', sales:167 },
+          { id:6, name:'Smartwatch Fit 2', sku:'SW-F2', img:'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=120&q=70', cat:'Wearables', price:3400, stock:15, status:'active', sales:132 },
+          { id:7, name:'Silicone Phone Case', sku:'AC-CASE', img:'https://images.unsplash.com/photo-1520923642038-b4259acecbd7?w=120&q=70', cat:'Accessories', price:450, stock:210, status:'active', sales:76 },
+          { id:8, name:'Tempered Glass Protector', sku:'AC-GLASS', img:'https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=120&q=70', cat:'Accessories', price:250, stock:0, status:'draft', sales:0 },
+          { id:9, name:'Over-Ear Headphones', sku:'HP-OE', img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=70', cat:'Audio', price:3100, stock:30, status:'active', sales:88 },
+          { id:10, name:'Wireless Charging Pad 15W', sku:'CH-WL', img:'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?w=120&q=70', cat:'Electronics', price:780, stock:5, status:'draft', sales:0 }
+        ],
+        stMeta(p) {
+          if (p.status === 'draft') return { k:'draft', c:'bg-black/5 dark:bg-white/10 text-ink/60 dark:text-slate-300', en:'Draft', am:'ረቂቅ', ar:'مسودة' };
+          if (p.stock === 0) return { k:'out', c:'bg-crimson/10 text-crimson', en:'Out of stock', am:'አልቋል', ar:'نفد' };
+          if (p.stock < 10) return { k:'low', c:'bg-amber-500/15 text-amber-600', en:'Low stock', am:'ጥቂት', ar:'منخفض' };
+          return { k:'active', c:'bg-forest/10 text-forest', en:'Active', am:'ንቁ', ar:'نشط' };
+        },
+        inTab(p, t) {
+          if (t === 'all') return true;
+          if (t === 'active') return p.status !== 'draft' && p.stock > 0;
+          if (t === 'out') return p.stock === 0;
+          if (t === 'draft') return p.status === 'draft';
+          return true;
+        },
+        count(t) { return this.products.filter(p => this.inTab(p, t)).length; },
+        get filtered() {
+          let l = this.products.filter(p => this.inTab(p, this.tab) && (!this.search || p.name.toLowerCase().includes(this.search.toLowerCase()) || p.sku.toLowerCase().includes(this.search.toLowerCase())));
+          if (this.sort === 'price') l = [...l].sort((a,b)=>b.price-a.price);
+          else if (this.sort === 'sales') l = [...l].sort((a,b)=>b.sales-a.sales);
+          else if (this.sort === 'stock') l = [...l].sort((a,b)=>a.stock-b.stock);
+          return l;
+        },
+        toggleStatus(p) { p.status = p.status === 'active' ? 'draft' : 'active'; },
+        duplicate(p) { const n = JSON.parse(JSON.stringify(p)); n.id = Date.now(); n.name = p.name + ' (copy)'; n.status = 'draft'; n.sales = 0; this.products.unshift(n); },
+        remove(id) { this.products = this.products.filter(p => p.id !== id); this.selected = this.selected.filter(s => s !== id); },
+        toggleSel(id) { this.selected.includes(id) ? this.selected = this.selected.filter(s=>s!==id) : this.selected.push(id); },
+        get allSel() { return this.filtered.length > 0 && this.filtered.every(p => this.selected.includes(p.id)); },
+        toggleAll() { this.allSel ? this.selected = [] : this.selected = this.filtered.map(p => p.id); },
+        bulkDelete() { this.products = this.products.filter(p => !this.selected.includes(p.id)); this.selected = []; },
+        bulkDraft() { this.products.forEach(p => { if (this.selected.includes(p.id)) p.status = 'draft'; }); this.selected = []; },
+        init() { this.$watch('tab', () => this.$nextTick(() => window.lucide && lucide.createIcons())); this.$watch('search', () => this.$nextTick(() => window.lucide && lucide.createIcons())); this.$nextTick(() => window.lucide && lucide.createIcons()); }
+      }
+    }
+  </script>
+
+  <script>document.addEventListener('DOMContentLoaded', () => { window.lucide && lucide.createIcons(); });</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "brand": "ኪትማን",
+  "nav": { "home": "መነሻ", "browse": "አስስ", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ" },
+  "common": { "search": "ምርቶችን ይፈልጉ…", "addToCart": "ወደ ጋሪ ጨምር", "loading": "በመጫን ላይ…", "noResults": "ምንም ምርት አልተገኘም" },
+  "footer": { "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ", "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።" }
+}

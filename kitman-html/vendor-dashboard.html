@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Dashboard — Kitman</title>
+  <meta name="description" content="Kitman — the modern multi-vendor marketplace of Ethiopia. Shop authentic Ethiopian goods, tech, fashion and more. Pay with Telebirr, CBE Birr, ArifPay or Cash on Delivery." />
+
+  <!-- Tailwind CSS (v3 CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Plus Jakarta Sans (EN), Noto Sans Ethiopic (AM), Cairo (AR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Swiper.js (CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <!-- Lucide Icons (CDN) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // ---- Tailwind theme configuration -------------------------------------
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            forest: { light: '#0e9c60', DEFAULT: '#0b7a4b', dark: '#075c38', deep: '#043b24' },
+            gold:   { light: '#ffce4d', DEFAULT: '#f5b301', dark: '#c98f00' },
+            crimson:{ light: '#f04455', DEFAULT: '#d81e2c', dark: '#a8121e' },
+            cream:  '#fbf6ec',
+            sand:   '#f4ecdd',
+            ink:    '#0f172a',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            ethiopic: ['Noto Sans Ethiopic', 'sans-serif'],
+            arabic: ['Cairo', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 4px 24px -6px rgba(15,23,42,0.12)',
+            card: '0 10px 30px -12px rgba(15,23,42,0.18)',
+            glow: '0 8px 30px -8px rgba(11,122,75,0.45)',
+          },
+          borderRadius: { '2xl': '1.1rem', '3xl': '1.6rem' },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Warm base + smooth theme transition */
+    html { scroll-behavior: smooth; }
+    body { transition: background-color .3s ease, color .3s ease; }
+    [x-cloak] { display: none !important; }
+
+    /* Language-driven fonts */
+    body.lang-en { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    body.lang-am { font-family: 'Noto Sans Ethiopic', sans-serif; }
+    body.lang-ar { font-family: 'Cairo', sans-serif; }
+
+    /* Subtle Ethiopian-inspired geometric motif for hero backdrops */
+    .motif {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(245,179,1,.18) 0, transparent 22%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,.14) 0, transparent 20%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 10px, transparent 10px 20px);
+    }
+    /* Thin scrollbar for story rails */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Swiper theme */
+    .swiper-pagination-bullet { background: #ffffff; opacity: .5; }
+    .swiper-pagination-bullet-active { background: #f5b301; opacity: 1; width: 22px; border-radius: 4px; }
+    .hero-swiper .swiper-button-next, .hero-swiper .swiper-button-prev { color: #fff; }
+    .hero-swiper .swiper-button-next:after, .hero-swiper .swiper-button-prev:after { font-size: 20px; }
+
+    /* Gradient text accent */
+    .text-gradient { background: linear-gradient(90deg,#0b7a4b,#0e9c60); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  </style>
+
+  <script>
+    // ---- Global image fallback: no broken-image icons, ever ---------------
+    (function () {
+      var FALLBACK = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="#0b7a4b"/><stop offset="1" stop-color="#f5b301"/>' +
+        '</linearGradient></defs><rect width="400" height="400" fill="url(#g)"/>' +
+        '<text x="50%" y="56%" font-size="190" fill="rgba(255,255,255,.35)" ' +
+        'text-anchor="middle" font-family="sans-serif">ኪ</text></svg>'
+      );
+      document.addEventListener('error', function (e) {
+        var t = e.target;
+        if (t && t.tagName === 'IMG' && t.src.indexOf('data:image') !== 0) { t.src = FALLBACK; }
+      }, true);
+    })();
+  </script>
+
+  <script>
+    // =====================================================================
+    //  Kitman — shared Alpine state, trilingual i18n engine + dark mode
+    //  This same kitman() root will power every page in the marketplace.
+    // =====================================================================
+    function kitman() {
+      return {
+        // --- global state --------------------------------------------------
+        lang: 'en',              // 'en' | 'am' | 'ar'
+        dark: false,
+        city: 'Addis Ababa',
+        cartCount: 3,
+        wishCount: 2,
+        // UI toggles
+        langModal: false,
+        searchFocused: false,
+        catOpen: false,
+        mobileMenu: false,
+
+        // --- notifications (demo) ------------------------------------------
+        notifOpen: false,
+        notifs: [
+          { icon:'truck',        unread:true,  en:'Your order KTM-90312 is on its way', am:'ትዕዛዝዎ KTM-90312 በመንገድ ላይ ነው', ar:'طلبك KTM-90312 في الطريق', time:'2m' },
+          { icon:'tag',          unread:true,  en:'Flash sale — up to 40% off tech',     am:'ፍላሽ ሽያጭ — እስከ 40% ቅናሽ',        ar:'تخفيضات — حتى 40٪ على التقنية',  time:'1h' },
+          { icon:'star',         unread:false, en:'You received a new 5-star review',     am:'አዲስ 5 ኮከብ ግምገማ ደርሶዎታል',        ar:'حصلت على تقييم 5 نجوم',          time:'3h' },
+          { icon:'wallet',       unread:false, en:'Payout of ETB 84,200 was processed',   am:'ክፍያ ETB 84,200 ተከናውኗል',          ar:'تمت تسوية ETB 84,200',           time:'1d' }
+        ],
+        get unread() { return this.notifs.filter(n => n.unread).length; },
+        markAllRead() { this.notifs.forEach(n => n.unread = false); },
+
+        // --- chat with seller (demo) ---------------------------------------
+        chatOpen: false, chatWith: '', chatInput: '', chatMsgs: [],
+        openChat(name) {
+          this.chatWith = name || 'Seller';
+          this.chatMsgs = [{ me:false, text:'Selam! Welcome to ' + this.chatWith + '. How can I help you today?' }];
+          this.chatOpen = true;
+          this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+        },
+        sendChat(text) {
+          const t = (text || this.chatInput).trim();
+          if (!t) return;
+          this.chatMsgs.push({ me:true, text:t });
+          this.chatInput = '';
+          this.$nextTick(() => this.chatScrollBottom());
+          setTimeout(() => {
+            this.chatMsgs.push({ me:false, text:"Thanks for reaching out! Yes, it's available. We deliver across Addis Ababa in 1-2 days and accept Telebirr, CBE Birr, ArifPay and Cash on Delivery." });
+            this.$nextTick(() => { window.lucide && lucide.createIcons(); this.chatScrollBottom(); });
+          }, 900);
+        },
+        chatScrollBottom() { const el = this.$refs.chatScroll; if (el) el.scrollTop = el.scrollHeight; },
+
+        // --- write a review (demo) -----------------------------------------
+        reviewOpen: false, reviewFor: '', reviewStars: 5, reviewText: '', reviewSent: false,
+        openReview(name) { this.reviewFor = name || 'this product'; this.reviewStars = 5; this.reviewText = ''; this.reviewSent = false; this.reviewOpen = true; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        submitReview() { if (!this.reviewText.trim()) return; this.reviewSent = true; this.$nextTick(() => window.lucide && lucide.createIcons()); setTimeout(() => { this.reviewOpen = false; }, 1700); },
+
+        // --- Quick View + Compare (shared across every product card) -------
+        quickView: null,          // product object shown in modal
+        qvQty: 1,
+        compare: [],              // products staged for comparison (max 4)
+        compareOpen: false,       // comparison table modal
+        openQuickView(p) { this.quickView = p; this.qvQty = 1; this.$nextTick(() => window.lucide && lucide.createIcons()); },
+        toggleCompare(p) {
+          const i = this.compare.findIndex(x => x.name === p.name);
+          if (i > -1) { this.compare.splice(i, 1); }
+          else if (this.compare.length < 4) { this.compare.push(p); }
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        inCompare(p) { return this.compare.some(x => x.name === p.name); },
+        clearCompare() { this.compare = []; this.compareOpen = false; },
+        disc(p) { return p.was ? Math.round((1 - p.price / p.was) * 100) : 0; },
+        qvAddToCart() { this.cartCount += this.qvQty; this.quickView = null; },
+
+        cities: ['Addis Ababa', 'Adama', 'Hawassa', 'Bahir Dar', 'Dire Dawa', 'Mekelle', 'Gondar'],
+
+        // --- lifecycle -----------------------------------------------------
+        init() {
+          this.applyLang();
+          this.$watch('lang', () => this.applyLang());
+          this.$watch('dark', () => document.documentElement.classList.toggle('dark', this.dark));
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        applyLang() {
+          const rtl = this.lang === 'ar';
+          const el = document.documentElement;
+          el.lang = this.lang; el.dir = rtl ? 'rtl' : 'ltr';
+          document.body.classList.remove('lang-en','lang-am','lang-ar');
+          document.body.classList.add('lang-' + this.lang);
+          this.$nextTick(() => window.lucide && lucide.createIcons());
+        },
+        setLang(l) { this.lang = l; this.langModal = false; },
+
+        // --- translation helper -------------------------------------------
+        t(key) { return (this.dict[key] && this.dict[key][this.lang]) || (this.dict[key] && this.dict[key].en) || key; },
+
+        langName(l) { return { en: 'English', am: 'አማርኛ', ar: 'العربية' }[l]; },
+
+        // --- price formatter (Ethiopian Birr) -----------------------------
+        etb(v) {
+          const n = Number(v).toLocaleString('en-US');
+          return this.lang === 'am' ? (n + ' ብር') : ('ETB ' + n);
+        },
+
+        // --- dictionary ----------------------------------------------------
+        dict: {
+          ship_to:      { en: 'Deliver to', am: 'መድረሻ', ar: 'التوصيل إلى' },
+          support:      { en: 'Help & Support: 8556', am: 'እገዛ: 8556', ar: 'الدعم: 8556' },
+          seller_link:  { en: 'Sell on Kitman', am: 'በኪትማን ይሽጡ', ar: 'بِع على كِتمان' },
+          track_order:  { en: 'Track Order', am: 'ትዕዛዝ ይከታተሉ', ar: 'تتبع الطلب' },
+          search_ph:    { en: 'Search products, brands & vendors…', am: 'እቃዎችን፣ ብራንዶችን ይፈልጉ…', ar: 'ابحث عن المنتجات والبائعين…' },
+          all_cats:     { en: 'All Categories', am: 'ሁሉም ምድቦች', ar: 'كل الفئات' },
+          account:      { en: 'Account', am: 'መለያ', ar: 'الحساب' },
+          wishlist:     { en: 'Wishlist', am: 'ተመራጮች', ar: 'المفضلة' },
+          cart:         { en: 'Cart', am: 'ጋሪ', ar: 'السلة' },
+          home:         { en: 'Home', am: 'መነሻ', ar: 'الرئيسية' },
+          categories:   { en: 'Categories', am: 'ምድቦች', ar: 'الفئات' },
+          choose_lang:  { en: 'Choose your language', am: 'ቋንቋ ይምረጡ', ar: 'اختر لغتك' },
+          lang_note:    { en: 'Prices, layout and reading direction adapt automatically.', am: 'ዋጋና አቀማመጥ በራስ-ሰር ይስተካከላል።', ar: 'تتكيّف الأسعار والاتجاه تلقائياً.' },
+          hero1_tag:    { en: 'MADE IN ETHIOPIA', am: 'በኢትዮጵያ የተሰራ', ar: 'صُنع في إثيوبيا' },
+          hero1_title:  { en: 'Authentic Habesha, delivered to your door', am: 'እውነተኛ የሀበሻ ምርቶች እስከ በርዎ', ar: 'منتجات حبشية أصيلة حتى بابك' },
+          hero1_sub:    { en: 'Hand-woven Kemis, coffee & crafts from trusted local vendors.', am: 'በእጅ የተሰራ ቀሚስ፣ ቡና እና ጥበባት ከታማኝ ሻጮች።', ar: 'أزياء وبن وحِرف يدوية من بائعين موثوقين.' },
+          hero2_tag:    { en: 'MEGA TECH WEEK', am: 'የቴክ ሳምንት', ar: 'أسبوع التقنية' },
+          hero2_title:  { en: 'Up to 40% off phones & electronics', am: 'እስከ 40% ቅናሽ በስልኮች እና ኤሌክትሮኒክስ', ar: 'خصم حتى 40٪ على الهواتف والإلكترونيات' },
+          hero2_sub:    { en: 'Genuine warranty. Free delivery across Addis Ababa.', am: 'ዋስትና ያለው። በአዲስ አበባ ነፃ መላኪያ።', ar: 'ضمان أصلي وتوصيل مجاني في أديس أبابا.' },
+          hero3_tag:    { en: 'NEW SEASON', am: 'አዲስ ወቅት', ar: 'موسم جديد' },
+          hero3_title:  { en: 'Fashion that moves with the city', am: 'ከከተማዋ ጋር የሚራመድ ፋሽን', ar: 'أزياء تواكب المدينة' },
+          hero3_sub:    { en: 'Discover trending styles from Addis top boutiques.', am: 'ከአዲስ አበባ ምርጥ ሱቆች አዳዲስ ስታይሎች።', ar: 'اكتشف أحدث الصيحات من أرقى متاجر أديس.' },
+          shop_now:     { en: 'Shop now', am: 'አሁን ይግዙ', ar: 'تسوّق الآن' },
+          explore:      { en: 'Explore deals', am: 'ቅናሾችን ይመልከቱ', ar: 'استكشف العروض' },
+          trust_secure: { en: '100% Secure Payments', am: '100% ደህንነቱ የተጠበቀ ክፍያ', ar: 'مدفوعات آمنة 100٪' },
+          trust_cod:    { en: 'Cash on Delivery', am: 'በመቀበል ጊዜ ክፍያ', ar: 'الدفع عند الاستلام' },
+          trust_pay:    { en: 'Trusted local payments', am: 'የታመኑ የአገር ውስጥ ክፍያዎች', ar: 'وسائل دفع محلية موثوقة' },
+        },
+      }
+    }
+  </script>
+</head>
+
+<body class="lang-en text-ink dark:text-slate-100 antialiased min-h-screen" x-data="kitman()" x-init="init()" x-cloak>
+  <!-- soft ambient background -->
+  <div class="fixed inset-0 -z-10 bg-[#eef1ef] dark:bg-[#0a0e0c]"></div>
+  <div class="fixed -top-24 start-1/4 -z-10 w-[32rem] h-[32rem] rounded-full bg-emerald-300/25 dark:bg-emerald-500/10 blur-[130px]"></div>
+  <div class="fixed bottom-0 end-1/4 -z-10 w-[28rem] h-[28rem] rounded-full bg-teal-200/25 dark:bg-teal-500/10 blur-[130px]"></div>
+
+  <div x-data="vdash()">
+    <div class="min-h-screen p-3 sm:p-4 lg:p-6">
+      <div class="max-w-[1440px] mx-auto lg:flex lg:gap-6">
+
+        <!-- overlay (mobile) -->
+        <div x-show="open" x-transition.opacity @click="open=false" class="lg:hidden fixed inset-0 bg-ink/30 backdrop-blur-sm z-50" x-cloak></div>
+
+        <!-- ===== FLOATING SIDEBAR ===== -->
+        <aside :class="open ? 'translate-x-0' : '-translate-x-[110%] rtl:translate-x-[110%]'"
+               class="fixed lg:sticky top-3 lg:top-6 start-3 lg:start-0 bottom-3 lg:bottom-auto z-[60] lg:z-auto w-64 shrink-0 lg:self-start lg:h-[calc(100vh-3rem)]
+                      flex flex-col rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10
+                      shadow-[0_20px_60px_-20px_rgba(0,0,0,0.25)] p-3.5 transition-transform duration-300 lg:translate-x-0">
+          <div class="flex items-center gap-2.5 px-2 py-2">
+            <span class="grid place-items-center w-9 h-9 rounded-2xl bg-forest text-white font-extrabold shadow-sm">ኪ</span>
+            <div class="leading-none"><div class="font-extrabold">Kitman</div><div class="text-[10px] tracking-[0.18em] text-ink/40 dark:text-slate-500 uppercase">Seller</div></div>
+            <button @click="open=false" class="lg:hidden ms-auto grid place-items-center w-8 h-8 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+
+          <div class="flex items-center gap-2.5 mt-2 mb-3 p-2.5 rounded-2xl bg-black/[0.03] dark:bg-white/5">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&q=70" class="w-9 h-9 rounded-xl object-cover" alt="" />
+            <div class="min-w-0"><div class="flex items-center gap-1 text-sm font-bold truncate">Addis Tech<i data-lucide="badge-check" class="w-3.5 h-3.5 text-forest shrink-0"></i></div><div class="text-[11px] text-ink/45 dark:text-slate-500">Growth plan</div></div>
+          </div>
+
+          <nav class="flex-1 space-y-0.5 overflow-y-auto">
+            <template x-for="n in nav" :key="n.id">
+              <a :href="n.href" @click="open=false"
+                 :class="active===n.id ? 'bg-forest text-white shadow-[0_6px_20px_-6px_rgba(11,122,75,0.6)]' : 'text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5'"
+                 class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition">
+                <i :data-lucide="n.icon" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?n.am:lang==='ar'?n.ar:n.en"></span>
+                <span x-show="n.badge" :class="active===n.id?'bg-white/25':'bg-forest/10 text-forest'" class="ms-auto min-w-5 h-5 px-1.5 grid place-items-center text-[10px] font-bold rounded-full" x-text="n.badge"></span>
+              </a>
+            </template>
+          </nav>
+
+          <div class="mt-2 pt-2 border-t border-black/5 dark:border-white/10 space-y-0.5">
+            <a href="vendor-store.html" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition"><i data-lucide="external-link" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?'ሱቄን ይመልከቱ':lang==='ar'?'عرض متجري':'View my store'"></span></a>
+            <a href="login.html" class="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-crimson hover:bg-crimson/10 transition"><i data-lucide="log-out" class="w-[18px] h-[18px]"></i><span x-text="lang==='am'?'ውጣ':lang==='ar'?'خروج':'Log out'"></span></a>
+          </div>
+        </aside>
+
+        <!-- ===== CONTENT ===== -->
+        <div class="flex-1 min-w-0 space-y-5 mt-0">
+
+          <!-- top bar (floating glass) -->
+          <div class="flex items-center gap-3 rounded-[1.5rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.2)] px-3 sm:px-4 h-16">
+            <button @click="open=true" class="lg:hidden grid place-items-center w-10 h-10 -ms-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="menu" class="w-6 h-6"></i></button>
+            <div class="min-w-0">
+              <h1 class="text-base sm:text-lg font-extrabold leading-none truncate"><span x-text="lang==='am'?'ሰላም፣ አዲስ ቴክ':lang==='ar'?'مرحباً، Addis Tech':'Hello, Addis Tech'"></span></h1>
+              <p class="text-[11px] text-ink/45 dark:text-slate-500 mt-1" x-text="lang==='am'?'ሰኞ፣ ሐምሌ 27':lang==='ar'?'الاثنين 27 يوليو':'Monday, July 27'"></p>
+            </div>
+            <div class="ms-auto flex items-center gap-1.5">
+              <div class="hidden md:flex items-center gap-2 h-10 px-3 rounded-2xl bg-black/[0.04] dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10">
+                <i data-lucide="search" class="w-4 h-4 text-ink/40"></i>
+                <input type="text" :placeholder="lang==='am'?'ፈልግ…':lang==='ar'?'بحث…':'Search…'" class="w-32 xl:w-44 bg-transparent text-sm outline-none placeholder:text-ink/40" />
+              </div>
+              <button @click="langModal=true" class="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="globe" class="w-5 h-5"></i></button>
+              <button @click="notifOpen=true" class="relative grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10" aria-label="Notifications"><i data-lucide="bell" class="w-5 h-5"></i><span x-show="unread>0" class="absolute top-2 end-2 w-2 h-2 rounded-full bg-crimson"></span></button><button @click="dark=!dark" class="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="moon" class="w-5 h-5" x-show="!dark"></i><i data-lucide="sun" class="w-5 h-5 text-gold" x-show="dark"></i></button>
+              <a href="vendor-add-product.html" class="inline-flex items-center gap-1.5 h-10 px-3 sm:px-4 rounded-2xl bg-forest text-white font-semibold text-sm shadow-[0_8px_20px_-8px_rgba(11,122,75,0.7)] hover:bg-forest-dark transition"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline" x-text="lang==='am'?'ምርት':lang==='ar'?'منتج':'Add'"></span></a>
+            </div>
+          </div>
+
+          <!-- KPI cards -->
+          <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+            <template x-for="k in [
+                {label:{en:'Revenue · 30d',am:'ገቢ · 30 ቀን',ar:'الإيراد'}, val:'ETB 128,400', delta:'+12%', up:true, icon:'trending-up'},
+                {label:{en:'Orders · 30d',am:'ትዕዛዞች',ar:'الطلبات'}, val:'342', delta:'+8%', up:true, icon:'shopping-bag'},
+                {label:{en:'Products',am:'ምርቶች',ar:'المنتجات'}, val:'48', delta:'6 low', up:false, icon:'package'},
+                {label:{en:'Store views',am:'እይታዎች',ar:'المشاهدات'}, val:'12.4k', delta:'+21%', up:true, icon:'eye'}
+              ]" :key="k.val">
+              <div class="rounded-[1.5rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-4 hover:ring-forest/20 transition">
+                <div class="flex items-center justify-between">
+                  <span class="grid place-items-center w-9 h-9 rounded-2xl bg-forest/10 text-forest"><i :data-lucide="k.icon" class="w-[18px] h-[18px]"></i></span>
+                  <span :class="k.up?'text-emerald-600 bg-emerald-500/10':'text-amber-600 bg-amber-500/10'" class="text-[11px] font-bold px-2 py-0.5 rounded-full" x-text="k.delta"></span>
+                </div>
+                <div class="text-2xl font-extrabold mt-3 tracking-tight" x-text="k.val"></div>
+                <div class="text-xs text-ink/45 dark:text-slate-500" x-text="lang==='am'?k.label.am:lang==='ar'?k.label.ar:k.label.en"></div>
+              </div>
+            </template>
+          </div>
+
+          <div class="grid lg:grid-cols-3 gap-4">
+            <!-- sales chart -->
+            <div class="lg:col-span-2 rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-5">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h2 class="font-bold" x-text="lang==='am'?'የሽያጭ አዝማሚያ':lang==='ar'?'اتجاه المبيعات':'Sales this week'"></h2>
+                  <div class="text-2xl font-extrabold mt-1 tracking-tight">ETB 34,900 <span class="text-sm font-semibold text-emerald-600 align-middle">+9%</span></div>
+                </div>
+                <span class="text-[11px] text-ink/45 dark:text-slate-500 px-2.5 py-1 rounded-full bg-black/[0.04] dark:bg-white/5" x-text="lang==='am'?'7 ቀናት':lang==='ar'?'7 أيام':'7 days'"></span>
+              </div>
+              <svg viewBox="0 0 700 210" class="w-full mt-3" preserveAspectRatio="none">
+                <defs><linearGradient id="sl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b7a4b" stop-opacity="0.28"/><stop offset="1" stop-color="#0b7a4b" stop-opacity="0"/></linearGradient></defs>
+                <polygon points="20,102 130,78 240,113 350,57 460,69 570,38 680,86 680,190 20,190" fill="url(#sl)"/>
+                <polyline points="20,102 130,78 240,113 350,57 460,69 570,38 680,86" fill="none" stroke="#0b7a4b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <template x-for="pt in [[20,102],[130,78],[240,113],[350,57],[460,69],[570,38],[680,86]]" :key="pt[0]"><circle :cx="pt[0]" :cy="pt[1]" r="4" fill="#fff" stroke="#0b7a4b" stroke-width="2.5"/></template>
+              </svg>
+              <div class="flex justify-between text-[10px] text-ink/40 dark:text-slate-500 mt-1 px-1">
+                <template x-for="d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" :key="d"><span x-text="d"></span></template>
+              </div>
+            </div>
+
+            <!-- right column -->
+            <div class="space-y-4">
+              <!-- subscription -->
+              <div class="rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-5">
+                <div class="flex items-center gap-2 text-sm font-bold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span x-text="lang==='am'?'ደንበኝነት ንቁ':lang==='ar'?'الاشتراك نشط':'Subscription active'"></span></div>
+                <div class="mt-3 flex items-end justify-between">
+                  <div><div class="text-lg font-extrabold">Growth</div><div class="text-xs text-ink/45 dark:text-slate-500" x-text="lang==='am'?'ETB 1,200 / ወር':lang==='ar'?'ETB 1,200 / شهر':'ETB 1,200 / month'"></div></div>
+                  <a href="vendor-subscription.html" class="text-sm font-semibold text-forest hover:underline" x-text="lang==='am'?'አስተዳድር':lang==='ar'?'إدارة':'Manage'"></a>
+                </div>
+                <p class="text-[11px] text-ink/40 dark:text-slate-500 mt-2" x-text="lang==='am'?'የሚታደሰው ነሐሴ 26':lang==='ar'?'يتجدد 26 أغسطس':'Renews Aug 26, 2026'"></p>
+              </div>
+              <!-- needs attention -->
+              <div class="rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-5">
+                <h2 class="font-bold mb-3 text-sm" x-text="lang==='am'?'ትኩረት የሚሹ':lang==='ar'?'تحتاج انتباه':'Needs attention'"></h2>
+                <div class="space-y-2 text-sm">
+                  <a href="vendor-orders.html" class="flex items-center gap-2.5 group"><span class="grid place-items-center w-8 h-8 rounded-xl bg-crimson/10 text-crimson"><i data-lucide="clock" class="w-4 h-4"></i></span><span class="flex-1 group-hover:text-forest transition" x-text="lang==='am'?'ያልተከናወኑ ትዕዛዞች':lang==='ar'?'طلبات معلقة':'Orders to fulfill'"></span><span class="font-bold">7</span></a>
+                  <a href="vendor-products.html" class="flex items-center gap-2.5 group"><span class="grid place-items-center w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600"><i data-lucide="package-x" class="w-4 h-4"></i></span><span class="flex-1 group-hover:text-forest transition" x-text="lang==='am'?'ክምችት ያለቀ':lang==='ar'?'مخزون منخفض':'Low on stock'"></span><span class="font-bold">6</span></a>
+                  <a href="vendor-payouts.html" class="flex items-center gap-2.5 group"><span class="grid place-items-center w-8 h-8 rounded-xl bg-forest/10 text-forest"><i data-lucide="wallet" class="w-4 h-4"></i></span><span class="flex-1 group-hover:text-forest transition" x-text="lang==='am'?'ለመውጣት ዝግጁ':lang==='ar'?'جاهز للسحب':'Ready to withdraw'"></span><span class="font-bold text-forest" x-text="etb(84200)"></span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- recent orders + top products -->
+          <div class="grid lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-5">
+              <div class="flex items-center justify-between mb-3"><h2 class="font-bold" x-text="lang==='am'?'የቅርብ ትዕዛዞች':lang==='ar'?'أحدث الطلبات':'Recent orders'"></h2><a href="vendor-orders.html" class="text-sm font-semibold text-forest hover:underline flex items-center gap-1"><span x-text="lang==='am'?'ሁሉንም':lang==='ar'?'الكل':'All'"></span><i data-lucide="arrow-right" class="w-4 h-4 rtl:rotate-180"></i></a></div>
+              <div class="overflow-x-auto -mx-1">
+                <table class="w-full text-sm min-w-[520px]">
+                  <thead class="text-ink/40 dark:text-slate-500 text-[11px] uppercase tracking-wide"><tr><th class="text-start font-semibold py-2 px-1">Order</th><th class="text-start font-semibold py-2 px-1">Customer</th><th class="text-start font-semibold py-2 px-1">Total</th><th class="text-start font-semibold py-2 px-1">Status</th></tr></thead>
+                  <tbody>
+                    <template x-for="o in [
+                        {id:'KTM-90312', c:'Selamawit T.', t:41010, s:'New', sc:'bg-amber-500/15 text-amber-600'},
+                        {id:'KTM-90308', c:'Yonas G.', t:2240, s:'Processing', sc:'bg-blue-500/15 text-blue-600'},
+                        {id:'KTM-90297', c:'Hanan A.', t:990, s:'Shipped', sc:'bg-forest/10 text-forest'},
+                        {id:'KTM-90281', c:'Dawit M.', t:3400, s:'Delivered', sc:'bg-forest text-white'}
+                      ]" :key="o.id">
+                      <tr class="border-t border-black/5 dark:border-white/10">
+                        <td class="py-3 px-1 font-semibold" x-text="'#'+o.id"></td>
+                        <td class="py-3 px-1 text-ink/60 dark:text-slate-300" x-text="o.c"></td>
+                        <td class="py-3 px-1 font-semibold" x-text="etb(o.t)"></td>
+                        <td class="py-3 px-1"><span :class="o.sc" class="px-2 py-0.5 rounded-full text-[11px] font-bold" x-text="o.s"></span></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="rounded-[1.75rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-22px_rgba(0,0,0,0.25)] p-5">
+              <h2 class="font-bold mb-3" x-text="lang==='am'?'ምርጥ ሻጮች':lang==='ar'?'الأكثر مبيعاً':'Top products'"></h2>
+              <div class="space-y-3">
+                <template x-for="p in [{n:'Wireless Earbuds Pro',img:'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100&q=70',s:212},{n:'65W Fast Charger',img:'https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?w=100&q=70',s:143},{n:'Samsung Galaxy A55',img:'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=100&q=70',s:64}]" :key="p.n">
+                  <div class="flex items-center gap-3"><img :src="p.img" class="w-10 h-10 rounded-xl object-cover" alt="" /><span class="flex-1 min-w-0 text-sm font-medium truncate" x-text="p.n"></span><span class="text-xs text-ink/45 dark:text-slate-500 font-semibold" x-text="p.s"></span></div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- language modal -->
+    <!-- KITMAN:NOTIF -->
+  <div x-show="notifOpen" x-transition.opacity class="fixed inset-0 z-[75]" @click.self="notifOpen=false" x-cloak>
+    <div x-show="notifOpen" x-transition
+         class="absolute top-[4.75rem] end-3 md:end-6 w-80 max-w-[92vw] bg-white dark:bg-slate-800 rounded-2xl shadow-[0_24px_60px_-15px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-black/5 dark:border-white/10">
+        <span class="font-bold" x-text="lang==='am'?'ማሳወቂያዎች':lang==='ar'?'الإشعارات':'Notifications'"></span>
+        <button @click="markAllRead()" class="text-xs font-semibold text-forest hover:underline" x-text="lang==='am'?'ሁሉንም አንብብ':lang==='ar'?'تعليم الكل كمقروء':'Mark all read'"></button>
+      </div>
+      <div class="max-h-80 overflow-y-auto divide-y divide-black/5 dark:divide-white/10">
+        <template x-for="(n,i) in notifs" :key="i">
+          <div class="flex items-start gap-3 px-4 py-3 hover:bg-black/[0.03] dark:hover:bg-white/5 transition">
+            <span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest shrink-0"><i :data-lucide="n.icon" class="w-[18px] h-[18px]"></i></span>
+            <div class="flex-1 min-w-0"><p class="text-sm leading-snug" x-text="lang==='am'?n.am:lang==='ar'?n.ar:n.en"></p><p class="text-[11px] text-black/40 dark:text-white/40 mt-0.5" x-text="n.time"></p></div>
+            <span x-show="n.unread" class="w-2 h-2 rounded-full bg-crimson mt-1.5 shrink-0"></span>
+          </div>
+        </template>
+      </div>
+      <a href="#" class="block text-center px-4 py-3 text-sm font-semibold text-forest hover:bg-black/[0.03] dark:hover:bg-white/5 border-t border-black/5 dark:border-white/10" x-text="lang==='am'?'ሁሉንም ማሳወቂያ ይመልከቱ':lang==='ar'?'عرض كل الإشعارات':'View all notifications'"></a>
+    </div>
+  </div>
+
+  <div x-show="langModal" x-transition.opacity class="fixed inset-0 z-[70] bg-ink/40 backdrop-blur-sm grid place-items-center p-4" @click.self="langModal=false" x-cloak>
+    <div x-show="langModal" x-transition.scale class="w-full max-w-sm bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10 rounded-3xl shadow-card p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold" x-text="t('choose_lang')"></h3><button @click="langModal=false" class="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"><i data-lucide="x" class="w-5 h-5"></i></button></div>
+      <div class="space-y-2">
+        <template x-for="l in ['en','am','ar']" :key="l">
+          <button @click="setLang(l)" :class="lang===l ? 'ring-2 ring-forest bg-forest/5' : 'ring-1 ring-black/10 dark:ring-white/10'" class="w-full flex items-center justify-between px-4 py-3 rounded-2xl transition hover:bg-forest/5">
+            <span class="flex items-center gap-3"><span class="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest font-bold" x-text="l==='en'?'EN':l==='am'?'አ':'ع'"></span><span class="font-semibold" x-text="langName(l)"></span></span>
+            <i data-lucide="check" class="w-5 h-5 text-forest" x-show="lang===l"></i>
+          </button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function vdash() {
+      return {
+        open: false, active: 'dashboard',
+        nav: [
+          { id:'dashboard', href:'vendor-dashboard.html', icon:'layout-dashboard', en:'Dashboard', am:'ዳሽቦርድ', ar:'لوحة التحكم' },
+          { id:'products', href:'vendor-products.html', icon:'package', en:'Products', am:'ምርቶች', ar:'المنتجات' },
+          { id:'orders', href:'vendor-orders.html', icon:'shopping-bag', en:'Orders', am:'ትዕዛዞች', ar:'الطلبات', badge:7 },
+          { id:'payouts', href:'vendor-payouts.html', icon:'wallet', en:'Payouts', am:'ክፍያዎች', ar:'المدفوعات' },
+          { id:'subscription', href:'vendor-subscription.html', icon:'badge-percent', en:'Subscription', am:'ደንበኝነት', ar:'الاشتراك' },
+          { id:'settings', href:'vendor-settings.html', icon:'settings', en:'Settings', am:'ቅንብሮች', ar:'الإعدادات' }
+        ]
+      }
+    }
+  </script>
+  <script>document.addEventListener('DOMContentLoaded', () => { window.lucide && lucide.createIcons(); });</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

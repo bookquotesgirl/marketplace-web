@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kitman — Page Directory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { forest:{light:'#0e9c60',DEFAULT:'#0b7a4b',dark:'#075c38',deep:'#043b24'}, gold:'#f5b301', crimson:'#d81e2c', cream:'#fbf6ec', ink:'#0f172a' },
+      fontFamily: { sans:['Plus Jakarta Sans','system-ui','sans-serif'] }
+    } } }
+  </script>
+  <style>body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}</style>
+</head>
+<body class="bg-cream text-ink">
+  <!-- header -->
+  <header class="motif bg-gradient-to-br from-forest via-forest-dark to-forest-deep text-white">
+    <div class="max-w-5xl mx-auto px-6 py-12">
+      <div class="flex items-center gap-3">
+        <span class="grid place-items-center w-12 h-12 rounded-2xl bg-white/15 ring-1 ring-white/30 font-extrabold text-xl">ኪ</span>
+        <div>
+          <div class="text-2xl font-extrabold leading-none">Kitman</div>
+          <div class="text-[11px] tracking-[0.25em] uppercase text-white/70">Marketplace · Page Directory</div>
+        </div>
+      </div>
+      <h1 class="mt-6 text-3xl md:text-4xl font-extrabold leading-tight">Ethiopia's multi-vendor marketplace — interactive prototype</h1>
+      <p class="mt-3 text-white/85 max-w-2xl">A clickable, front-end demo of the full Kitman experience: buyer storefront, seller portal and admin console. Trilingual (English · አማርኛ · العربية with right-to-left), dark-mode ready, and built around a subscription model for vendors (no sales commission).</p>
+      <div class="mt-5 flex flex-wrap gap-2 text-sm">
+        <span class="px-3 py-1.5 rounded-full bg-white/15">31 pages</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/15">EN / አማ / عربي + RTL</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/15">Light &amp; dark mode</span>
+        <span class="px-3 py-1.5 rounded-full bg-white/15">Telebirr · CBE Birr · ArifPay · COD</span>
+      </div>
+      <a href="https://ui.sprintstudio.net/index.html" class="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gold text-ink font-bold hover:bg-yellow-300 transition">Open the live demo →</a>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-10 space-y-10">
+    <p class="text-sm text-ink/50">Base URL: <span class="font-semibold text-ink">https://ui.sprintstudio.net/</span> · Tip: use the globe icon to switch language and the moon icon for dark mode. Every page below is a real, clickable link.</p>
+
+    <!-- SECTION TEMPLATE repeated -->
+    <section>
+      <h2 class="text-xl font-extrabold flex items-center gap-2 mb-4"><span class="grid place-items-center w-8 h-8 rounded-xl bg-forest/10 text-forest text-base">🛒</span> Buyer · Storefront <span class="text-sm font-medium text-ink/40">(9)</span></h2>
+      <div class="grid sm:grid-cols-2 gap-3"></div>
+    </section>
+  </main>
+
+  <script>
+    const groups = [
+      { icon:'🛒', title:'Buyer · Storefront', pages:[
+        ['index.html','Homepage','Story-category circles, hero carousel, flash deals with live countdown, vendor spotlight, curated product grids, seller CTA and app-style mobile nav.'],
+        ['shop.html','Category / Search results','Filter sidebar & mobile drawer (price, category, region, vendor, rating, stock), sort options and grid/list toggle.'],
+        ['product.html','Product detail','Image gallery, storage/colour variants, multi-vendor box, chat-with-seller, Specs/Delivery/Reviews tabs, write-a-review and related products.'],
+        ['vendor-store.html','Vendor storefront','Cover banner, store stats, Follow, category tabs, featured / discounted / all products and a store-info drawer.'],
+        ['cart.html','Multi-vendor cart','Items grouped by seller with per-vendor shipping, free-shipping progress, promo code and live totals.'],
+        ['checkout.html','Checkout (3-step)','Delivery address with Addis sub-cities, ArifPay payment (Telebirr / CBE Birr / Awash / Cash on Delivery), review and order-placed success.'],
+        ['orders.html','Order history & tracking','Status tabs and a Placed → Processing → Shipped → Delivered timeline, with Rate / Track / Buy-again.'],
+        ['wishlist.html','Wishlist','Saved-items grid with move-all-to-cart and remove.'],
+        ['profile.html','My account','Overview stats, saved addresses, payment methods, notification settings and security (phone OTP verified).'],
+      ]},
+      { icon:'🔐', title:'Sign in & Register', pages:[
+        ['login.html','Sign in','Phone + one-time code (OTP) or password, plus social sign-in — for buyers, sellers and admins.'],
+        ['register.html','Create account','New buyer sign-up with name, phone and OTP verification.'],
+      ]},
+      { icon:'🏪', title:'Vendor Portal', pages:[
+        ['vendor-register.html','Seller onboarding','Business info → store setup → choose subscription plan → ArifPay payment → pending admin approval.'],
+        ['vendor-dashboard.html','Seller dashboard','KPIs, weekly sales chart, subscription status, recent orders and top products.'],
+        ['vendor-products.html','Products manager','Searchable table with filters, sort, status pills, row actions and bulk operations.'],
+        ['vendor-add-product.html','Add / edit product','Media, pricing with live profit & margin, inventory, a variant builder and publish controls.'],
+        ['vendor-orders.html','Vendor orders','Order pipeline with a detail drawer and status-advance actions.'],
+        ['vendor-payouts.html','Payouts','Available balance, withdraw flow and history — vendors keep 100% (no sales commission).'],
+        ['vendor-subscription.html','Subscription & billing','Current plan, usage meters, upgrade / downgrade and invoices.'],
+        ['vendor-settings.html','Store settings','Branding, contact & location, shipping / return policies and store preferences.'],
+      ]},
+      { icon:'🛡️', title:'Admin Console', pages:[
+        ['admin-dashboard.html','Admin overview','8 KPIs, revenue / GMV trend, sales-by-category donut and a recent-activity feed.'],
+        ['admin-vendors.html','Vendors','Filters, full table and a vendor-profile drawer with suspend / reactivate.'],
+        ['admin-approvals.html','Vendor approvals','Verify each subscription payment and documents, then approve or reject with a reason.'],
+        ['admin-orders.html','Platform orders','Every order across all vendors, with filters and an order drawer.'],
+        ['admin-payouts.html','Payouts','Approve vendor withdrawal requests and view payout history.'],
+        ['admin-customers.html','Customers','Buyer directory with profile drawer and block / unblock.'],
+        ['admin-subscriptions.html','Subscriptions','Monthly recurring revenue, per-plan breakdown, editable pricing and active subscriptions.'],
+        ['admin-settings.html','Platform settings','Categories, payment gateways, delivery zones, admin team and maintenance mode.'],
+      ]},
+      { icon:'ℹ️', title:'Info & System', pages:[
+        ['about.html','About Kitman','Mission, key stats, values and a become-a-seller call to action.'],
+        ['help.html','Help center','Contact options and a frequently-asked-questions accordion.'],
+        ['terms.html','Terms of service','Plain-language terms including the subscription (no-commission) model.'],
+        ['404.html','Not found','Branded 404 page with search and popular categories.'],
+      ]},
+    ];
+    const BASE = 'https://ui.sprintstudio.net/';
+    const main = document.querySelector('main');
+    // clear the placeholder template section
+    main.querySelectorAll('section').forEach(s => s.remove());
+    groups.forEach(g => {
+      const sec = document.createElement('section');
+      sec.innerHTML = `<h2 class="text-xl font-extrabold flex items-center gap-2 mb-4"><span class="grid place-items-center w-8 h-8 rounded-xl bg-forest/10 text-forest text-base">${g.icon}</span> ${g.title} <span class="text-sm font-medium text-ink/40">(${g.pages.length})</span></h2>`;
+      const grid = document.createElement('div');
+      grid.className = 'grid sm:grid-cols-2 gap-3';
+      g.pages.forEach(([file,name,desc]) => {
+        const a = document.createElement('a');
+        a.href = BASE + file; a.target = '_blank'; a.rel = 'noopener';
+        a.className = 'block bg-white rounded-2xl ring-1 ring-black/5 shadow-sm hover:shadow-md hover:ring-forest/30 transition p-4';
+        a.innerHTML = `<div class="flex items-center justify-between gap-2"><span class="font-bold">${name}</span><span class="text-forest text-sm">↗</span></div>
+          <div class="text-[12px] font-mono text-forest/80 mt-0.5 break-all">${BASE}${file}</div>
+          <p class="text-sm text-ink/60 mt-2 leading-snug">${desc}</p>`;
+        grid.appendChild(a);
+      });
+      sec.appendChild(grid);
+      main.appendChild(sec);
+    });
+  </script>
+
+  <footer class="border-t border-black/5 mt-6">
+    <div class="max-w-5xl mx-auto px-6 py-8 text-sm text-ink/50">
+      <p><span class="font-semibold text-ink">Kitman</span> — interactive front-end prototype. This is a UI demo; backend, live payments and data are the next phase.</p>
+      <p class="mt-1">© 2026 Kitman Marketplace · Prepared for client review.</p>
+    </div>
+  </footer>
+</body>
+</html>
