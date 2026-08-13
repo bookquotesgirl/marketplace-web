@@ -1,14 +1,35 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Rating from './Rating';
 import { useCartStore } from '../../store/cartStore';
+
 // Matches the mockup card. Extend to pixel-match kitman-html.
-export default function ProductCard({ product }) {
+// onAdd(product) — optional override for the add-to-cart action (e.g. admin read-only views).
+//   When omitted the card dispatches to the global cartStore (buyer storefront default).
+// currency — ISO code displayed before the price; defaults to 'ETB'.
+export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
+  const { t } = useTranslation();
   const add = useCartStore((s) => s.add);
   const { slug, title, basePrice, images = [], rating = 0, reviewCount, vendorName } = product;
+
+  const handleAdd = () => {
+    if (onAdd) {
+      onAdd(product);
+    } else {
+      add({ productId: product._id, variantId: null, title, price: basePrice, vendor: vendorName });
+    }
+  };
+
   return (
     <div className="group bg-white rounded-2xl ring-1 ring-black/5 shadow-soft overflow-hidden hover:shadow-card transition">
       <Link to={`/product/${slug}`} className="block aspect-square overflow-hidden">
-        <img src={images[0]} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+        {images[0] ? (
+          <img src={images[0]} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+        ) : (
+          <div className="w-full h-full bg-black/5 grid place-items-center text-ink/20 text-4xl font-bold select-none">
+            {title?.[0]?.toUpperCase() ?? '?'}
+          </div>
+        )}
       </Link>
       <div className="p-3">
         {vendorName && <p className="text-[11px] text-forest font-semibold truncate">{vendorName}</p>}
@@ -17,11 +38,11 @@ export default function ProductCard({ product }) {
         </Link>
         <Rating value={rating} count={reviewCount} />
         <div className="flex items-center justify-between mt-2">
-          <span className="font-extrabold text-forest">ETB {Number(basePrice).toLocaleString()}</span>
+          <span className="font-extrabold text-forest">{currency} {Number(basePrice).toLocaleString()}</span>
           <button
-            onClick={() => add({ productId: product._id, variantId: null, title, price: basePrice, vendor: vendorName })}
+            onClick={handleAdd}
             className="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest hover:bg-forest hover:text-white transition"
-            aria-label="Add to cart"
+            aria-label={t('common.addToCart')}
           >
             +
           </button>
