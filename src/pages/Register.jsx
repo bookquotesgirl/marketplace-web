@@ -1,8 +1,6 @@
+import Login from './Login';
+
+// /register renders the same combined auth page with the register tab pre-selected.
 export default function Register() {
-  return (
-    <section className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-2xl md:text-3xl font-extrabold">Create account</h1>
-      <p className="text-ink/60 mt-2">Registers a buyer with OTP verify (Hiwot).</p>
-    </section>
-  );
+  return <Login defaultMode="register" />;
 }

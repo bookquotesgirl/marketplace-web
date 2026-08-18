@@ -11,3 +11,9 @@ One line per merged PR: what you did.
   added Modal + Toast + ProductCard to /components-demo with live state demos; added gray Badge tone
   and Button size variants to demo; updated src/components/README.md with full prop tables and
   ProductCard shape/override docs.
+- Story 5 (feat/vendor-admin-shells) — Vendor and admin app shells implemented with sidebar
+  navigation and nested routing via React Router v6 Outlet; Login and Register auth pages built
+  against the approved API contract (POST /auth/login, POST /auth/register); VendorRegister
+  4-step flow submitting to POST /auth/register-vendor; role-based ProtectedRoute gates
+  /vendor (role=vendor) and /admin (role=admin); all strings in EN/Amharic/Arabic with RTL
+  support; lint, tests, and build passing.
