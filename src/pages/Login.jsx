@@ -127,9 +127,7 @@ export default function Login({ defaultMode = 'login' }) {
       {/* ── Auth layout ──────────────────────────────────────────────────── */}
       <main className="flex-1 grid lg:grid-cols-2">
         {/* Hero / brand panel */}
-        <div className="hidden lg:flex flex-col justify-center gap-6 p-14 bg-gradient-to-br from-forest via-forest-dark to-forest-deep text-white relative overflow-hidden">
-          {/* Motif overlay — separate div so it composites on top of the gradient without overriding it */}
-          <div className="motif absolute inset-0 pointer-events-none" />
+        <div className="hidden lg:flex flex-col justify-center gap-6 p-14 bg-gradient-to-br from-forest to-forest-deep text-white relative overflow-hidden">
           {/* Decorative gold orb */}
           <div className="absolute -top-20 -end-20 w-72 h-72 rounded-full bg-gold/20 blur-3xl pointer-events-none" />
 
