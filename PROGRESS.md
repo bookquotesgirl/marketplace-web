@@ -11,3 +11,12 @@ One line per merged PR: what you did.
   added Modal + Toast + ProductCard to /components-demo with live state demos; added gray Badge tone
   and Button size variants to demo; updated src/components/README.md with full prop tables and
   ProductCard shape/override docs.
+- Story — App State Hooks: added `useAuth`/`useCart`/`useLanguage` selector hooks over the existing
+  authStore/cartStore/uiStore (scaffold, language cycle + RTL, cart persistence, and ProtectedRoute
+  redirect were already in place from earlier work); rewired Header, TopBar, ProtectedRoute, and
+  ProductCard to consume the hooks instead of the raw stores; re-fixed ProductCard's dead `t`/
+  `currency`/`handleAdd` (aria-label + currency prefix + real add-to-cart handler were unused —
+  lint was failing on integration before this change) and added the missing
+  `src/test/renderWithProviders` test helper referenced by Header.test.jsx/TopBar.test.jsx (test
+  suite couldn't run before this change). Verified: lint/test/build all pass; Header+TopBar tests
+  cover cart badge and en→am→ar language cycling with RTL flip.

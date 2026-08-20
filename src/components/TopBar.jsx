@@ -2,15 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Globe, ChevronDown, MapPin, PackageSearch, Headphones, Store } from 'lucide-react';
-import { useUiStore } from '../store/uiStore';
+import { useLanguage } from '../hooks/useLanguage';
 
 const LANG_NAME = { en: 'English', am: 'አማርኛ', ar: 'العربية' };
 const CITIES = ['Addis Ababa', 'Adama', 'Hawassa', 'Bahir Dar', 'Dire Dawa', 'Mekelle', 'Gondar'];
 
 export default function TopBar() {
   const { t } = useTranslation();
-  const language = useUiStore((s) => s.language);
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
+  const { language, cycleLanguage } = useLanguage();
   const [city, setCity] = useState(CITIES[0]);
 
   return (

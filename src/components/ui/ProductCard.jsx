@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Rating from './Rating';
-import { useCartStore } from '../../store/cartStore';
+import { useCart } from '../../hooks/useCart';
 
 // Matches the mockup card. Extend to pixel-match kitman-html.
 // onAdd(product) — optional override for the add-to-cart action (e.g. admin read-only views).
@@ -9,7 +9,7 @@ import { useCartStore } from '../../store/cartStore';
 // currency — ISO code displayed before the price; defaults to 'ETB'.
 export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
   const { t } = useTranslation();
-  const add = useCartStore((s) => s.add);
+  const { add } = useCart();
   const { slug, title, basePrice, images = [], rating = 0, reviewCount, vendorName } = product;
 
   const handleAdd = () => {
@@ -39,20 +39,12 @@ export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
         <Rating value={rating} count={reviewCount} />
         <div className="flex items-center justify-between mt-2">
           <span className="font-extrabold text-forest">
-            ETB {Number(basePrice).toLocaleString()}
+            {currency} {Number(basePrice).toLocaleString()}
           </span>
           <button
-            onClick={() =>
-              add({
-                productId: product._id,
-                variantId: null,
-                title,
-                price: basePrice,
-                vendor: vendorName,
-              })
-            }
+            onClick={handleAdd}
             className="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest hover:bg-forest hover:text-white transition"
-            aria-label="Add to cart"
+            aria-label={t('common.addToCart')}
           >
             +
           </button>
