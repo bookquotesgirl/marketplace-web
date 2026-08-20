@@ -72,11 +72,13 @@ App.jsx               routes: buyer pages under <Layout>; /login /register; /ven
 ```
 
 ### Routing
+
 - Buyer pages render inside `<Layout>`. `/login` and `/register` are standalone.
 - `/vendor` and `/admin` are wrapped in `<ProtectedRoute role="…">`. Add nested routes under each.
 - Product links use slugs: `/product/:slug`, `/store/:slug`.
 
 ### State (Zustand) — the rules
+
 - **authStore**: `{ user, token }`. Token lives **in memory only** (not localStorage). `setAuth`,
   `logout`.
 - **cartStore**: cart lines, `add/updateQty/remove/clear`, `count()`, `total()`. **Persisted** to
@@ -87,12 +89,14 @@ App.jsx               routes: buyer pages under <Layout>; /login /register; /ven
   cache if we adopt one). No business logic in stores.
 
 ### Data fetching
+
 - Always go through `src/lib/api.js` (never hardcode URLs; base URL comes from `VITE_API_URL`).
 - Every fetch renders three states: **loading** (`Spinner`), **empty** (`t('common.noResults')`),
   and **error** (a `Toast`/message). No blank screens.
 - **No hardcoded product/order data** in components — everything comes from the API.
 
 ### i18n & RTL (critical)
+
 - **Every user-visible string goes through `t('…')`** with keys in `locales/en|am|ar.json`. No
   hardcoded English in JSX. Missing keys fall back to English (never blank).
 - The language toggle cycles **English → Amharic → Arabic**. `useApplyLanguage` sets
@@ -104,6 +108,7 @@ App.jsx               routes: buyer pages under <Layout>; /login /register; /ven
   before calling a screen done.
 
 ### Styling
+
 - Colors and fonts come from **`tailwind.config.js`** tokens (`forest`, `gold`, `crimson`, `cream`,
   `ink`; `font-sans/ethiopic/arabic`). **No stray hex values** in components.
 - Match `kitman-html/` for spacing, radii, and component structure. Reuse `components/ui/*`
@@ -131,6 +136,7 @@ math, forms/validation, language switching, protected routes, add-to-cart) is te
 change as the code.
 
 **Tooling to use** (add these devDeps + scripts, then they work):
+
 ```bash
 npm i -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom msw
 # package.json scripts:
@@ -139,6 +145,7 @@ npm i -D vitest @testing-library/react @testing-library/user-event @testing-libr
 #   "test:ui": "vitest --ui"
 # vite.config.js → test: { environment: 'jsdom', globals: true, setupFiles: './src/test/setup.js' }
 ```
+
 - **Vitest** runner + **React Testing Library** + **user-event**. Query by role/text like a user
   (`getByRole('button', { name: /add to cart/i })`), not by class or test-id where avoidable.
 - **MSW** mocks the API at the network layer — do not mock `axios`. Define handlers for the
@@ -150,6 +157,7 @@ npm i -D vitest @testing-library/react @testing-library/user-event @testing-libr
 **Where tests live:** co-located as `*.test.jsx` next to the component, or under `src/**/__tests__/`.
 
 **Example** (`src/store/cartStore.test.js`):
+
 ```js
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useCartStore } from './cartStore';
@@ -172,31 +180,37 @@ describe('cartStore', () => {
 ## Working Agreement (standing orders)
 
 ### Session start
+
 1. Restate the task as a 3–6 step plan **before** writing code. If scope is ambiguous, ask.
 2. `git checkout main && git pull`, then branch: `feat/…`, `fix/…`, `chore/…`, `refactor/…`,
    `docs/…`. **Never commit to `main`.**
 3. If the screen exists in `kitman-html/`, open it first and build to match.
 
 ### While coding
+
 - Reuse `components/ui/*`, brand tokens, `t()` for every string, logical CSS utilities for RTL,
   and `src/lib/api.js` for every request. Mirror existing patterns before inventing.
 - Write the tests in the same session.
 
 ### Self-check loop (mandatory before "done")
+
 Run, in order: `npm run lint` → `npm test` → `npm run build`. All green, and the screen verified in
 **EN, አማ, and Arabic-RTL** at mobile + desktop. Never weaken or skip a failing test to go green.
 
 ### Commits
+
 - Atomic, conventional (`feat(product): variant picker updates price + stock`). Commit only what the
   task touches. Never `--no-verify`, never force-push `main`, never commit `.env`.
 
 ### End-of-session report (always, in order)
+
 1. **Changed** — file-by-file, one line each (what & why).
 2. **Tests** — suites run, pass/fail counts, what the new tests cover.
 3. **i18n/RTL** — confirm new strings are in all three locale files and the screen mirrors in Arabic.
 4. **Deviations** — anything done differently from the plan/design, and why.
 
 ### Hard rules
+
 - No hardcoded UI text (use `t()`), no stray hex (use Tailwind tokens), no `left/right` utilities
   (use logical `start/end`). No tokens in `localStorage`. No new dependency without approval.
 - A screen is not done until it passes lint + tests + build **and** works in all three languages

@@ -13,7 +13,10 @@ export default function ComponentsDemo() {
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <Input label="Input" placeholder="Type here" />
-          <Select label="Select"><option>One</option><option>Two</option></Select>
+          <Select label="Select">
+            <option>One</option>
+            <option>Two</option>
+          </Select>
         </div>
         <div className="flex items-center gap-3">
           <Badge tone="forest">Active</Badge>
