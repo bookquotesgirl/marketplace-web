@@ -1,7 +1,7 @@
 {
   "brand": "ኪትማን",
   "nav": { "home": "መነሻ", "browse": "አስስ", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ" },
-  "common": { "search": "ምርቶችን ይፈልጉ…", "addToCart": "ወደ ጋሪ ጨምር", "loading": "በመጫን ላይ…", "noResults": "ምንም ምርት አልተገኘም", "error": "የሆነ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።" },
+  "common": { "search": "ምርቶችን ይፈልጉ…", "addToCart": "ወደ ጋሪ ጨምር", "loading": "በመጫን ላይ…", "noResults": "ምንም ምርት አልተገኘም", "error": "የሆነ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።", "addedToCart": "ወደ ጋሪ ታክሏል" },
   "footer": { "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ", "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።" },
   "home": {
     "heroTag": "በኢትዮጵያ የተሰራ",
@@ -19,5 +19,15 @@
     "prev": "ቀዳሚ",
     "next": "ቀጣይ",
     "pageOf": "ገጽ {{page}} ከ{{pages}}"
+  },
+  "product": {
+    "notFoundTitle": "ምርቱ አልተገኘም",
+    "notFoundBody": "በዚህ አገናኝ ምንም ምርት አላገኘንም።",
+    "backToBrowse": "ወደ አስስ ተመለስ",
+    "quantity": "ብዛት",
+    "outOfStock": "አልቋል",
+    "inStock": "{{count}} ቀርቷል",
+    "related": "ተዛማጅ ምርቶች",
+    "visitStore": "ሱቁን ጎብኝ"
   }
 }

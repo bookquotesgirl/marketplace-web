@@ -27,3 +27,13 @@ One line per merged PR: what you did.
   Product page's related grid next). New home.*/browse.*/common.error i18n keys in en/am/ar. No
   hardcoded product/category data. lint + build clean; not click-tested against a live
   marketplace-api in this environment.
+- Story — Buyer Product Page (feat/buyer-product-page): Product now fetches
+  GET /api/products/:slug — gallery with thumbnail strip, title/rating/price, a variant selector
+  (pill buttons, one per variant.attributes) that updates price/stock, a quantity input clamped to
+  the selected variant's stock, and Add to cart wired to useCart (disabled + labeled out-of-stock
+  when stock is 0). Vendor strip links to /store/:slug. Related products grid reuses
+  mapProduct.js + GET /api/products?category=… (no dedicated related-products endpoint in
+  API_CONTRACT.md), filtering out the current product. A 404 from the API renders a friendly
+  not-found screen with a link back to /browse; other failures show the shared error state. Added
+  product.* + common.addedToCart i18n keys in en/am/ar. lint + build clean; not click-tested
+  against a live marketplace-api in this environment.

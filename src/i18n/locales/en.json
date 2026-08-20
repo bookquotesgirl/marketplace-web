@@ -1,7 +1,7 @@
 {
   "brand": "Kitman",
   "nav": { "home": "Home", "browse": "Browse", "cart": "Cart", "login": "Sign in", "orders": "Orders", "account": "Account" },
-  "common": { "search": "Search products…", "addToCart": "Add to cart", "loading": "Loading…", "noResults": "No products found", "error": "Something went wrong. Please try again." },
+  "common": { "search": "Search products…", "addToCart": "Add to cart", "loading": "Loading…", "noResults": "No products found", "error": "Something went wrong. Please try again.", "addedToCart": "Added to cart" },
   "footer": { "tagline": "Ethiopia's multi-vendor marketplace", "rights": "All rights reserved." },
   "home": {
     "heroTag": "MADE IN ETHIOPIA",
@@ -19,5 +19,15 @@
     "prev": "Previous",
     "next": "Next",
     "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "product": {
+    "notFoundTitle": "Product not found",
+    "notFoundBody": "We couldn't find a product at this link.",
+    "backToBrowse": "Back to browse",
+    "quantity": "Quantity",
+    "outOfStock": "Out of stock",
+    "inStock": "{{count}} in stock",
+    "related": "Related products",
+    "visitStore": "Visit store"
   }
 }
