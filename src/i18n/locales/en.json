@@ -40,6 +40,26 @@
     "furniture": "Furniture",
     "supermarket": "Supermarket"
   },
+  "home": {
+    "heroTag": "New in Ethiopia",
+    "heroTitle": "Shop. Sell. Grow with Kitman.",
+    "heroSub": "Thousands of products from trusted local vendors, delivered nationwide.",
+    "heroCta": "Shop now",
+    "shopByCategory": "Shop by Category",
+    "featured": "Featured Products",
+    "topVendors": "Top Vendors",
+    "viewAll": "View all",
+    "visitStore": "Visit store"
+  },
+  "browse": {
+    "title": "All Products",
+    "results": "results",
+    "allCategories": "All Categories",
+    "category": "Category",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "pageOf": "Page {{page}} of {{pages}}"
+  },
   "footer": {
     "tagline": "Ethiopia's multi-vendor marketplace",
     "rights": "All rights reserved.",

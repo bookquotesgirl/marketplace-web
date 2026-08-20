@@ -38,3 +38,13 @@ One line per merged PR: what you did.
   `src/test/renderWithProviders` test helper referenced by Header.test.jsx/TopBar.test.jsx (test
   suite couldn't run before this change). Verified: lint/test/build all pass; Header+TopBar tests
   cover cart badge and en→am→ar language cycling with RTL flip.
+- Story — Buyer Home + Browse (feat/buyer-home-browse): built the real Home page (hero banner,
+  category row from GET /categories, featured ProductCard grid + top vendors from GET /products,
+  all deduped/derived from real API data, no hardcoded lists) and the real Browse page (category
+  filter + prev/next/numbered pagination reading/writing `?category=&page=` via useSearchParams,
+  ProductCard grid from GET /products). Both reuse the existing Header/Footer Layout and Spinner /
+  `common.noResults` / `common.error` states; the data-fetching (state, effects, api.js calls) was
+  already scaffolded from earlier work — this fills in the missing JSX. Added `home.*`/`browse.*`
+  i18n keys to en/am/ar. Verified: lint/test/build all pass; dev server smoke-tested against
+  `/`, `/browse`, `/browse?category=…`, `/browse?page=2` (no live marketplace-api in this
+  environment, so this is contract-shape verification, not a real seeded-data click-through).

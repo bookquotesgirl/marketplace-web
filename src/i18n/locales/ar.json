@@ -40,6 +40,26 @@
     "furniture": "أثاث",
     "supermarket": "سوبر ماركت"
   },
+  "home": {
+    "heroTag": "جديد في إثيوبيا",
+    "heroTitle": "تسوّق. بِع. انمُ مع كِتمان.",
+    "heroSub": "آلاف المنتجات من بائعين محليين موثوقين، تُوصَل في جميع أنحاء البلاد.",
+    "heroCta": "تسوّق الآن",
+    "shopByCategory": "تسوّق حسب الفئة",
+    "featured": "منتجات مميزة",
+    "topVendors": "أفضل البائعين",
+    "viewAll": "عرض الكل",
+    "visitStore": "زيارة المتجر"
+  },
+  "browse": {
+    "title": "كل المنتجات",
+    "results": "نتيجة",
+    "allCategories": "كل الفئات",
+    "category": "الفئة",
+    "prevPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "pageOf": "صفحة {{page}} من {{pages}}"
+  },
   "footer": {
     "tagline": "سوق إثيوبيا متعدد البائعين",
     "rights": "كل الحقوق محفوظة.",
