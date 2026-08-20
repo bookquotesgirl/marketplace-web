@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
-import { mapProductCard } from '../lib/mapProduct';
+import { mapProductCard, productImageUrl } from '../lib/mapProduct';
 import { useCart } from '../hooks/useCart';
 import { ProductCard, Rating, Spinner } from '../components/ui';
 
@@ -36,16 +36,18 @@ export default function Product() {
       .get(`/products/${slug}`)
       .then((res) => {
         if (cancelled) return;
-        const p = res.data;
+        const p = res.data?.data;
         setProduct(p);
-        setSelectedVariantId(p.variants?.[0]?.id ?? null);
+        // The API doesn't attach `variants` to this response yet (see PROGRESS.md) — this
+        // stays empty until the backend does, and the page falls back to product.stock/price.
+        setSelectedVariantId(p.variants?.[0]?._id ?? null);
         setStatus('ready');
-        if (p.category?.slug) {
+        if (p.categoryId?._id) {
           api
-            .get('/products', { params: { category: p.category.slug, limit: 5 } })
+            .get('/products', { params: { category: p.categoryId._id, limit: 5 } })
             .then((relRes) => {
               if (cancelled) return;
-              setRelated((relRes.data.items ?? []).filter((item) => item.slug !== p.slug).slice(0, 4));
+              setRelated((relRes.data?.data ?? []).filter((item) => item.slug !== p.slug).slice(0, 4));
             })
             .catch(() => {});
         }
@@ -61,23 +63,25 @@ export default function Product() {
   }, [slug]);
 
   const selectedVariant = useMemo(
-    () => product?.variants?.find((v) => v.id === selectedVariantId) ?? null,
+    () => product?.variants?.find((v) => v._id === selectedVariantId) ?? null,
     [product, selectedVariantId]
   );
 
-  const price = selectedVariant?.price ?? product?.basePrice;
-  const stock = selectedVariant?.stock;
-  const outOfStock = selectedVariant != null && stock <= 0;
+  // The API has no `variants` on the product response yet, so this normally falls back
+  // to the product's own price/stock (see the fetch effect above).
+  const price = selectedVariant?.price ?? product?.basePrice ?? product?.price;
+  const stock = selectedVariant?.stock ?? product?.stock;
+  const outOfStock = stock != null && stock <= 0;
 
   const handleAdd = () => {
     if (!product || outOfStock) return;
     add({
-      productId: product.id,
-      variantId: selectedVariant?.id ?? null,
+      productId: product._id,
+      variantId: selectedVariant?._id ?? null,
       title: product.title,
       price,
       qty,
-      vendor: product.vendor?.storeName,
+      vendor: product.vendorId?.storeName,
     });
     setAdded(true);
   };
@@ -112,36 +116,46 @@ export default function Product() {
     <section className="max-w-7xl mx-auto px-4 py-10">
       <div className="grid md:grid-cols-2 gap-8">
         <div>
-          <div className="aspect-square rounded-2xl overflow-hidden bg-black/5">
-            {product.images?.[activeImage] ? (
-              <img src={product.images[activeImage]} alt={product.title} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full grid place-items-center text-ink/20 text-6xl font-bold select-none">
-                {product.title?.[0]?.toUpperCase() ?? '?'}
-              </div>
-            )}
-          </div>
-          {product.images?.length > 1 && (
-            <div className="mt-3 flex gap-2">
-              {product.images.map((img, i) => (
-                <button
-                  key={img + i}
-                  onClick={() => setActiveImage(i)}
-                  className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${i === activeImage ? 'ring-forest' : 'ring-black/10'}`}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
+          {(() => {
+            const images = (product.images ?? []).map(productImageUrl).filter(Boolean);
+            return (
+              <>
+                <div className="aspect-square rounded-2xl overflow-hidden bg-black/5">
+                  {images[activeImage] ? (
+                    <img src={images[activeImage]} alt={product.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full grid place-items-center text-ink/20 text-6xl font-bold select-none">
+                      {product.title?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                  )}
+                </div>
+                {images.length > 1 && (
+                  <div className="mt-3 flex gap-2">
+                    {images.map((img, i) => (
+                      <button
+                        key={img + i}
+                        onClick={() => setActiveImage(i)}
+                        className={`w-16 h-16 rounded-xl overflow-hidden ring-2 ${i === activeImage ? 'ring-forest' : 'ring-black/10'}`}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         <div>
-          {product.vendor && (
-            <Link to={`/store/${product.vendor.slug}`} className="text-sm font-semibold text-forest hover:underline">
-              {product.vendor.storeName}
-            </Link>
-          )}
+          {product.vendorId &&
+            (product.vendorId.slug ? (
+              <Link to={`/store/${product.vendorId.slug}`} className="text-sm font-semibold text-forest hover:underline">
+                {product.vendorId.storeName}
+              </Link>
+            ) : (
+              <span className="text-sm font-semibold text-forest">{product.vendorId.storeName}</span>
+            ))}
           <h1 className="mt-1 text-2xl md:text-3xl font-extrabold">{product.title}</h1>
           <div className="mt-2">
             <Rating value={product.rating} count={product.reviewCount} />
@@ -150,7 +164,7 @@ export default function Product() {
             {product.currency} {Number(price).toLocaleString()}
           </p>
 
-          {selectedVariant && (
+          {stock != null && (
             <p className="mt-1 text-sm">
               {outOfStock ? (
                 <span className="text-crimson font-semibold">{t('product.outOfStock')}</span>
@@ -164,14 +178,14 @@ export default function Product() {
             <div className="mt-5 flex flex-wrap gap-2">
               {product.variants.map((v) => (
                 <button
-                  key={v.id}
+                  key={v._id}
                   onClick={() => {
-                    setSelectedVariantId(v.id);
+                    setSelectedVariantId(v._id);
                     setQty(1);
                   }}
                   disabled={v.stock <= 0}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold ring-1 transition disabled:opacity-40 disabled:cursor-not-allowed
-                    ${v.id === selectedVariantId ? 'bg-forest text-white ring-forest' : 'ring-black/10 hover:ring-forest'}`}
+                    ${v._id === selectedVariantId ? 'bg-forest text-white ring-forest' : 'ring-black/10 hover:ring-forest'}`}
                 >
                   {variantLabel(v)}
                 </button>
@@ -185,7 +199,7 @@ export default function Product() {
               <input
                 type="number"
                 min={1}
-                max={selectedVariant ? Math.max(stock, 1) : undefined}
+                max={stock != null ? Math.max(stock, 1) : undefined}
                 value={qty}
                 onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
                 className="w-20 px-3 py-2 rounded-xl ring-1 ring-black/10 outline-none focus:ring-2 focus:ring-forest text-sm"
@@ -210,7 +224,7 @@ export default function Product() {
           <h2 className="text-xl md:text-2xl font-extrabold">{t('product.related')}</h2>
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {related.map((p) => (
-              <ProductCard key={p.id} product={mapProductCard(p)} />
+              <ProductCard key={p._id} product={mapProductCard(p)} />
             ))}
           </div>
         </div>

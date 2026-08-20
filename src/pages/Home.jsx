@@ -7,21 +7,19 @@ import { ProductCard, Spinner } from '../components/ui';
 
 export default function Home() {
   const { t } = useTranslation();
-  const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
 
   useEffect(() => {
     let cancelled = false;
     setStatus('loading');
-    Promise.all([
-      api.get('/products', { params: { limit: 8, sort: 'newest' } }),
-      api.get('/categories'),
-    ])
-      .then(([productsRes, categoriesRes]) => {
+    // No GET /api/categories exists on the API yet — the category row and top-vendors
+    // strip below are derived from the fetched products instead of a dedicated endpoint.
+    api
+      .get('/products', { params: { limit: 8, sort: 'newest' } })
+      .then((res) => {
         if (cancelled) return;
-        setProducts(productsRes.data.items ?? []);
-        setCategories(categoriesRes.data ?? []);
+        setProducts(res.data?.data ?? []);
         setStatus('ready');
       })
       .catch(() => {
@@ -32,12 +30,20 @@ export default function Home() {
     };
   }, []);
 
+  const categories = [];
   const vendors = [];
-  const seen = new Set();
+  const seenCategories = new Set();
+  const seenVendors = new Set();
   for (const p of products) {
-    if (p.vendor && !seen.has(p.vendor.id)) {
-      seen.add(p.vendor.id);
-      vendors.push(p.vendor);
+    const c = p.categoryId;
+    if (c?._id && !seenCategories.has(c._id)) {
+      seenCategories.add(c._id);
+      categories.push(c);
+    }
+    const v = p.vendorId;
+    if (v?._id && !seenVendors.has(v._id)) {
+      seenVendors.add(v._id);
+      vendors.push(v);
     }
   }
 
@@ -81,8 +87,8 @@ export default function Home() {
               <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
                 {categories.map((c) => (
                   <Link
-                    key={c.id}
-                    to={`/browse?category=${c.slug}`}
+                    key={c._id}
+                    to={`/browse?category=${c._id}`}
                     className="shrink-0 px-4 py-2.5 rounded-2xl ring-1 ring-black/10 bg-white text-sm font-semibold hover:ring-forest hover:text-forest transition"
                   >
                     {c.name}
@@ -99,7 +105,7 @@ export default function Home() {
             ) : (
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {products.map((p) => (
-                  <ProductCard key={p.id} product={mapProductCard(p)} />
+                  <ProductCard key={p._id} product={mapProductCard(p)} />
                 ))}
               </div>
             )}
@@ -109,15 +115,21 @@ export default function Home() {
             <section className="max-w-7xl mx-auto px-4 py-10">
               <h2 className="text-xl md:text-2xl font-extrabold">{t('home.topVendors')}</h2>
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {vendors.map((v) => (
-                  <Link
-                    key={v.id}
-                    to={`/store/${v.slug}`}
-                    className="p-4 rounded-2xl bg-white ring-1 ring-black/5 shadow-soft hover:shadow-card transition text-center"
-                  >
-                    <span className="font-semibold text-sm">{v.storeName}</span>
-                  </Link>
-                ))}
+                {vendors.map((v) =>
+                  v.slug ? (
+                    <Link
+                      key={v._id}
+                      to={`/store/${v.slug}`}
+                      className="p-4 rounded-2xl bg-white ring-1 ring-black/5 shadow-soft hover:shadow-card transition text-center"
+                    >
+                      <span className="font-semibold text-sm">{v.storeName}</span>
+                    </Link>
+                  ) : (
+                    <div key={v._id} className="p-4 rounded-2xl bg-white ring-1 ring-black/5 shadow-soft text-center">
+                      <span className="font-semibold text-sm">{v.storeName}</span>
+                    </div>
+                  )
+                )}
               </div>
             </section>
           )}

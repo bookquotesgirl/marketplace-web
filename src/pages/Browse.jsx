@@ -8,6 +8,8 @@ import { ProductCard, Spinner, Select } from '../components/ui';
 export default function Browse() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  // No GET /api/categories endpoint exists yet, and the products API filters by the
+  // category's Mongo _id (not slug) — so `category` here holds an _id, derived below.
   const category = searchParams.get('category') || '';
   const page = Number(searchParams.get('page')) || 1;
 
@@ -17,8 +19,19 @@ export default function Browse() {
 
   useEffect(() => {
     api
-      .get('/categories')
-      .then((res) => setCategories(res.data ?? []))
+      .get('/products', { params: { limit: 100 } })
+      .then((res) => {
+        const seen = new Set();
+        const cats = [];
+        for (const p of res.data?.data ?? []) {
+          const c = p.categoryId;
+          if (c?._id && !seen.has(c._id)) {
+            seen.add(c._id);
+            cats.push(c);
+          }
+        }
+        setCategories(cats);
+      })
       .catch(() => {});
   }, []);
 
@@ -29,7 +42,12 @@ export default function Browse() {
       .get('/products', { params: { category: category || undefined, page, limit: 12 } })
       .then((res) => {
         if (cancelled) return;
-        setResult(res.data);
+        setResult({
+          items: res.data?.data ?? [],
+          page: res.data?.currentPage ?? 1,
+          pages: res.data?.totalPages ?? 1,
+          total: res.data?.total ?? 0,
+        });
         setStatus('ready');
       })
       .catch(() => {
@@ -62,7 +80,7 @@ export default function Browse() {
           <Select label={t('browse.category')} value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">{t('browse.allCategories')}</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
+              <option key={c._id} value={c._id}>
                 {c.name}
               </option>
             ))}
@@ -85,7 +103,7 @@ export default function Browse() {
           ) : (
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {result.items.map((p) => (
-                <ProductCard key={p.id} product={mapProductCard(p)} />
+                <ProductCard key={p._id} product={mapProductCard(p)} />
               ))}
             </div>
           )}
