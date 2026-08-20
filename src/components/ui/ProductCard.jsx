@@ -1,10 +1,25 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Rating from './Rating';
 import { useCartStore } from '../../store/cartStore';
+
 // Matches the mockup card. Extend to pixel-match kitman-html.
-export default function ProductCard({ product }) {
+// onAdd(product) — optional override for the add-to-cart action (e.g. admin read-only views).
+//   When omitted the card dispatches to the global cartStore (buyer storefront default).
+// currency — ISO code displayed before the price; defaults to 'ETB'.
+export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
+  const { t } = useTranslation();
   const add = useCartStore((s) => s.add);
   const { slug, title, basePrice, images = [], rating = 0, reviewCount, vendorName } = product;
+
+  const handleAdd = () => {
+    if (onAdd) {
+      onAdd(product);
+    } else {
+      add({ productId: product._id, variantId: null, title, price: basePrice, vendor: vendorName });
+    }
+  };
+
   return (
     <div className="group bg-white dark:bg-slate-800 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-soft overflow-hidden hover:shadow-card transition">
       <Link to={`/product/${slug}`} className="block aspect-square overflow-hidden">
@@ -36,7 +51,7 @@ export default function ProductCard({ product }) {
                 vendor: vendorName,
               })
             }
-            className="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 dark:bg-forest/20 text-forest hover:bg-forest hover:text-white transition"
+            className="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest hover:bg-forest hover:text-white transition"
             aria-label="Add to cart"
           >
             +

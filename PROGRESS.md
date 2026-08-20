@@ -6,3 +6,8 @@ One line per merged PR: what you did.
   routes + vendor/admin (ProtectedRoute), Zustand stores (auth/cart/ui) with localStorage
   persistence, axios API client (VITE_API_URL), i18next EN/አማ/ar + RTL + fonts, shared UI
   component library + /components-demo, Header/Footer Layout. Static design reference in kitman-html/.
+- Story 1 — Shared UI Component Library: fixed ProductCard (aria-label via t('common.addToCart'),
+  configurable currency prop, image-initial fallback, optional onAdd override decoupling cart store);
+  added Modal + Toast + ProductCard to /components-demo with live state demos; added gray Badge tone
+  and Button size variants to demo; updated src/components/README.md with full prop tables and
+  ProductCard shape/override docs.

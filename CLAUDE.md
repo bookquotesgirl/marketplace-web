@@ -215,3 +215,9 @@ Run, in order: `npm run lint` → `npm test` → `npm run build`. All green, and
   (use logical `start/end`). No tokens in `localStorage`. No new dependency without approval.
 - A screen is not done until it passes lint + tests + build **and** works in all three languages
   including Arabic RTL.
+
+## API Contract
+
+The approved backend API contract is documented in `API_CONTRACT.md`.
+Use it as the source of truth when implementing API integrations.
+Do not invent endpoints, request fields, response fields, or error formats.
