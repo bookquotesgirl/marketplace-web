@@ -48,3 +48,26 @@ One line per merged PR: what you did.
   i18n keys to en/am/ar. Verified: lint/test/build all pass; dev server smoke-tested against
   `/`, `/browse`, `/browse?category=…`, `/browse?page=2` (no live marketplace-api in this
   environment, so this is contract-shape verification, not a real seeded-data click-through).
+- Correction — API shape: the above Home/Browse work was built strictly against the documented
+  `API_CONTRACT.md` (`items`/`id`/`slug`/`vendor.slug`). Reading the actual backend
+  (`back/src/controllers/product.controller.js`, `product.model.js`) shows the *live* API returns
+  raw Mongoose documents instead: `{ data, currentPage, totalPages }` with `_id`,
+  `categoryId`/`vendorId` (populated, `vendorId` has no `slug`), and **no `variants` field on the
+  product model at all yet**. `src/lib/mapProduct.js` documents this gap. When
+  `feat/buyer-home-browse` was merged into `feat/buyer-product-page`, the real-shape Home/Browse
+  (already built earlier on this branch) was correctly kept over the contract-only version — no
+  further action needed there, but `API_CONTRACT.md` is stale and worth a backend-side fix.
+- Story — Buyer Product Page (feat/buyer-product-page): verified/repaired after the
+  feat/buyer-home-browse merge — the merge resolution had kept all of Product.jsx's data-fetching
+  (GET /products/:slug, related products via GET /products?category=…) and handlers intact but
+  reverted the actual render to a placeholder, leaving `mapProductCard`, `ProductCard`, `Rating`,
+  `variantLabel`, `related`, `activeImage`, `added`, and `handleAdd` unused (lint was failing).
+  Restored the real render: image gallery with thumbnail strip, vendor strip linking to
+  `/store/:slug`, title/rating/price, a variant selector (pill buttons, disabled when a variant's
+  stock is 0) that updates price/stock — falls back to the product's own basePrice/stock since the
+  live backend has no `variants` data yet — a quantity input clamped to stock, and Add to cart
+  wired to `useCart` (disabled + labeled out-of-stock at 0 stock). A 404 from the API renders a
+  friendly not-found screen linking back to `/browse`; other failures show the shared error state.
+  Verified: lint/test/build all pass; dev server smoke-tested `/product/:slug` (no live
+  marketplace-api in this environment, so add-to-cart → cart-badge and real variant switching are
+  not yet click-tested against seeded data).
