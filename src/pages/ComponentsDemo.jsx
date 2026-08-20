@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { Button, Input, Select, Badge, Card, Modal, Spinner, Rating, Toast, ProductCard } from '../components/ui';
+import {
+  Button,
+  Input,
+  Select,
+  Badge,
+  Card,
+  Modal,
+  Spinner,
+  Rating,
+  Toast,
+  ProductCard,
+} from '../components/ui';
 
 const MOCK_PRODUCT = {
   _id: 'demo-1',
@@ -27,7 +38,9 @@ export default function ComponentsDemo() {
 
       {/* Button / Input / Select / Badge / Rating / Spinner */}
       <Card className="p-5 space-y-4">
-        <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">Button · Input · Select · Badge · Rating · Spinner</p>
+        <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">
+          Button · Input · Select · Badge · Rating · Spinner
+        </p>
         <div className="flex flex-wrap gap-2">
           <Button>Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -42,7 +55,6 @@ export default function ComponentsDemo() {
           <Select label="Select">
             <option>One</option>
             <option>Two</option>
-            <option>Three</option>
           </Select>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -61,10 +73,16 @@ export default function ComponentsDemo() {
         <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">Modal</p>
         <Button onClick={() => setModalOpen(true)}>Open modal</Button>
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Confirm action">
-          <p className="text-ink/70 text-sm">This is the modal body. Click Confirm or press the backdrop to close.</p>
+          <p className="text-ink/70 text-sm">
+            This is the modal body. Click Confirm or press the backdrop to close.
+          </p>
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="secondary" size="sm" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={() => setModalOpen(false)}>Confirm</Button>
+            <Button variant="secondary" size="sm" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={() => setModalOpen(false)}>
+              Confirm
+            </Button>
           </div>
         </Modal>
       </Card>
@@ -72,13 +90,17 @@ export default function ComponentsDemo() {
       {/* Toast */}
       <Card className="p-5 space-y-3">
         <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">Toast</p>
-        <Button variant="secondary" onClick={showToast}>Show toast</Button>
+        <Button variant="secondary" onClick={showToast}>
+          Show toast
+        </Button>
       </Card>
       <Toast show={toastShow}>Item added to cart</Toast>
 
       {/* ProductCard */}
       <Card className="p-5 space-y-3">
-        <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">ProductCard — image fallback (no image)</p>
+        <p className="text-xs font-semibold text-ink/50 uppercase tracking-wide">
+          ProductCard — image fallback (no image)
+        </p>
         <div className="max-w-[200px]">
           <ProductCard product={MOCK_PRODUCT} onAdd={showToast} />
         </div>

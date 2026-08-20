@@ -1,11 +1,17 @@
 const styles = {
   primary: 'bg-forest text-white hover:bg-forest-dark',
-  secondary: 'ring-1 ring-black/10 hover:bg-black/5',
+  secondary: 'ring-1 ring-black/10 dark:ring-white/15 hover:bg-black/5 dark:hover:bg-white/10',
   gold: 'bg-gold text-ink hover:bg-gold-light',
-  ghost: 'hover:bg-black/5',
+  ghost: 'hover:bg-black/5 dark:hover:bg-white/10',
 };
 const sizes = { sm: 'h-9 px-3 text-sm', md: 'h-11 px-5', lg: 'h-12 px-6 text-lg' };
-export default function Button({ variant = 'primary', size = 'md', disabled, className = '', ...props }) {
+export default function Button({
+  variant = 'primary',
+  size = 'md',
+  disabled,
+  className = '',
+  ...props
+}) {
   return (
     <button
       disabled={disabled}
