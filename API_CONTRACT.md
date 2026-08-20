@@ -1,25 +1,16 @@
-# Kitman API Contract — v2
+# Kitman API Contract — v3
 
-This is a revision of the original contract. Every change below was verified against the
-static mockups in `kitman-html/` before being made — nothing here is speculative. Endpoints
-with no note are unchanged from v1.
+## Changelog (v2 → v3)
 
-## Changelog
+| # | Endpoint(s) | Change |
+|---|---|---|
+| 1 | `POST /auth/register/initiate`, `/verify`, `/complete`, `/resend-otp` | **New** — buyer registration is now Phone → OTP → Complete (3 steps) |
+| 2 | `POST /auth/register-vendor/initiate`, `/verify`, `/complete`, `/resend-otp` | **New** — vendor registration same multi-step pattern |
+| 3 | `GET /auth/google`, `/google/callback`, `/google/me` | **New** — Google OAuth |
+| 4 | `POST /auth/login`, `GET /auth/me` | `vendor.verified` → `vendor.status` (`pending`\|`approved`\|`rejected`\|`suspended`) |
+| 5 | `POST /auth/register`, `/register-vendor`, `/send-otp`, `/verify-otp` | **Deprecated** — kept for backward compat, do not use in new code |
 
-| #   | Endpoint(s)                                                      | Change                                                                                                                                              | Evidence                                                                                                                                                                                                           |
-| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | `POST /auth/register`                                            | `email` is now **optional**                                                                                                                         | `register.html` form only collects `name`, `phone`, `password` — no email input exists                                                                                                                             |
-| 2   | `POST /auth/forgot-password`, `POST /auth/reset-password`        | **New endpoints**                                                                                                                                   | Both `login.html` and `register.html` render a "Forgot password?" link with no backing endpoint anywhere in v1                                                                                                     |
-| 3   | `POST /auth/login`, `POST /auth/register-vendor`, `GET /auth/me` | Response now embeds a `vendor` summary object when `role: "vendor"`                                                                                 | `vendor-dashboard.html` sidebar renders store name, logo, and plan on every page load — v1 required a second call the contract never defined                                                                       |
-| 4   | `GET /vendor/me`, `PATCH /vendor/me`                             | **New endpoints**                                                                                                                                   | `vendor-settings.html` has editable store identity fields (name, tagline, handle, description, logo) with no endpoint to read or save them                                                                         |
-| 5   | `PATCH /vendor/orders/:subOrderId/status`                        | `cancelled` added as a legal status                                                                                                                 | `vendor-orders.html` has a live "Cancelled" filter tab and badge styling for it — v1's transition list (`placed→confirmed→shipped→delivered`) never allowed it                                                     |
-| 6   | `GET /vendor/analytics`                                          | Added `storeViews30d`, `productsCount`, `lowStockCount`; `salesOverTime` scoped to 7 days                                                           | `vendor-dashboard.html` KPI row shows Revenue·30d, Orders·30d, Products (with low-stock delta), and **Store views** — none of which existed in v1's response shape                                                 |
-| 7   | `GET /vendor/dashboard`                                          | **New composed endpoint**                                                                                                                           | Avoids the frontend firing 3 separate calls (`analytics` + `earnings` + `low-stock`) just to paint one screen; returns exactly what `vendor-dashboard.html` renders                                                |
-| 8   | `GET /admin/analytics`                                           | Added `subscriptionMrr`, `activeVendors`, `pendingApprovals`, `customersCount`, `avgOrderValue`, `refundRate`; `growthOverTime` scoped to 12 months | `admin-dashboard.html` KPI row has 8 cards — v1's response only covered 2 of them (`revenue`, `ordersCount`)                                                                                                       |
-| 9   | `GET /admin/dashboard`                                           | **New composed endpoint**                                                                                                                           | Same rationale as #7, for the admin overview screen                                                                                                                                                                |
-| 10  | Order status naming                                              | Documentation-only clarification, no field renamed                                                                                                  | `vendor-orders.html` labels statuses "New"/"Processing" in the UI while the API uses `placed`/`confirmed` — this is an intentional display-label mapping, not a data mismatch; mapping is now spelled out under §5 |
-
-Everything else below is reproduced from v1 unchanged.
+Everything below §1 is reproduced from v2 unchanged except §2 (Authentication).
 
 ## Base URL
 
@@ -45,78 +36,205 @@ Most endpoints require a Bearer token in the `Authorization` header: `Authorizat
 
 ## 2. Authentication
 
-### POST /api/auth/register (Buyer)
+---
 
+### Buyer Registration — Phone → OTP → Complete
+
+#### POST /api/auth/register/initiate
 - **Auth:** Public
-- **Body:** `{ "name": "string", "email": "string, optional", "phone": "string", "password": "string" }` <!-- [CHANGED] #1: email optional -->
-- **Response:** `201 Created` - Returns user object and JWT token.
-- **Note [CHANGED] #1:** `email` was required in v1, but the registration mockup (`register.html`) never collects it — only phone-based signup is offered. Making it optional avoids a form field the UI doesn't have. If email capture is wanted later, prompt for it post-registration instead of blocking signup on it.
+- **Body:**
+  ```json
+  { "phone": "+251911234567" }
+  ```
+- **Response:** `200 OK`
+  ```json
+  { "message": "OTP sent", "expiresIn": 10 }
+  ```
+  `expiresIn` is in minutes.
+- **Errors:**
+  - `409` — phone already registered
+    ```json
+    { "error": { "code": "PHONE_ALREADY_REGISTERED", "message": "An account with this phone number already exists." } }
+    ```
 
-### POST /api/auth/register-vendor
-
+#### POST /api/auth/register/verify
 - **Auth:** Public
-- **Body:** `{ "name": "string", "email": "string", "phone": "string", "password": "string", "storeName": "string", "kyc": { "businessName": "string", "docType": "string", "docNumber": "string", "docUrl": "string" } }`
-- **Response:** `201 Created` - Creates a User with `role: 'vendor'` and a Vendor with `status: 'pending'`. Returns user, token, and a `vendor` summary object (see #3 below).
+- **Body:**
+  ```json
+  { "phone": "+251911234567", "code": "123456" }
+  ```
+- **Response:** `200 OK`
+  ```json
+  { "message": "Phone verified" }
+  ```
+- **Errors:**
+  - `400` — OTP expired
+    ```json
+    { "error": { "code": "SESSION_EXPIRED", "message": "The OTP session has expired. Please request a new code." } }
+    ```
+  - `400` — wrong code
+    ```json
+    { "error": { "code": "INVALID_OTP", "message": "The code you entered is incorrect." } }
+    ```
+  - `400` — too many wrong attempts
+    ```json
+    { "error": { "code": "MAX_ATTEMPTS_EXCEEDED", "message": "Too many incorrect attempts. Please request a new code." } }
+    ```
 
-### POST /api/auth/login
-
+#### POST /api/auth/register/complete
 - **Auth:** Public
-- **Body:** `{ "phone": "string", "password": "string" }`
-- **Response:** `200 OK` - Returns
+- **Body:**
+  ```json
+  { "phone": "+251911234567", "password": "string", "name": "Abebe Kebede" }
+  ```
+  `email` is optional and not collected by the UI.
+- **Response:** `201 Created`
   ```json
   {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
       "id": "64f1a2b3c4d5e6f7a8b9c0d1",
-      "name": "Addis Tech",
-      "email": "admin@example.com",
-      "phone": "+251933456789",
-      "role": "vendor",
+      "name": "Abebe Kebede",
+      "phone": "+251911234567",
+      "email": null,
+      "role": "buyer",
       "isPhoneVerified": true,
-      "isEmailVerified": true,
-      "createdAt": "2026-07-22T09:00:00.000Z",
-      "vendor": {
-        "id": "vendor-id",
-        "storeName": "Addis Tech",
-        "slug": "addis-tech",
-        "logoUrl": "/uploads/addis-tech-logo.jpg",
-        "verified": true,
-        "plan": { "name": "Growth", "price": 1200.0, "renewsAt": "2026-08-26" }
-      }
+      "createdAt": "2026-08-20T09:00:00.000Z"
     }
   }
   ```
-- **Note [CHANGED] #3:** `user.vendor` is a **new**, optional field — present only when `role: "vendor"`. It's a summary, not the full store profile: enough to render the sidebar identity block (`vendor-dashboard.html`) without an extra round trip on every page load. Use `GET /vendor/me` (new, see §9) for the full editable profile.
+- **Errors:**
+  - `400` — validation (missing/weak password, missing name)
+    ```json
+    { "error": { "code": "VALIDATION_ERROR", "message": "..." } }
+    ```
 
-### GET /api/auth/me
-
-- **Auth:** Bearer Token
-- **Response:** `200 OK` - Returns the current user object (same shape as the `login` response above, including `vendor` when applicable).
-
-### POST /api/auth/send-otp
-
-- **Auth:** Bearer Token (authenticated user)
-- **Body:** `{ "phone": "string" }`
-- **Response:** `200 OK` - Sends a 6-digit code via the stubbed notification provider (logs to console in dev).
-
-### POST /api/auth/verify-otp
-
-- **Auth:** Bearer Token
-- **Body:** `{ "phone": "string", "code": "string" }`
-- **Response:** `200 OK` - Marks the user's phone as verified if the code matches. Errors on expired/incorrect code.
-
-### POST /api/auth/forgot-password `[NEW]` #2
-
+#### POST /api/auth/register/resend-otp
 - **Auth:** Public
-- **Body:** `{ "phone": "string" }`
-- **Response:** `200 OK` - Always returns success regardless of whether the phone exists (avoid account enumeration). Sends a reset code via the same stubbed notification provider used by OTP.
-- **Evidence:** `login.html` and `register.html` both render a "Forgot password?" link with nowhere to send the user; this closes that gap.
+- **Body:**
+  ```json
+  { "phone": "+251911234567" }
+  ```
+- **Response:** `200 OK`
+  ```json
+  { "message": "OTP resent", "expiresIn": 10 }
+  ```
 
-### POST /api/auth/reset-password `[NEW]` #2
+---
 
+### Login
+
+#### POST /api/auth/login
 - **Auth:** Public
-- **Body:** `{ "phone": "string", "code": "string", "newPassword": "string" }`
-- **Response:** `200 OK` - Resets the password if the code is valid and unexpired. `400` on invalid/expired code (`code: "INVALID_RESET_CODE"`).
+- **Body:**
+  ```json
+  { "phone": "+251911234567", "password": "string" }
+  ```
+- **Response:** `200 OK`
+  ```json
+  {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "name": "Abebe Kebede",
+      "phone": "+251911234567",
+      "email": null,
+      "role": "buyer",
+      "isPhoneVerified": true,
+      "createdAt": "2026-07-22T09:00:00.000Z"
+    }
+  }
+  ```
+  When `role: "vendor"`, `user` also contains:
+  ```json
+  {
+    "vendor": {
+      "id": "vendor-id",
+      "storeName": "Addis Tech",
+      "slug": "addis-tech",
+      "logoUrl": "/uploads/addis-tech-logo.jpg",
+      "status": "approved",
+      "plan": { "name": "Growth", "price": 1200.0, "renewsAt": "2026-08-26" }
+    }
+  }
+  ```
+  `vendor.status` is `pending | approved | rejected | suspended`. **`vendor.verified` (v2) is removed — use `status === "approved"` instead.**
+- **Errors:**
+  - `401`
+    ```json
+    { "error": { "code": "INVALID_CREDENTIALS", "message": "Phone number or password is incorrect." } }
+    ```
+
+---
+
+### Get Current User
+
+#### GET /api/auth/me
+- **Auth:** Bearer Token
+- **Response:** `200 OK` — Same shape as the `POST /auth/login` response.
+
+---
+
+### Google OAuth
+
+#### GET /api/auth/google
+- **Auth:** Public
+- **Response:** Redirects to Google's OAuth consent screen. No body.
+
+#### GET /api/auth/google/callback
+- **Auth:** Public (OAuth redirect)
+- **Response:** Redirects the browser to the frontend with `token` and `user` as query parameters:
+  ```
+  https://<frontend>/?token=eyJ...&user=%7B%22id%22%3A...%7D
+  ```
+  `user` is URL-encoded JSON matching the login response shape. Frontend must:
+  ```js
+  const token = params.get('token');
+  const user  = JSON.parse(decodeURIComponent(params.get('user')));
+  setAuth({ token, user });
+  ```
+
+#### GET /api/auth/google/me
+- **Auth:** Bearer Token
+- **Response:** `200 OK` — Same shape as `GET /api/auth/me`.
+
+---
+
+### Password Reset
+
+#### POST /api/auth/forgot-password
+- **Auth:** Public
+- **Body:** `{ "phone": "+251911234567" }`
+- **Response:** `200 OK` — Always succeeds (avoids account enumeration).
+  ```json
+  { "message": "Reset code sent if the account exists." }
+  ```
+
+#### POST /api/auth/reset-password
+- **Auth:** Public
+- **Body:** `{ "phone": "+251911234567", "code": "string", "newPassword": "string" }`
+- **Response:** `200 OK`
+  ```json
+  { "message": "Password reset successfully." }
+  ```
+- **Errors:**
+  - `400`
+    ```json
+    { "error": { "code": "INVALID_RESET_CODE", "message": "The reset code is invalid or has expired." } }
+    ```
+
+---
+
+### Deprecated (do not use in new code)
+
+These endpoints remain on the server for backward compatibility only.
+
+| Endpoint | Replaced by |
+|---|---|
+| `POST /api/auth/register` | `register/initiate → verify → complete` |
+| `POST /api/auth/register-vendor` | `register-vendor/initiate → verify → complete` |
+| `POST /api/auth/send-otp` | `register/initiate` or `register/resend-otp` |
+| `POST /api/auth/verify-otp` | `register/verify` |
 
 ---
 
