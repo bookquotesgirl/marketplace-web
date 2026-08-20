@@ -3,7 +3,15 @@
 @tailwind utilities;
 
 /* Language-driven fonts (set by the ui store on language change). */
-html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-html[lang='am'] { font-family: 'Noto Sans Ethiopic', sans-serif; }
-html[lang='ar'] { font-family: 'Cairo', sans-serif; }
-body { @apply bg-cream text-ink antialiased; }
+html {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+html[lang='am'] {
+  font-family: 'Noto Sans Ethiopic', sans-serif;
+}
+html[lang='ar'] {
+  font-family: 'Cairo', sans-serif;
+}
+body {
+  @apply bg-cream text-ink antialiased dark:bg-ink dark:text-slate-100 transition-colors;
+}

@@ -21,28 +21,38 @@ export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
   };
 
   return (
-    <div className="group bg-white rounded-2xl ring-1 ring-black/5 shadow-soft overflow-hidden hover:shadow-card transition">
+    <div className="group bg-white dark:bg-slate-800 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-soft overflow-hidden hover:shadow-card transition">
       <Link to={`/product/${slug}`} className="block aspect-square overflow-hidden">
-        {images[0] ? (
-          <img src={images[0]} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition" />
-        ) : (
-          <div className="w-full h-full bg-black/5 grid place-items-center text-ink/20 text-4xl font-bold select-none">
-            {title?.[0]?.toUpperCase() ?? '?'}
-          </div>
-        )}
+        <img
+          src={images[0]}
+          alt={title}
+          className="w-full h-full object-cover group-hover:scale-105 transition"
+        />
       </Link>
       <div className="p-3">
-        {vendorName && <p className="text-[11px] text-forest font-semibold truncate">{vendorName}</p>}
+        {vendorName && (
+          <p className="text-[11px] text-forest font-semibold truncate">{vendorName}</p>
+        )}
         <Link to={`/product/${slug}`}>
           <h3 className="text-sm font-semibold line-clamp-2 h-9 hover:text-forest">{title}</h3>
         </Link>
         <Rating value={rating} count={reviewCount} />
         <div className="flex items-center justify-between mt-2">
-          <span className="font-extrabold text-forest">{currency} {Number(basePrice).toLocaleString()}</span>
+          <span className="font-extrabold text-forest">
+            ETB {Number(basePrice).toLocaleString()}
+          </span>
           <button
-            onClick={handleAdd}
+            onClick={() =>
+              add({
+                productId: product._id,
+                variantId: null,
+                title,
+                price: basePrice,
+                vendor: vendorName,
+              })
+            }
             className="grid place-items-center w-9 h-9 rounded-xl bg-forest/10 text-forest hover:bg-forest hover:text-white transition"
-            aria-label={t('common.addToCart')}
+            aria-label="Add to cart"
           >
             +
           </button>

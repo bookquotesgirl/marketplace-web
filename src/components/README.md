@@ -1,10 +1,19 @@
 # Shared UI components
 
-Prop-driven, Tailwind + brand tokens. Import from the barrel and reuse everywhere — no copy-paste styling.
+Prop-driven, Tailwind + brand tokens. Reuse these everywhere (no copy-paste).
 
-```js
-import { Button, Input, Select, Badge, Card, Modal, Spinner, Rating, Toast, ProductCard } from '../components/ui';
-```
+| Component   | Key props                                                                          |
+| ----------- | ---------------------------------------------------------------------------------- |
+| Button      | variant (primary/secondary/gold/ghost), size (sm/md/lg), disabled                  |
+| Input       | label, ...input props                                                              |
+| Select      | label, children (options)                                                          |
+| Badge       | tone (forest/gold/crimson/gray)                                                    |
+| Card        | className, children                                                                |
+| Modal       | open, onClose, title, children                                                     |
+| Spinner     | className                                                                          |
+| Rating      | value, count                                                                       |
+| Toast       | show, children                                                                     |
+| ProductCard | product ({ _id, slug, title, basePrice, images, rating, reviewCount, vendorName }) |
 
 Visual check: run the app and open `/components-demo`.
 
@@ -12,18 +21,18 @@ Visual check: run the app and open `/components-demo`.
 
 ## Component reference
 
-| Component | Key props | Notes |
-|-----------|-----------|-------|
-| `Button` | `variant` (primary\|secondary\|gold\|ghost), `size` (sm\|md\|lg), `disabled`, `className` | Spreads all `<button>` attrs |
-| `Input` | `label`, `className`, ...input props | Wraps `<input>` in a `<label>`; all native input attrs pass through |
-| `Select` | `label`, `children` (options), `className`, ...select props | Same wrapper pattern as Input |
-| `Badge` | `tone` (forest\|gold\|crimson\|gray), `children` | Inline pill label |
-| `Card` | `className`, `children` | White rounded surface with soft shadow |
-| `Modal` | `open` (bool), `onClose` (fn), `title` (string?), `children` | Backdrop click calls `onClose`; renders nothing when `open` is false |
-| `Spinner` | `className` | Animated border ring in `forest` color |
-| `Rating` | `value` (0–5), `count` (number?) | Renders filled/empty stars; omit `count` to hide the review count |
-| `Toast` | `show` (bool), `children` | Fixed bottom-center banner; renders nothing when `show` is false |
-| `ProductCard` | `product` (object), `onAdd` (fn?), `currency` (string?) | See shape below |
+| Component     | Key props                                                                                 | Notes                                                                |
+| ------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `Button`      | `variant` (primary\|secondary\|gold\|ghost), `size` (sm\|md\|lg), `disabled`, `className` | Spreads all `<button>` attrs                                         |
+| `Input`       | `label`, `className`, ...input props                                                      | Wraps `<input>` in a `<label>`; all native input attrs pass through  |
+| `Select`      | `label`, `children` (options), `className`, ...select props                               | Same wrapper pattern as Input                                        |
+| `Badge`       | `tone` (forest\|gold\|crimson\|gray), `children`                                          | Inline pill label                                                    |
+| `Card`        | `className`, `children`                                                                   | White rounded surface with soft shadow                               |
+| `Modal`       | `open` (bool), `onClose` (fn), `title` (string?), `children`                              | Backdrop click calls `onClose`; renders nothing when `open` is false |
+| `Spinner`     | `className`                                                                               | Animated border ring in `forest` color                               |
+| `Rating`      | `value` (0–5), `count` (number?)                                                          | Renders filled/empty stars; omit `count` to hide the review count    |
+| `Toast`       | `show` (bool), `children`                                                                 | Fixed bottom-center banner; renders nothing when `show` is false     |
+| `ProductCard` | `product` (object), `onAdd` (fn?), `currency` (string?)                                   | See shape below                                                      |
 
 ### ProductCard — `product` shape
 
@@ -42,7 +51,7 @@ Visual check: run the app and open `/components-demo`.
 
 ### ProductCard — optional props
 
-| Prop | Default | Purpose |
-|------|---------|---------|
+| Prop             | Default                   | Purpose                                                                                                                 |
+| ---------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `onAdd(product)` | dispatches to `cartStore` | Override add-to-cart. Pass a no-op or custom handler in admin/vendor contexts where the global cart should not be used. |
-| `currency` | `'ETB'` | ISO currency code shown before the price. |
+| `currency`       | `'ETB'`                   | ISO currency code shown before the price.                                                                               |
