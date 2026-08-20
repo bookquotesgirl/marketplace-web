@@ -27,8 +27,9 @@ import {
   Globe,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
-import { useCartStore } from '../store/cartStore';
-import { useAuthStore } from '../store/authStore';
+import { useLanguage } from '../hooks/useLanguage';
+import { useCart } from '../hooks/useCart';
+import { useAuth } from '../hooks/useAuth';
 import { Modal } from './ui';
 
 const LANG_NAME = { en: 'English', am: 'አማርኛ', ar: 'العربية' };
@@ -57,12 +58,11 @@ const MOBILE_NAV_ITEMS = [
 export default function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
-  const language = useUiStore((s) => s.language);
+  const { language, cycleLanguage } = useLanguage();
   const dark = useUiStore((s) => s.dark);
   const toggleDark = useUiStore((s) => s.toggleDark);
-  const cartCount = useCartStore((s) => s.count());
-  const token = useAuthStore((s) => s.token);
+  const { count: cartCount } = useCart();
+  const { token } = useAuth();
 
   const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
