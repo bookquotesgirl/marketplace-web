@@ -6,7 +6,7 @@
 html { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
 html[lang='am'] { font-family: 'Noto Sans Ethiopic', sans-serif; }
 html[lang='ar'] { font-family: 'Cairo', sans-serif; }
-body { @apply bg-cream text-ink antialiased; }
+body { @apply bg-cream text-ink antialiased dark:bg-ink dark:text-slate-100 transition-colors; }
 
 /* Subtle Ethiopian-inspired geometric motif — used on auth hero panels. */
 .motif {

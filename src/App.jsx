@@ -60,40 +60,26 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Vendor dashboard — sidebar shell, role-gated */}
-      <Route
-        path="/vendor"
-        element={
-          <ProtectedRoute role="vendor">
-            <VendorShell />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<VendorDashboard />} />
-        <Route path="products" element={<VendorProducts />} />
-        <Route path="orders" element={<VendorOrders />} />
-        <Route path="payouts" element={<VendorPayouts />} />
-        <Route path="subscription" element={<VendorSubscription />} />
-        <Route path="settings" element={<VendorSettings />} />
+      {/* Vendor dashboard — shell provides sidebar + outlet */}
+      <Route element={<ProtectedRoute role="vendor"><VendorShell /></ProtectedRoute>}>
+        <Route path="/vendor" element={<VendorDashboard />} />
+        <Route path="/vendor/products" element={<VendorProducts />} />
+        <Route path="/vendor/orders" element={<VendorOrders />} />
+        <Route path="/vendor/payouts" element={<VendorPayouts />} />
+        <Route path="/vendor/subscription" element={<VendorSubscription />} />
+        <Route path="/vendor/settings" element={<VendorSettings />} />
       </Route>
 
-      {/* Admin console — sidebar shell, role-gated */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminShell />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<AdminDashboard />} />
-        <Route path="vendors" element={<AdminVendors />} />
-        <Route path="approvals" element={<AdminApprovals />} />
-        <Route path="orders" element={<AdminOrders />} />
-        <Route path="payouts" element={<AdminPayouts />} />
-        <Route path="customers" element={<AdminCustomers />} />
-        <Route path="subscriptions" element={<AdminSubscriptions />} />
-        <Route path="settings" element={<AdminSettings />} />
+      {/* Admin console — shell provides sidebar + outlet */}
+      <Route element={<ProtectedRoute role="admin"><AdminShell /></ProtectedRoute>}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/vendors" element={<AdminVendors />} />
+        <Route path="/admin/approvals" element={<AdminApprovals />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/payouts" element={<AdminPayouts />} />
+        <Route path="/admin/customers" element={<AdminCustomers />} />
+        <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
       </Route>
     </Routes>
   ); 

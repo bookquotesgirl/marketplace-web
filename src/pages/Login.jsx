@@ -40,8 +40,7 @@ const FEATURES = [
   },
 ];
 
-// Shared by /login (defaultMode='login') and /register (defaultMode='register').
-export default function Login({ defaultMode = 'login' }) {
+export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -50,25 +49,27 @@ export default function Login({ defaultMode = 'login' }) {
   const dark = useUiStore((s) => s.dark);
   const language = useUiStore((s) => s.language);
 
-  const [mode, setMode] = useState(defaultMode);
-  const [form, setForm] = useState({ name: '', phone: '', password: '' });
+  const [form, setForm] = useState({ phone: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
-  const switchMode = (next) => { setMode(next); setError(''); };
+  const handlePhoneChange = (e) => {
+    let val = e.target.value.trim();
+    if (val.startsWith('+251'))     val = val.slice(4);
+    else if (val.startsWith('251')) val = val.slice(3);
+    else if (val.startsWith('0'))   val = val.slice(1);
+    setForm((f) => ({ ...f, phone: val }));
+  };
 
   const submit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
-      const body =
-        mode === 'login'
-          ? { phone: form.phone, password: form.password }
-          : { name: form.name, phone: form.phone, password: form.password };
-      const { data } = await api.post(endpoint, body);
+      const { data } = await api.post('/auth/login', {
+        phone: '+251' + form.phone,
+        password: form.password,
+      });
       setAuth({ user: data.user, token: data.token });
       if (data.user.role === 'vendor') navigate('/vendor', { replace: true });
       else if (data.user.role === 'admin') navigate('/admin', { replace: true });
@@ -160,55 +161,23 @@ export default function Login({ defaultMode = 'login' }) {
         {/* Form panel */}
         <div className="flex items-center justify-center p-6">
           <div className="w-full max-w-sm">
-            {/* Mode tabs */}
+            {/* Tabs — Sign in active, Create account links to /register */}
             <div className="flex gap-1 p-1 rounded-2xl bg-black/5 dark:bg-white/10 mb-6">
-              <button
-                type="button"
-                onClick={() => switchMode('login')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition ${
-                  mode === 'login'
-                    ? 'bg-white dark:bg-slate-800 shadow-soft text-forest'
-                    : 'text-ink/60 dark:text-slate-300 hover:text-ink dark:hover:text-white'
-                }`}
-              >
+              <span className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center bg-white dark:bg-slate-800 shadow-soft text-forest">
                 {t('auth.signIn')}
-              </button>
-              <button
-                type="button"
-                onClick={() => switchMode('register')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition ${
-                  mode === 'register'
-                    ? 'bg-white dark:bg-slate-800 shadow-soft text-forest'
-                    : 'text-ink/60 dark:text-slate-300 hover:text-ink dark:hover:text-white'
-                }`}
+              </span>
+              <Link
+                to="/register"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-center text-ink/60 dark:text-slate-300 hover:text-ink dark:hover:text-white transition"
               >
                 {t('auth.createAccount')}
-              </button>
+              </Link>
             </div>
 
-            <h2 className="text-2xl font-extrabold">
-              {mode === 'login' ? t('auth.welcomeBack') : t('auth.createYourAccount')}
-            </h2>
+            <h2 className="text-2xl font-extrabold">{t('auth.welcomeBack')}</h2>
             <p className="text-sm text-ink/60 dark:text-slate-400 mt-1">{t('auth.continueWithPhone')}</p>
 
             <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
-              {mode === 'register' && (
-                <label className="block">
-                  <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
-                    {t('auth.name')}
-                  </span>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={set('name')}
-                    autoComplete="name"
-                    placeholder="Abebe Kebede"
-                    required
-                    className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
-                  />
-                </label>
-              )}
-
               {/* Phone with +251 prefix */}
               <label className="block">
                 <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
@@ -221,7 +190,7 @@ export default function Login({ defaultMode = 'login' }) {
                   <input
                     type="tel"
                     value={form.phone}
-                    onChange={set('phone')}
+                    onChange={handlePhoneChange}
                     autoComplete="tel"
                     placeholder="911 234 567"
                     required
@@ -238,20 +207,18 @@ export default function Login({ defaultMode = 'login' }) {
                 <input
                   type="password"
                   value={form.password}
-                  onChange={set('password')}
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   required
                   className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
                 />
-                {mode === 'login' && (
-                  <a
-                    href="#"
-                    className="block text-xs text-forest font-semibold mt-1.5 text-end hover:underline"
-                  >
-                    {t('auth.forgotPassword')}
-                  </a>
-                )}
+                <a
+                  href="#"
+                  className="block text-xs text-forest font-semibold mt-1.5 text-end hover:underline"
+                >
+                  {t('auth.forgotPassword')}
+                </a>
               </label>
 
               {error && (
@@ -260,20 +227,14 @@ export default function Login({ defaultMode = 'login' }) {
                 </p>
               )}
 
-              {/* Submit */}
               <Button
                 type="submit"
                 size="lg"
                 disabled={loading}
                 className="w-full shadow-glow mt-2"
               >
-                {loading
-                  ? t('common.loading')
-                  : mode === 'login'
-                  ? t('auth.submit')
-                  : t('auth.submitRegister')}
+                {loading ? t('common.loading') : t('auth.submit')}
                 {!loading && (
-                  // arrow-right icon — mirrors in RTL
                   <svg className="w-4 h-4 rtl:rotate-180 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                   </svg>
@@ -281,17 +242,14 @@ export default function Login({ defaultMode = 'login' }) {
               </Button>
             </form>
 
-            {/* Terms */}
             <p className="text-[11px] text-ink/50 dark:text-slate-400 text-center mt-5">
               {t('auth.terms')}
             </p>
 
-            {/* Seller CTA */}
             <Link
               to="/vendor/register"
               className="mt-4 flex items-center justify-center gap-1.5 text-sm font-semibold text-forest hover:underline"
             >
-              {/* store icon */}
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
               </svg>

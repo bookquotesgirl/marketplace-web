@@ -10,6 +10,9 @@ export default {
         crimson: { light: '#f04455', DEFAULT: '#d81e2c', dark: '#a8121e' },
         cream: '#fbf6ec',
         ink: '#0f172a',
+        telebirr: '#0a7d3e',
+        cbeBirr: '#5b2d8e',
+        arifpay: '#1560d4',
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],

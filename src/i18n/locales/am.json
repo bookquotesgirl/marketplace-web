@@ -1,8 +1,8 @@
 {
   "brand": "ኪትማን",
-  "nav": { "home": "መነሻ", "browse": "አስስ", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ" },
+  "nav": { "home": "መነሻ", "browse": "አስስ", "categories": "ምድቦች", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ", "wishlist": "ተመራጮች" },
   "common": {
-    "search": "ምርቶችን ይፈልጉ…",
+    "search": "እቃዎችን፣ ብራንዶችን ይፈልጉ…",
     "addToCart": "ወደ ጋሪ ጨምር",
     "loading": "በመጫን ላይ…",
     "noResults": "ምንም ምርት አልተገኘም",
@@ -16,7 +16,69 @@
     "status": "ሁኔታ",
     "comingSoon": "በቅርቡ ይመጣል"
   },
-  "footer": { "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ", "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።" },
+  "topbar": {
+    "deliverTo": "መድረሻ",
+    "trackOrder": "ትዕዛዝ ይከታተሉ",
+    "support": "እገዛ: 8556",
+    "sellOnKitman": "በኪትማን ይሽጡ"
+  },
+  "header": {
+    "allCategories": "ሁሉም ምድቦች",
+    "notifications": "ማሳወቂያዎች",
+    "menu": "ማውጫ",
+    "theme": "ገጽታ ቀይር",
+    "language": "ቋንቋ"
+  },
+  "categories": {
+    "electronics": "ኤሌክትሮኒክስ",
+    "fashion": "ፋሽን",
+    "coffeeSpice": "ቡና እና ቅመም",
+    "homeKitchen": "ቤት እና ኩሽና",
+    "appliances": "የቤት እቃዎች",
+    "habeshaKemis": "የሀበሻ ቀሚስ",
+    "cosmetics": "ውበት",
+    "furniture": "የቤት እቃ",
+    "supermarket": "ሱፐርማርኬት"
+  },
+  "footer": {
+    "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ",
+    "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።",
+    "description": "የኢትዮጵያ ዘመናዊ ባለ ብዙ ሻጭ ገበያ፣ የታመኑ የአካባቢ ሻጮችን በመላ ሀገሪቱ ካሉ ገዢዎች ጋር ያገናኛል።",
+    "weAccept": "የክፍያ አማራጮች:",
+    "app": {
+      "heading": "ኪትማንን በኪስዎ ይያዙ",
+      "subtitle": "የተሻለ ግብይት፣ ፈጣን ማድረሻ በመተግበሪያው።",
+      "appStoreLabel": "Download on the",
+      "appStoreName": "App Store",
+      "googlePlayLabel": "GET IT ON",
+      "googlePlayName": "Google Play"
+    },
+    "social": {
+      "ariaLabel": "ማህበራዊ ሚዲያ",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "youtube": "YouTube"
+    },
+    "columns": {
+      "shop": {
+        "heading": "ግብይት",
+        "links": ["Electronics", "Habesha Kemis", "Coffee & Spice", "Home & Kitchen", "Fashion"]
+      },
+      "customerService": {
+        "heading": "የደንበኛ አገልግሎት",
+        "links": ["Help Center", "Track Order", "Returns & Refunds", "Shipping Info", "Contact Us"]
+      },
+      "sell": {
+        "heading": "ሽያጭ",
+        "links": ["Become a Vendor", "Vendor Dashboard", "Seller Policies", "Payouts", "Success Stories"]
+      },
+      "about": {
+        "heading": "ስለ እኛ",
+        "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
+      }
+    }
+  },
   "auth": {
     "signIn": "ግባ",
     "createAccount": "መለያ ፍጠር",

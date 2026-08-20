@@ -1,8 +1,8 @@
 {
   "brand": "كِتمان",
-  "nav": { "home": "الرئيسية", "browse": "تصفّح", "cart": "السلة", "login": "تسجيل الدخول", "orders": "الطلبات", "account": "الحساب" },
+  "nav": { "home": "الرئيسية", "browse": "تصفّح", "categories": "الفئات", "cart": "السلة", "login": "تسجيل الدخول", "orders": "الطلبات", "account": "الحساب", "wishlist": "المفضلة" },
   "common": {
-    "search": "ابحث عن المنتجات…",
+    "search": "ابحث عن المنتجات والبائعين…",
     "addToCart": "أضف إلى السلة",
     "loading": "جارٍ التحميل…",
     "noResults": "لا توجد منتجات",
@@ -16,7 +16,69 @@
     "status": "الحالة",
     "comingSoon": "قريباً"
   },
-  "footer": { "tagline": "سوق إثيوبيا متعدد البائعين", "rights": "كل الحقوق محفوظة." },
+  "topbar": {
+    "deliverTo": "التوصيل إلى",
+    "trackOrder": "تتبع الطلب",
+    "support": "الدعم: 8556",
+    "sellOnKitman": "بِع على كِتمان"
+  },
+  "header": {
+    "allCategories": "كل الفئات",
+    "notifications": "الإشعارات",
+    "menu": "القائمة",
+    "theme": "تبديل المظهر",
+    "language": "اللغة"
+  },
+  "categories": {
+    "electronics": "إلكترونيات",
+    "fashion": "أزياء",
+    "coffeeSpice": "بن وتوابل",
+    "homeKitchen": "المنزل والمطبخ",
+    "appliances": "أجهزة منزلية",
+    "habeshaKemis": "أزياء حبشية",
+    "cosmetics": "مستحضرات تجميل",
+    "furniture": "أثاث",
+    "supermarket": "سوبر ماركت"
+  },
+  "footer": {
+    "tagline": "سوق إثيوبيا متعدد البائعين",
+    "rights": "كل الحقوق محفوظة.",
+    "description": "سوق إثيوبيا الحديث متعدد البائعين، يربط بائعين محليين موثوقين بمشترين في جميع أنحاء البلاد.",
+    "weAccept": "طرق الدفع:",
+    "app": {
+      "heading": "كِتمان في جيبك",
+      "subtitle": "تسوّق أسرع وتتبّع طلباتك مع التطبيق.",
+      "appStoreLabel": "Download on the",
+      "appStoreName": "App Store",
+      "googlePlayLabel": "GET IT ON",
+      "googlePlayName": "Google Play"
+    },
+    "social": {
+      "ariaLabel": "وسائل التواصل الاجتماعي",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "youtube": "YouTube"
+    },
+    "columns": {
+      "shop": {
+        "heading": "تسوّق",
+        "links": ["Electronics", "Habesha Kemis", "Coffee & Spice", "Home & Kitchen", "Fashion"]
+      },
+      "customerService": {
+        "heading": "خدمة العملاء",
+        "links": ["Help Center", "Track Order", "Returns & Refunds", "Shipping Info", "Contact Us"]
+      },
+      "sell": {
+        "heading": "البيع",
+        "links": ["Become a Vendor", "Vendor Dashboard", "Seller Policies", "Payouts", "Success Stories"]
+      },
+      "about": {
+        "heading": "عن كِتمان",
+        "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
+      }
+    }
+  },
   "auth": {
     "signIn": "تسجيل الدخول",
     "createAccount": "إنشاء حساب",
