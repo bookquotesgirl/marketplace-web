@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useUiStore } from '../store/uiStore';
-import { useCartStore } from '../store/cartStore';
+import { useLanguage } from '../hooks/useLanguage';
+import { useCart } from '../hooks/useCart';
 
 const LABEL = { en: 'EN', am: 'አማ', ar: 'ع' };
 export default function Header() {
   const { t } = useTranslation();
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
-  const language = useUiStore((s) => s.language);
-  const count = useCartStore((s) => s.count());
+  const { language, cycleLanguage } = useLanguage();
+  const { count } = useCart();
   return (
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur border-b border-black/5">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">

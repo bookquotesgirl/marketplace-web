@@ -11,3 +11,9 @@ One line per merged PR: what you did.
   added Modal + Toast + ProductCard to /components-demo with live state demos; added gray Badge tone
   and Button size variants to demo; updated src/components/README.md with full prop tables and
   ProductCard shape/override docs.
+- Story — App State (chore/app-state): added useAuth/useCart/useLanguage hooks as the app-facing
+  API over authStore/cartStore/uiStore (auth in memory; cart+language persisted, language cycle
+  en→am→ar drives RTL via useApplyLanguage). Repointed Header, ProtectedRoute, and ProductCard to
+  consume the new hooks instead of the stores directly. Verified: language cycle flips dir="rtl" on
+  Arabic, cart survives refresh (localStorage), /vendor and /admin redirect to /login when logged
+  out. lint + build clean.
