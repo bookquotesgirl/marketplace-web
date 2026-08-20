@@ -11,19 +11,12 @@ One line per merged PR: what you did.
   added Modal + Toast + ProductCard to /components-demo with live state demos; added gray Badge tone
   and Button size variants to demo; updated src/components/README.md with full prop tables and
   ProductCard shape/override docs.
-- Story — App State (chore/app-state): added useAuth/useCart/useLanguage hooks as the app-facing
-  API over authStore/cartStore/uiStore (auth in memory; cart+language persisted, language cycle
-  en→am→ar drives RTL via useApplyLanguage). Repointed Header, ProtectedRoute, and ProductCard to
-  consume the new hooks instead of the stores directly. Verified: language cycle flips dir="rtl" on
-  Arabic, cart survives refresh (localStorage), /vendor and /admin redirect to /login when logged
-  out. lint + build clean.
-- Story — Buyer Home + Browse (feat/buyer-home-browse): Home now fetches GET /api/products
-  (limit 8, newest) + GET /api/categories for hero, category row, featured grid (ProductCard), and
-  a top-vendors strip deduped from the fetched products (no public vendor-list endpoint exists in
-  API_CONTRACT.md, so it isn't invented). Browse reads `?category=&page=` via useSearchParams, has a
-  category Select and Prev/Next pagination driven by the response's page/pages, and both pages
-  render loading (Spinner) / empty (t('common.noResults')) / error (t('common.error')) states. Added
-  src/lib/mapProduct.js to map the API's product-list shape to ProductCard's prop shape (reused by
-  Product page's related grid next). New home.*/browse.*/common.error i18n keys in en/am/ar. No
-  hardcoded product/category data. lint + build clean; not click-tested against a live
-  marketplace-api in this environment.
+- Story — App State Hooks: added `useAuth`/`useCart`/`useLanguage` selector hooks over the existing
+  authStore/cartStore/uiStore (scaffold, language cycle + RTL, cart persistence, and ProtectedRoute
+  redirect were already in place from earlier work); rewired Header, TopBar, ProtectedRoute, and
+  ProductCard to consume the hooks instead of the raw stores; re-fixed ProductCard's dead `t`/
+  `currency`/`handleAdd` (aria-label + currency prefix + real add-to-cart handler were unused —
+  lint was failing on integration before this change) and added the missing
+  `src/test/renderWithProviders` test helper referenced by Header.test.jsx/TopBar.test.jsx (test
+  suite couldn't run before this change). Verified: lint/test/build all pass; Header+TopBar tests
+  cover cart badge and en→am→ar language cycling with RTL flip.

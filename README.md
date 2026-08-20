@@ -6,16 +6,19 @@ dashboard and admin console. Trilingual (English / አማርኛ / العربية
 **Team:** Kernemi (Buyer) · Zionawit (Design system & storefront) · Hiwot (Vendor & Admin)
 
 ## Quick start
+
 ```bash
 cd marketplace-web
 npm install
 cp .env.example .env         # VITE_API_URL=http://localhost:5000/api
 npm run dev                  # http://localhost:5173
 ```
+
 Also try `/components-demo`. The static design reference is in **`kitman-html/`** (reference only) — convert
 those pages into the React pages under `src/pages`.
 
 ## Structure
+
 ```
 kitman-html/          the approved static HTML design (source of truth for look & feel)
 src/
@@ -28,6 +31,7 @@ src/
 ```
 
 ## Conventions
+
 - One story = one branch = one PR. Brand colors come from `tailwind.config.js` (no stray hex).
 - Use logical utilities (`ms-*`, `me-*`, `ps-*`, `pe-*`, `text-start`) so Arabic RTL mirrors automatically.
 - Language toggle cycles EN → አማ → ع; selecting Arabic sets `dir="rtl"`.
