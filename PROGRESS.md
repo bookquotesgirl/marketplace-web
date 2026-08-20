@@ -17,3 +17,13 @@ One line per merged PR: what you did.
   consume the new hooks instead of the stores directly. Verified: language cycle flips dir="rtl" on
   Arabic, cart survives refresh (localStorage), /vendor and /admin redirect to /login when logged
   out. lint + build clean.
+- Story — Buyer Home + Browse (feat/buyer-home-browse): Home now fetches GET /api/products
+  (limit 8, newest) + GET /api/categories for hero, category row, featured grid (ProductCard), and
+  a top-vendors strip deduped from the fetched products (no public vendor-list endpoint exists in
+  API_CONTRACT.md, so it isn't invented). Browse reads `?category=&page=` via useSearchParams, has a
+  category Select and Prev/Next pagination driven by the response's page/pages, and both pages
+  render loading (Spinner) / empty (t('common.noResults')) / error (t('common.error')) states. Added
+  src/lib/mapProduct.js to map the API's product-list shape to ProductCard's prop shape (reused by
+  Product page's related grid next). New home.*/browse.*/common.error i18n keys in en/am/ar. No
+  hardcoded product/category data. lint + build clean; not click-tested against a live
+  marketplace-api in this environment.

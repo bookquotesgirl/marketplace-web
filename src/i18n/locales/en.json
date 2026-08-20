@@ -1,6 +1,23 @@
 {
   "brand": "Kitman",
   "nav": { "home": "Home", "browse": "Browse", "cart": "Cart", "login": "Sign in", "orders": "Orders", "account": "Account" },
-  "common": { "search": "Search products…", "addToCart": "Add to cart", "loading": "Loading…", "noResults": "No products found" },
-  "footer": { "tagline": "Ethiopia's multi-vendor marketplace", "rights": "All rights reserved." }
+  "common": { "search": "Search products…", "addToCart": "Add to cart", "loading": "Loading…", "noResults": "No products found", "error": "Something went wrong. Please try again." },
+  "footer": { "tagline": "Ethiopia's multi-vendor marketplace", "rights": "All rights reserved." },
+  "home": {
+    "heroTag": "MADE IN ETHIOPIA",
+    "heroTitle": "Authentic Habesha, delivered to your door",
+    "heroSubtitle": "Hand-woven Kemis, coffee & crafts from trusted local vendors.",
+    "heroCta": "Shop now",
+    "categories": "Categories",
+    "featured": "Featured products",
+    "topVendors": "Top vendors"
+  },
+  "browse": {
+    "title": "Browse",
+    "allCategories": "All categories",
+    "category": "Category",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}"
+  }
 }

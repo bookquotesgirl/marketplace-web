@@ -1,6 +1,23 @@
 {
   "brand": "ኪትማን",
   "nav": { "home": "መነሻ", "browse": "አስስ", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ" },
-  "common": { "search": "ምርቶችን ይፈልጉ…", "addToCart": "ወደ ጋሪ ጨምር", "loading": "በመጫን ላይ…", "noResults": "ምንም ምርት አልተገኘም" },
-  "footer": { "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ", "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።" }
+  "common": { "search": "ምርቶችን ይፈልጉ…", "addToCart": "ወደ ጋሪ ጨምር", "loading": "በመጫን ላይ…", "noResults": "ምንም ምርት አልተገኘም", "error": "የሆነ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።" },
+  "footer": { "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ", "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።" },
+  "home": {
+    "heroTag": "በኢትዮጵያ የተሰራ",
+    "heroTitle": "እውነተኛ የሀበሻ ምርቶች እስከ በርዎ",
+    "heroSubtitle": "በእጅ የተሰራ ቀሚስ፣ ቡና እና ጥበባት ከታማኝ ሻጮች።",
+    "heroCta": "አሁን ይግዙ",
+    "categories": "ምድቦች",
+    "featured": "ተመራጭ ምርቶች",
+    "topVendors": "ምርጥ ሻጮች"
+  },
+  "browse": {
+    "title": "አስስ",
+    "allCategories": "ሁሉም ምድቦች",
+    "category": "ምድብ",
+    "prev": "ቀዳሚ",
+    "next": "ቀጣይ",
+    "pageOf": "ገጽ {{page}} ከ{{pages}}"
+  }
 }
