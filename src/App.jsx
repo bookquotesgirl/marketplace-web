@@ -96,5 +96,5 @@ export default function App() {
         <Route path="settings" element={<AdminSettings />} />
       </Route>
     </Routes>
-  );
+  ); 
 }

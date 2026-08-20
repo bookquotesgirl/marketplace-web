@@ -49,7 +49,21 @@
     "forgotPassword": "የይለፍ ቃል ረሱ?",
     "terms": "በመቀጠል የአገልግሎት ውሎችንና የግላዊነት ፖሊሲን ተስማምተዋል።",
     "toggleDark": "ጨለማ/ብርሃን ቀይር",
-    "toggleLanguage": "ቋንቋ ቀይር"
+    "toggleLanguage": "ቋንቋ ቀይር",
+    "enterPhoneSub": "ኮድ ለማግኘት ስልክ ቁጥርዎን ያስገቡ",
+    "sendCode": "ኮድ ላክ",
+    "verifyPhone": "ስልክዎን ያረጋግጡ",
+    "otpSentTo": "6-አሃዝ ኮድ ወደ ስልክዎ ልከናል",
+    "verifyBtn": "አረጋግጠህ ቀጥል",
+    "resendIn": "ኮድ በድጋሚ ላክ በ",
+    "resendCode": "ኮድ በድጋሚ ላክ",
+    "completeSetup": "መለያዎን ያጠናቅቁ",
+    "completeSetupSub": "ሊጠናቀቅ ነው — ስምዎን እና የይለፍ ቃልዎን ያስገቡ",
+    "phoneAlreadyRegistered": "ይህ ስልክ ቁጥር ቀደም ሲል ተመዝግቧል።",
+    "signInInstead": "በምትኩ ግባ",
+    "invalidOtp": "ያስገቡት ኮድ ትክክለኛ አይደለም።",
+    "sessionExpired": "ኮድዎ ጊዜው አልፎበታል። አዲስ ኮድ ይጠይቁ።",
+    "maxAttemptsExceeded": "ብዙ ስህተቶች። አዲስ ኮድ ይጠይቁ።"
   },
   "vendor": {
     "nav": {

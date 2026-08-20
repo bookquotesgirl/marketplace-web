@@ -49,7 +49,21 @@
     "forgotPassword": "نسيت كلمة المرور؟",
     "terms": "بالمتابعة أنت توافق على الشروط وسياسة الخصوصية.",
     "toggleDark": "تبديل الوضع الداكن",
-    "toggleLanguage": "تغيير اللغة"
+    "toggleLanguage": "تغيير اللغة",
+    "enterPhoneSub": "أدخل رقمك لتلقي رمز التحقق",
+    "sendCode": "إرسال الرمز",
+    "verifyPhone": "تحقق من هاتفك",
+    "otpSentTo": "أرسلنا رمزاً من 6 أرقام إلى",
+    "verifyBtn": "تحقق وتابع",
+    "resendIn": "إعادة الإرسال خلال",
+    "resendCode": "إعادة إرسال الرمز",
+    "completeSetup": "أكمل حسابك",
+    "completeSetupSub": "اقتربت — أدخل اسمك وكلمة المرور",
+    "phoneAlreadyRegistered": "رقم الهاتف هذا مسجّل مسبقاً.",
+    "signInInstead": "تسجيل الدخول بدلاً من ذلك",
+    "invalidOtp": "الرمز الذي أدخلته غير صحيح.",
+    "sessionExpired": "انتهت صلاحية الرمز. اطلب رمزاً جديداً.",
+    "maxAttemptsExceeded": "محاولات خاطئة كثيرة. اطلب رمزاً جديداً."
   },
   "vendor": {
     "nav": {

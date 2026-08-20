@@ -49,7 +49,21 @@
     "forgotPassword": "Forgot password?",
     "terms": "By continuing you agree to our Terms & Privacy Policy.",
     "toggleDark": "Toggle dark mode",
-    "toggleLanguage": "Change language"
+    "toggleLanguage": "Change language",
+    "enterPhoneSub": "Enter your number to receive a verification code",
+    "sendCode": "Send code",
+    "verifyPhone": "Verify your phone",
+    "otpSentTo": "We sent a 6-digit code to",
+    "verifyBtn": "Verify & continue",
+    "resendIn": "Resend code in",
+    "resendCode": "Resend code",
+    "completeSetup": "Complete your account",
+    "completeSetupSub": "Almost there — set your name and password",
+    "phoneAlreadyRegistered": "This phone number is already registered.",
+    "signInInstead": "Sign in instead",
+    "invalidOtp": "The code you entered is incorrect.",
+    "sessionExpired": "Your code has expired. Request a new one.",
+    "maxAttemptsExceeded": "Too many incorrect attempts. Request a new code."
   },
   "vendor": {
     "nav": {
