@@ -41,6 +41,26 @@
     "furniture": "የቤት እቃ",
     "supermarket": "ሱፐርማርኬት"
   },
+  "home": {
+    "heroTag": "በኢትዮጵያ አዲስ",
+    "heroTitle": "ይግዙ። ይሽጡ። ከኪትማን ጋር ያድጉ።",
+    "heroSub": "ከታመኑ የአካባቢ ሻጮች በሺዎች የሚቆጠሩ ምርቶች፣ በመላ ሀገሪቱ ይደርሳሉ።",
+    "heroCta": "አሁን ይግዙ",
+    "shopByCategory": "በምድብ ይግዙ",
+    "featured": "ተለይተው የቀረቡ ምርቶች",
+    "topVendors": "ምርጥ ሻጮች",
+    "viewAll": "ሁሉንም ይመልከቱ",
+    "visitStore": "ሱቅ ይጎብኙ"
+  },
+  "browse": {
+    "title": "ሁሉም ምርቶች",
+    "results": "ውጤቶች",
+    "allCategories": "ሁሉም ምድቦች",
+    "category": "ምድብ",
+    "prevPage": "ቀዳሚ ገጽ",
+    "nextPage": "ቀጣይ ገጽ",
+    "pageOf": "ገጽ {{page}} ከ {{pages}}"
+  },
   "footer": {
     "tagline": "የኢትዮጵያ ባለ ብዙ ሻጭ ገበያ",
     "rights": "ሁሉም መብቶች የተጠበቁ ናቸው።",
