@@ -14,7 +14,8 @@
     "order": "طلب",
     "total": "الإجمالي",
     "status": "الحالة",
-    "comingSoon": "قريباً"
+    "comingSoon": "قريباً",
+    "retry": "حاول مرة أخرى"
   },
   "topbar": {
     "deliverTo": "التوصيل إلى",
@@ -78,6 +79,20 @@
         "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
       }
     }
+  },
+  "cart": {
+    "title": "السلة",
+    "empty": "سلة التسوق فارغة",
+    "emptyHint": "تصفح المنتجات وأضف عناصر إلى سلتك.",
+    "continueShopping": "مواصلة التسوق",
+    "qty": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "variant": "النوع",
+    "remove": "إزالة",
+    "subtotal": "المجموع الجزئي",
+    "grandTotal": "المجموع الكلي",
+    "checkout": "المتابعة للدفع",
+    "unknownVendor": "أخرى"
   },
   "auth": {
     "signIn": "تسجيل الدخول",
@@ -213,6 +228,19 @@
       "f_p3": "مواضع مميزة في الصفحة الرئيسية",
       "f_p4": "مدير حساب مخصص",
       "f_p5": "دعم على مدار الساعة"
+    },
+    "products": {
+      "title": "منتجاتي",
+      "name": "الاسم",
+      "empty": "لا توجد منتجات بعد",
+      "emptyHint": "ستظهر منتجاتك هنا بعد إضافتها.",
+      "image": "الصورة",
+      "price": "السعر",
+      "stock": "المخزون",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "errorLoad": "فشل تحميل المنتجات. حاول مرة أخرى."
     }
   },
   "admin": {
