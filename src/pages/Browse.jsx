@@ -106,7 +106,7 @@ export default function Browse() {
               </button>
               {categories.map((c) => (
                 <button
-                  key={c.id}
+                  key={c._id}
                   onClick={() => setCategory(c.slug)}
                   className={`block w-full text-start px-3 py-2 rounded-xl text-sm transition ${
                     category === c.slug
@@ -134,7 +134,7 @@ export default function Browse() {
               </button>
               {categories.map((c) => (
                 <button
-                  key={c.id}
+                  key={c._id}
                   onClick={() => setCategory(c.slug)}
                   className={`shrink-0 px-3.5 py-2 rounded-full text-sm ring-1 ring-black/10 dark:ring-white/15 transition ${
                     category === c.slug ? 'bg-forest text-white' : ''
@@ -166,7 +166,7 @@ export default function Browse() {
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {result.items.map((p) => (
-                  <ProductCard key={p.id} product={mapProductCard(p)} />
+                  <ProductCard key={p._id} product={mapProductCard(p)} />
                 ))}
               </div>
 

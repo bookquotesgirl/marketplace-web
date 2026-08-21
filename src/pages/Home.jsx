@@ -87,7 +87,7 @@ export default function Home() {
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {categories.map((c) => (
                   <Link
-                    key={c.id}
+                    key={c._id}
                     to={`/browse?category=${c.slug}`}
                     className="shrink-0 px-4 py-2.5 rounded-full bg-white dark:bg-slate-800 ring-1 ring-black/10 dark:ring-white/15 text-sm font-medium hover:bg-forest hover:text-white dark:hover:bg-forest transition"
                   >
@@ -121,7 +121,7 @@ export default function Home() {
               <h2 className="text-xl md:text-2xl font-extrabold mb-5">{t('home.topVendors')}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {vendors.map((v) => (
-                  <Card key={v.id} className="p-4">
+                  <Card key={v._id} className="p-4">
                     <h3 className="font-bold">{v.storeName}</h3>
                     <Link
                       to={`/store/${v.slug}`}
