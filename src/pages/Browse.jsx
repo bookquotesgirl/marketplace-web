@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import { mapProductCard } from '../lib/mapProduct';
 import { ProductCard, Spinner } from '../components/ui';
+import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
 
 export default function Browse() {
   const { t } = useTranslation();
@@ -104,19 +105,25 @@ export default function Browse() {
               >
                 {t('browse.allCategories')}
               </button>
-              {categories.map((c) => (
-                <button
-                  key={c._id}
-                  onClick={() => setCategory(c.slug)}
-                  className={`block w-full text-start px-3 py-2 rounded-xl text-sm transition ${
-                    category === c.slug
-                      ? 'bg-forest text-white font-semibold'
-                      : 'hover:bg-black/5 dark:hover:bg-white/10'
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
+              {categories.map((c) => {
+                const known = CATEGORY_ICONS[c.slug];
+                const Icon = known?.Icon ?? DEFAULT_CATEGORY_ICON;
+                const label = known ? t(known.i18nKey) : c.name;
+                return (
+                  <button
+                    key={c._id}
+                    onClick={() => setCategory(c.slug)}
+                    className={`flex items-center gap-2 w-full text-start px-3 py-2 rounded-xl text-sm transition ${
+                      category === c.slug
+                        ? 'bg-forest text-white font-semibold'
+                        : 'hover:bg-black/5 dark:hover:bg-white/10'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="truncate">{label}</span>
+                  </button>
+                );
+              })}
             </div>
           </aside>
         )}
@@ -132,17 +139,23 @@ export default function Browse() {
               >
                 {t('browse.allCategories')}
               </button>
-              {categories.map((c) => (
-                <button
-                  key={c._id}
-                  onClick={() => setCategory(c.slug)}
-                  className={`shrink-0 px-3.5 py-2 rounded-full text-sm ring-1 ring-black/10 dark:ring-white/15 transition ${
-                    category === c.slug ? 'bg-forest text-white' : ''
-                  }`}
-                >
-                  {c.name}
-                </button>
-              ))}
+              {categories.map((c) => {
+                const known = CATEGORY_ICONS[c.slug];
+                const Icon = known?.Icon ?? DEFAULT_CATEGORY_ICON;
+                const label = known ? t(known.i18nKey) : c.name;
+                return (
+                  <button
+                    key={c._id}
+                    onClick={() => setCategory(c.slug)}
+                    className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm ring-1 ring-black/10 dark:ring-white/15 transition ${
+                      category === c.slug ? 'bg-forest text-white' : ''
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           )}
 

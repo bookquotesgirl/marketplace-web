@@ -41,15 +41,40 @@
     "supermarket": "ሱፐርማርኬት"
   },
   "home": {
-    "heroTag": "በኢትዮጵያ አዲስ",
-    "heroTitle": "ይግዙ። ይሽጡ። ከኪትማን ጋር ያድጉ።",
-    "heroSub": "ከታመኑ የአካባቢ ሻጮች በሺዎች የሚቆጠሩ ምርቶች፣ በመላ ሀገሪቱ ይደርሳሉ።",
+    "heroSlides": [
+      {
+        "tag": "በኢትዮጵያ አዲስ",
+        "title": "ይግዙ። ይሽጡ። ከኪትማን ጋር ያድጉ።",
+        "sub": "ከታመኑ የአካባቢ ሻጮች በሺዎች የሚቆጠሩ ምርቶች፣ በመላ ሀገሪቱ ይደርሳሉ።"
+      },
+      {
+        "tag": "የቴክ ሳምንት",
+        "title": "እስከ 40% ቅናሽ በስልኮች እና ኤሌክትሮኒክስ",
+        "sub": "ዋስትና ያለው። በአዲስ አበባ ነፃ መላኪያ።"
+      },
+      {
+        "tag": "አዲስ ወቅት",
+        "title": "ከከተማዋ ጋር የሚራመድ ፋሽን",
+        "sub": "ከአዲስ አበባ ምርጥ ሱቆች አዳዲስ ስታይሎች።"
+      }
+    ],
     "heroCta": "አሁን ይግዙ",
     "shopByCategory": "በምድብ ይግዙ",
     "featured": "ተለይተው የቀረቡ ምርቶች",
     "topVendors": "ምርጥ ሻጮች",
     "viewAll": "ሁሉንም ይመልከቱ",
-    "visitStore": "ሱቅ ይጎብኙ"
+    "visitStore": "ሱቅ ይጎብኙ",
+    "trustPayments": "የታመኑ የአገር ውስጥ ክፍያዎች",
+    "trustSecure": "100% ደህንነቱ የተጠበቀ ክፍያ",
+    "trustDelivery": "በመላ ሀገሪቱ ማድረሻ",
+    "trustCod": "በመቀበል ጊዜ ክፍያ",
+    "vendorCtaBadge": "ንግድዎን ያሳድጉ",
+    "vendorCtaTitle": "ምርቶችዎን በመላው ኢትዮጵያ ለሺዎች ይሽጡ",
+    "vendorCtaSub": "ቀላል ወርሃዊ ምዝገባ፣ የአካባቢ ክፍያዎች እና በየቀኑ ክፍያ ማግኘት።",
+    "vendorCtaButton": "በኪትማን መሸጥ ይጀምሩ",
+    "vendorCtaVendors": "ንቁ ሻጮች",
+    "vendorCtaBuyers": "ወርሃዊ ገዢዎች",
+    "vendorCtaApproval": "የማጽደቅ ጊዜ"
   },
   "browse": {
     "title": "ሁሉም ምርቶች",
