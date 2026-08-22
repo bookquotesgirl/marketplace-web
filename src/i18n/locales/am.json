@@ -85,6 +85,13 @@
     "nextPage": "ቀጣይ ገጽ",
     "pageOf": "ገጽ {{page}} ከ {{pages}}"
   },
+  "notFound": {
+    "title": "ገጹ አልተገኘም",
+    "subtitle": "የፈለጉት ገጽ ተንቀሳቅሷል ወይም የለም። ወደ ግብይት ይመለሱ።",
+    "backHome": "ወደ መነሻ",
+    "browseShop": "ግብይት",
+    "popularCategories": "ተወዳጅ ምድቦች"
+  },
   "checkout": {
     "title": "ትዕዛዝ ማጠናቀቅ",
     "addressTitle": "የማድረሻ አድራሻ",

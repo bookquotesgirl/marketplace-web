@@ -85,6 +85,13 @@
     "nextPage": "Next page",
     "pageOf": "Page {{page}} of {{pages}}"
   },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you're looking for moved or no longer exists. Let's get you back to shopping.",
+    "backHome": "Back home",
+    "browseShop": "Browse shop",
+    "popularCategories": "Popular categories"
+  },
   "checkout": {
     "title": "Checkout",
     "addressTitle": "Delivery address",
