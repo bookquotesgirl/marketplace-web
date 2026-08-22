@@ -110,6 +110,17 @@
     "errorPaymentFailed": "فشل الدفع. حاول مرة أخرى.",
     "errorInvalidPayment": "اختر طريقة الدفع."
   },
+  "orders": {
+    "title": "طلباتي",
+    "emptyTitle": "لا توجد طلبات بعد",
+    "emptyBody": "عند تقديم طلب، سيظهر هنا.",
+    "browseProducts": "تصفّح المنتجات",
+    "viewDetails": "عرض التفاصيل",
+    "reorder": "إعادة الطلب",
+    "reorderVendor": "أعد طلب هذه العناصر",
+    "unknownItem": "عنصر",
+    "backToOrders": "العودة إلى الطلبات"
+  },
   "orderConfirm": {
     "title": "تم استلام طلبك!",
     "subtitle": "تم إرسال تأكيد إليك",

@@ -110,6 +110,17 @@
     "errorPaymentFailed": "ክፍያው አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
     "errorInvalidPayment": "የክፍያ ዘዴ ይምረጡ።"
   },
+  "orders": {
+    "title": "ትዕዛዞቼ",
+    "emptyTitle": "እስካሁን ምንም ትዕዛዝ የለም",
+    "emptyBody": "ትዕዛዝ ሲያደርጉ እዚህ ይታያል።",
+    "browseProducts": "ምርቶችን ያስሱ",
+    "viewDetails": "ዝርዝር ይመልከቱ",
+    "reorder": "እንደገና ይዘዙ",
+    "reorderVendor": "እነዚህን እቃዎች እንደገና ይዘዙ",
+    "unknownItem": "እቃ",
+    "backToOrders": "ወደ ትዕዛዞች ተመለስ"
+  },
   "orderConfirm": {
     "title": "ትዕዛዝዎ ተቀብሏል!",
     "subtitle": "ማረጋገጫ ተልኮልዎታል",
