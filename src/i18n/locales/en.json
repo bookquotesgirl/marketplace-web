@@ -41,23 +41,6 @@
     "supermarket": "Supermarket"
   },
   "home": {
-    "heroSlides": [
-      {
-        "tag": "New in Ethiopia",
-        "title": "Shop. Sell. Grow with Kitman.",
-        "sub": "Thousands of products from trusted local vendors, delivered nationwide."
-      },
-      {
-        "tag": "Mega Tech Week",
-        "title": "Up to 40% off phones & electronics",
-        "sub": "Genuine warranty. Free delivery across Addis Ababa."
-      },
-      {
-        "tag": "New Season",
-        "title": "Fashion that moves with the city",
-        "sub": "Discover trending styles from Addis's top boutiques."
-      }
-    ],
     "heroCta": "Shop now",
     "shopByCategory": "Shop by Category",
     "featured": "Featured Products",

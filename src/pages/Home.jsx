@@ -16,14 +16,6 @@ import { mapProductCard } from '../lib/mapProduct';
 import { ProductCard, Spinner, Card } from '../components/ui';
 import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
 
-// Decorative hero backdrops only — no product/business data lives here, just marketing imagery
-// paired with home.heroSlides copy (see locales/*.json).
-const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1523301343968-6a6ebf63c672?w=1400&q=75',
-  'https://images.unsplash.com/photo-1592286927505-1def25115558?w=1400&q=75',
-  'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1400&q=75',
-];
-
 const PAYMENT_BADGES = [
   { name: 'Telebirr', className: 'bg-telebirr' },
   { name: 'CBE Birr', className: 'bg-cbeBirr' },
@@ -33,16 +25,18 @@ const PAYMENT_BADGES = [
 
 function HeroBanner({ externalSlides }) {
   const { t } = useTranslation();
-  const i18nSlides = t('home.heroSlides', { returnObjects: true });
-  const slides = (externalSlides && externalSlides.length) ? externalSlides : i18nSlides;
+  const slides = externalSlides ?? [];
   const [active, setActive] = useState(0);
 
   useEffect(() => {
+    if (!slides.length) return undefined;
     const id = setInterval(() => {
       setActive((i) => (i + 1) % slides.length);
     }, 6000);
     return () => clearInterval(id);
   }, [slides.length]);
+
+  if (!slides.length) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 pt-5">
@@ -55,11 +49,13 @@ function HeroBanner({ externalSlides }) {
               i === active ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            <img
-              src={slide.image || HERO_IMAGES[i % HERO_IMAGES.length]}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-40"
-            />
+            {slide.image && (
+              <img
+                src={slide.image}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover opacity-40"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/90 via-forest-deep/40 to-transparent" />
           </div>
         ))}
@@ -212,9 +208,9 @@ export default function Home() {
   }, []);
 
   // GET /api/content returns { banners, featured } per API_CONTRACT.md — banner objects are
-  // { title, image, link, order, buttonText, subtitle }. Prefer these real, admin-managed
-  // banners; fall back to the static i18n hero copy if none are configured yet (or the request
-  // fails), so the homepage never shows a blank hero.
+  // { title, image, link, order, buttonText, subtitle }. Only real, admin-managed banners are
+  // shown; if none are configured (or the request fails) the hero section just doesn't render,
+  // rather than falling back to placeholder marketing copy.
   useEffect(() => {
     let cancelled = false;
     api
