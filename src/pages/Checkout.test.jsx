@@ -1,0 +1,129 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { renderWithProviders } from '../test/renderWithProviders';
+import Checkout from './Checkout';
+import { useCartStore } from '../store/cartStore';
+import '../i18n/i18n';
+
+vi.mock('../lib/api', () => ({
+  default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
+}));
+import api from '../lib/api';
+
+const vendorAItem = { productId: 'p1', variantId: null, title: 'Coffee beans', price: 100, qty: 1, vendor: 'Vendor A' };
+const vendorBItem = { productId: 'p2', variantId: null, title: 'Scarf', price: 50, qty: 2, vendor: 'Vendor B' };
+
+async function fillAddress(user) {
+  await user.type(screen.getByLabelText(/Full name/i), 'Abebe Kebede');
+  await user.type(screen.getByPlaceholderText('911 234 567'), '911234567');
+  await user.type(screen.getByLabelText(/City/i), 'Addis Ababa');
+  await user.type(screen.getByLabelText(/Street address/i), 'Bole, near Edna Mall');
+}
+
+beforeEach(() => {
+  useCartStore.getState().clear();
+  api.get.mockReset();
+  api.post.mockReset();
+  api.delete.mockReset();
+});
+
+describe('Checkout', () => {
+  it('shows an empty-cart state when there is nothing to check out', () => {
+    renderWithProviders(<Checkout />);
+    expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
+  });
+
+  it('groups cart items by vendor and totals them', () => {
+    useCartStore.getState().add(vendorAItem);
+    useCartStore.getState().add(vendorBItem);
+    renderWithProviders(<Checkout />);
+
+    expect(screen.getByText('Vendor A')).toBeInTheDocument();
+    expect(screen.getByText('Vendor B')).toBeInTheDocument();
+    // total = 100*1 + 50*2 = 200, shown at least in the summary sidebar
+    expect(screen.getAllByText('200').length).toBeGreaterThan(0);
+  });
+
+  it('blocks submit and shows field errors when the address form is incomplete', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+    renderWithProviders(<Checkout />);
+
+    await user.click(screen.getByRole('button', { name: /Place order/i }));
+
+    expect(await screen.findAllByText('This field is required')).not.toHaveLength(0);
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('syncs the local cart to the backend, places the order, clears the cart, and navigates to confirmation', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+    useCartStore.getState().add(vendorBItem);
+
+    api.delete.mockResolvedValue({});
+    api.post.mockImplementation((url) => {
+      if (url === '/cart/items') return Promise.resolve({ data: {} });
+      if (url === '/orders') {
+        return Promise.resolve({
+          data: { success: true, order: { _id: 'order-1', orderNumber: 'ORD-000001', total: 200, subOrders: [] } },
+        });
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    function LocationProbe() {
+      const location = useLocation();
+      return <p>at:{location.pathname}</p>;
+    }
+
+    render_with_routes(<Checkout />, <LocationProbe />);
+
+    await fillAddress(user);
+    await user.click(screen.getByRole('button', { name: /Place order/i }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/orders', expect.objectContaining({ paymentMethod: 'cod' })));
+
+    expect(api.delete).toHaveBeenCalledWith('/cart');
+    expect(api.post).toHaveBeenCalledWith('/cart/items', { productId: 'p1', variantId: null, qty: 1 });
+    expect(api.post).toHaveBeenCalledWith('/cart/items', { productId: 'p2', variantId: null, qty: 2 });
+
+    await waitFor(() => expect(screen.getByText('at:/order-confirmation/order-1')).toBeInTheDocument());
+    expect(useCartStore.getState().items).toHaveLength(0);
+  });
+
+  it('shows an API error and keeps the cart when the order fails', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+
+    api.delete.mockResolvedValue({});
+    api.post.mockImplementation((url) => {
+      if (url === '/cart/items') return Promise.resolve({ data: {} });
+      if (url === '/orders') {
+        const err = new Error('fail');
+        err.response = { data: { error: { code: 'CART_EMPTY', message: 'Cart is empty' } } };
+        return Promise.reject(err);
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    renderWithProviders(<Checkout />);
+    await fillAddress(user);
+    await user.click(screen.getByRole('button', { name: /Place order/i }));
+
+    expect(await screen.findByText('Your cart is empty.')).toBeInTheDocument();
+    expect(useCartStore.getState().items).toHaveLength(1);
+  });
+});
+
+function render_with_routes(checkoutElement, confirmationElement) {
+  render(
+    <MemoryRouter initialEntries={['/checkout']}>
+      <Routes>
+        <Route path="/checkout" element={checkoutElement} />
+        <Route path="/order-confirmation/:id" element={confirmationElement} />
+      </Routes>
+    </MemoryRouter>
+  );
+}

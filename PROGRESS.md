@@ -71,3 +71,33 @@ One line per merged PR: what you did.
   Verified: lint/test/build all pass; dev server smoke-tested `/product/:slug` (no live
   marketplace-api in this environment, so add-to-cart → cart-badge and real variant switching are
   not yet click-tested against seeded data).
+- Story — Checkout Flow (feat/checkout-flow): built Checkout.jsx (delivery address form matching
+  the backend's exact `shippingAddress` shape — name/phone/city/address, phone using the same
+  `+251`-prefix-strip pattern as Login/Register — order summary grouped per vendor, and a payment
+  selector: ArifPay stubbed as "Test mode" vs Cash on Delivery) and a new OrderConfirmation.jsx at
+  `/order-confirmation/:id` (order number, per-vendor sub-order cards with status badges, totals,
+  address recap; falls back to `GET /api/orders/:id` if opened without router state). Both routes
+  gated behind `ProtectedRoute role="buyer"` (previously unguarded, but the API requires a buyer
+  token). Correction — architecture gap: `cartStore` is client-only (localStorage) and no
+  add-to-cart call site has ever synced it to the backend, but `POST /api/orders` builds the order
+  strictly from the *server-side* cart and ignores the request body's items — checkout would 400
+  `CART_EMPTY` otherwise. Fixed by having Checkout's submit handler sync the local cart to the
+  server (`DELETE /api/cart` then `POST /api/cart/items` per line) immediately before placing the
+  order — scoped to this page, no other add-to-cart call site touched. Correction — backend
+  mismatch: there are two backend checkouts in this environment, `back/` and `marketplace-api/`;
+  `marketplace-api/` is the live one (`.env`'s `VITE_API_URL` default and `PAYMENT_PROVIDER=fake`
+  line up with it, and its own PROGRESS.md shows it as the actively developed/live-tested branch).
+  Built against it — its `POST /api/orders` response also never populates `subOrders[].items[].title`
+  despite the schema having the field, so Checkout enriches each item's title from the local cart
+  before navigating to the confirmation page (only fixes the immediate post-checkout view; a
+  refreshed confirmation page loaded via `GET /api/orders/:id` will still show blank titles — a
+  backend fix, not something addressable from here). Added `checkout.*`/`orderConfirm.*` keys to
+  en/am/ar with the ArifPay/COD copy from `kitman-html/checkout.html`. Verified: lint/test/build
+  all pass (12 tests, incl. multi-vendor grouping/totals, address validation, cart-sync + order
+  POST via a mocked `api`, and Arabic RTL); full flow live-tested against a real `marketplace-api`
+  + seeded Atlas buyer — added Phone Case (Vendor One) + USB-C Charger (Vendor Two) to cart,
+  checked out via COD into one order with 2 sub-orders and the correct 1,350 total, cart emptied,
+  confirmation page correct in English and mirrored correctly in Arabic RTL; also live-tested the
+  ArifPay/online path (test-mode charge, no real charge). Real hosted-checkout redirect (Chapa's
+  `checkoutUrl`, gated behind `PAYMENT_PROVIDER=chapa`) intentionally not implemented — out of
+  scope per the story's "fake payment result for now."
