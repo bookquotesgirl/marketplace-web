@@ -11,6 +11,7 @@ import Product from './pages/Product';
 import Store from './pages/Store';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Orders from './pages/Orders';
@@ -47,7 +48,22 @@ export default function App() {
         <Route path="/product/:slug" element={<Product />} />
         <Route path="/store/:slug" element={<Store />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute role="buyer">
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-confirmation/:id"
+          element={
+            <ProtectedRoute role="buyer">
+              <OrderConfirmation />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/orders" element={<Orders />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/profile" element={<Profile />} />
