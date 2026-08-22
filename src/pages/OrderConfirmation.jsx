@@ -3,14 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import { Spinner } from '../components/ui';
-
-const STATUS_KEY = {
-  placed: 'orderConfirm.status.placed',
-  confirmed: 'orderConfirm.status.confirmed',
-  shipped: 'orderConfirm.status.shipped',
-  delivered: 'orderConfirm.status.delivered',
-  cancelled: 'orderConfirm.status.cancelled',
-};
+import { STATUS_KEY } from '../lib/orderStatus';
 
 export default function OrderConfirmation() {
   const { t } = useTranslation();

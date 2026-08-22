@@ -101,3 +101,27 @@ One line per merged PR: what you did.
   ArifPay/online path (test-mode charge, no real charge). Real hosted-checkout redirect (Chapa's
   `checkoutUrl`, gated behind `PAYMENT_PROVIDER=chapa`) intentionally not implemented — out of
   scope per the story's "fake payment result for now."
+- Story — Order Tracking (feat/order-tracking): built the real `Orders.jsx` list (`GET /orders`,
+  order number/date/total/overall-status per order, empty and error states) and a new
+  `OrderDetail.jsx` at `/orders/:id` (`GET /orders/:id`, one card per vendor sub-order with a
+  placed→confirmed→shipped→delivered timeline, cancelled sub-orders shown with their reason
+  instead of a timeline, address recap). Added a "Re-order" action (whole order on the list page
+  and detail page, plus per-vendor on the detail page) that re-adds items to the local `cartStore`
+  and navigates to `/cart`. The API has no order-level status, only per-sub-order status, so added
+  `src/lib/orderStatus.js` with `overallStatus()` (least-progressed non-cancelled sub-order status;
+  `cancelled` only when every sub-order is cancelled) and had `OrderConfirmation.jsx` adopt its
+  shared `STATUS_KEY` map instead of keeping its own copy. Both new routes gated behind
+  `ProtectedRoute role="buyer"` (`/orders` was previously unguarded despite the API requiring a
+  buyer token). Correction — same backend gap noted on the Checkout story: `subOrders[].items[].title`
+  is never populated by `GET /orders`/`GET /orders/:id` (confirmed live against `marketplace-api`,
+  not just the contract doc), so list/detail views and re-added cart items fall back to a
+  translated "Item" placeholder — a backend fix, not addressable from here. Added `orders.*` i18n
+  keys to en/am/ar, reusing `orderConfirm.status`/`subOrderFrom`/`deliverTo` rather than
+  duplicating. Verified: lint/test/build all pass (10 new tests: list loading/empty/error, overall
+  status derivation, per-vendor timeline + cancelled reason, re-order populating the cart store and
+  navigating to `/cart`, Arabic content); also live-tested end-to-end with a headless-browser
+  driver against a running `marketplace-api` + seeded Atlas buyer (`+251914444444`) — logged in,
+  placed a real 2-vendor COD order (`ORD-000060`, ETB 380) via direct API calls, viewed it in
+  `/orders`, opened its detail page, re-ordered (cart badge went to 3, `/cart` showed the
+  re-added items), and re-checked both the list and detail pages in Amharic and Arabic (confirmed
+  `dir="rtl"` and correctly mirrored layout in Arabic) — zero console errors throughout.

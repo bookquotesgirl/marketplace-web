@@ -127,6 +127,17 @@
     "errorPaymentFailed": "Payment failed. Please try again.",
     "errorInvalidPayment": "Choose a payment method."
   },
+  "orders": {
+    "title": "My orders",
+    "emptyTitle": "No orders yet",
+    "emptyBody": "When you place an order, it will show up here.",
+    "browseProducts": "Browse products",
+    "viewDetails": "View details",
+    "reorder": "Re-order",
+    "reorderVendor": "Re-order these items",
+    "unknownItem": "Item",
+    "backToOrders": "Back to orders"
+  },
   "orderConfirm": {
     "title": "Order placed!",
     "subtitle": "A confirmation has been sent to you",

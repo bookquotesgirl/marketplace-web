@@ -15,6 +15,7 @@ import OrderConfirmation from './pages/OrderConfirmation';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
 import Wishlist from './pages/Wishlist';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
@@ -64,7 +65,22 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/orders" element={<Orders />} />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute role="buyer">
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute role="buyer">
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/vendor/register" element={<VendorRegister />} />
