@@ -3,10 +3,11 @@
 // a few fields), and images as [{ url, key }] (some seed data uses plain string URLs instead).
 // This file is the one place that adapts that shape for the UI — see PROGRESS.md for the backend
 // gaps this works around.
+import { resolveAssetUrl } from './api';
 
 export function productImageUrl(image) {
   if (!image) return undefined;
-  return typeof image === 'string' ? image : image.url;
+  return resolveAssetUrl(typeof image === 'string' ? image : image.url);
 }
 
 // Maps a product document (list or detail) to the shape ProductCard expects.

@@ -11,7 +11,7 @@ import {
   Store as StoreIcon,
   TrendingUp,
 } from 'lucide-react';
-import api from '../lib/api';
+import api, { resolveAssetUrl } from '../lib/api';
 import { mapProductCard } from '../lib/mapProduct';
 import { ProductCard, Spinner, Card } from '../components/ui';
 import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
@@ -31,9 +31,10 @@ const PAYMENT_BADGES = [
   { name: 'Awash', className: 'bg-crimson' },
 ];
 
-function HeroBanner() {
+function HeroBanner({ externalSlides }) {
   const { t } = useTranslation();
-  const slides = t('home.heroSlides', { returnObjects: true });
+  const i18nSlides = t('home.heroSlides', { returnObjects: true });
+  const slides = (externalSlides && externalSlides.length) ? externalSlides : i18nSlides;
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -55,7 +56,7 @@ function HeroBanner() {
             }`}
           >
             <img
-              src={HERO_IMAGES[i % HERO_IMAGES.length]}
+              src={slide.image || HERO_IMAGES[i % HERO_IMAGES.length]}
               alt=""
               className="absolute inset-0 w-full h-full object-cover opacity-40"
             />
@@ -64,18 +65,22 @@ function HeroBanner() {
         ))}
 
         <div className="relative z-10 p-8 md:p-14 max-w-xl">
-          <span className="inline-block px-3 py-1 rounded-full bg-gold text-ink text-[11px] font-bold tracking-wide">
-            {slides[active].tag}
-          </span>
+          {slides[active].tag && (
+            <span className="inline-block px-3 py-1 rounded-full bg-gold text-ink text-[11px] font-bold tracking-wide">
+              {slides[active].tag}
+            </span>
+          )}
           <h1 className="mt-4 text-3xl md:text-5xl font-extrabold leading-tight">
             {slides[active].title}
           </h1>
-          <p className="mt-3 text-white/85 text-sm md:text-lg">{slides[active].sub}</p>
+          {slides[active].sub && (
+            <p className="mt-3 text-white/85 text-sm md:text-lg">{slides[active].sub}</p>
+          )}
           <Link
-            to="/browse"
+            to={slides[active].link || '/browse'}
             className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gold hover:bg-gold-light text-ink font-bold shadow-glow transition"
           >
-            {t('home.heroCta')}
+            {slides[active].cta || t('home.heroCta')}
             <ArrowRight className="w-4 h-4 rtl:rotate-180" />
           </Link>
         </div>
@@ -181,17 +186,21 @@ export default function Home() {
   const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
+  const [externalSlides, setExternalSlides] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     setStatus('loading');
-    // No GET /api/categories exists on the API yet — the category row and top-vendors
-    // strip below are derived from the fetched products instead of a dedicated endpoint.
+    // The category row and top-vendors strip below are derived from the fetched products
+    // (there's no separate "top vendors" endpoint). Sample a larger page than the featured
+    // grid needs so those two rows aren't limited to whatever's in the 8 newest products.
     api
-      .get('/products', { params: { limit: 8, sort: 'newest' } })
+      .get('/products', { params: { limit: 100, sort: 'newest' } })
       .then((res) => {
         if (cancelled) return;
-        setProducts(res.data?.data ?? []);
+        const payload = res.data || {};
+        const items = payload.data ?? payload.items ?? payload;
+        setProducts(items ?? []);
         setStatus('ready');
       })
       .catch(() => {
@@ -201,6 +210,38 @@ export default function Home() {
       cancelled = true;
     };
   }, []);
+
+  // GET /api/content returns { banners, featured } per API_CONTRACT.md — banner objects are
+  // { title, image, link, order, buttonText, subtitle }. Prefer these real, admin-managed
+  // banners; fall back to the static i18n hero copy if none are configured yet (or the request
+  // fails), so the homepage never shows a blank hero.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get('/content')
+      .then((res) => {
+        if (cancelled) return;
+        const banners = res.data?.banners ?? [];
+        const slides = banners
+          .map((b) => ({
+            title: b.title,
+            sub: b.subtitle,
+            image: resolveAssetUrl(b.image),
+            link: b.link,
+            cta: b.buttonText,
+          }))
+          .filter((s) => s.title && s.image);
+        if (slides.length) setExternalSlides(slides);
+      })
+      .catch(() => {
+        /* ignore — fallback to i18n slides */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const featured = products.slice(0, 8);
 
   const categories = [];
   const vendors = [];
@@ -221,7 +262,7 @@ export default function Home() {
 
   return (
     <div>
-      <HeroBanner />
+      <HeroBanner externalSlides={externalSlides} />
       <TrustStrip />
 
       {status === 'loading' && (
@@ -270,11 +311,11 @@ export default function Home() {
                 {t('home.viewAll')}
               </Link>
             </div>
-            {products.length === 0 ? (
+            {featured.length === 0 ? (
               <p className="text-ink/60 dark:text-slate-400">{t('common.noResults')}</p>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((p) => (
+                {featured.map((p) => (
                   <ProductCard key={p._id} product={mapProductCard(p)} />
                 ))}
               </div>
@@ -290,7 +331,7 @@ export default function Home() {
                     <div className="flex items-center gap-3">
                       {v.logoUrl ? (
                         <img
-                          src={v.logoUrl}
+                          src={resolveAssetUrl(v.logoUrl)}
                           alt=""
                           className="w-11 h-11 rounded-2xl object-cover shrink-0"
                         />

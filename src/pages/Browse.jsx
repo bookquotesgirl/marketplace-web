@@ -9,8 +9,8 @@ import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
 export default function Browse() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  // No GET /api/categories endpoint exists yet, and the products API filters by the
-  // category's Mongo _id (not slug) — so `category` here holds an _id, derived below.
+  // The API supports filtering by `category` (slug or id) — we pass whatever is
+  // present in the `category` query param (slug is supported by the backend).
   const category = searchParams.get('category') || '';
   const page = Number(searchParams.get('page')) || 1;
 
@@ -22,9 +22,11 @@ export default function Browse() {
     api
       .get('/products', { params: { limit: 100 } })
       .then((res) => {
+        const payload = res.data || {};
+        const items = payload.data ?? payload.items ?? payload ?? [];
         const seen = new Set();
         const cats = [];
-        for (const p of res.data?.data ?? []) {
+        for (const p of items ?? []) {
           const c = p.categoryId;
           if (c?._id && !seen.has(c._id)) {
             seen.add(c._id);
@@ -43,11 +45,13 @@ export default function Browse() {
       .get('/products', { params: { category: category || undefined, page, limit: 12 } })
       .then((res) => {
         if (cancelled) return;
+        const payload = res.data || {};
+        const items = payload.data ?? payload.items ?? payload ?? [];
         setResult({
-          items: res.data?.data ?? [],
-          page: res.data?.currentPage ?? 1,
-          pages: res.data?.totalPages ?? 1,
-          total: res.data?.total ?? 0,
+          items: items ?? [],
+          page: payload.page ?? payload.currentPage ?? 1,
+          pages: payload.pages ?? payload.totalPages ?? 1,
+          total: payload.total ?? items.length ?? 0,
         });
         setStatus('ready');
       })
