@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
@@ -34,6 +34,31 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Saved addresses — checkout's buyer-only route means we're always authed here.
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('new');
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get('/me/addresses')
+      .then((res) => {
+        if (cancelled) return;
+        const addresses = res.data.addresses ?? [];
+        setSavedAddresses(addresses);
+        const defaultAddress = addresses.find((a) => a.isDefault) ?? addresses[0];
+        if (defaultAddress) setSelectedAddressId(defaultAddress._id);
+      })
+      .catch(() => {
+        /* No saved addresses to prefill — manual entry still works. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const usingSavedAddress = selectedAddressId !== 'new';
+
   const groups = useMemo(() => {
     const map = new Map();
     for (const item of items) {
@@ -59,6 +84,10 @@ export default function Checkout() {
   };
 
   const validate = () => {
+    if (usingSavedAddress) {
+      setFieldErrors({});
+      return true;
+    }
     const errors = {};
     if (!form.name.trim()) errors.name = t('checkout.required');
     if (!form.phone.trim()) errors.phone = t('checkout.required');
@@ -88,12 +117,16 @@ export default function Checkout() {
       }
 
       const { data } = await api.post('/orders', {
-        shippingAddress: {
-          name: form.name.trim(),
-          phone: '+251' + form.phone.trim(),
-          city: form.city.trim(),
-          address: form.address.trim(),
-        },
+        ...(usingSavedAddress
+          ? { savedAddressId: selectedAddressId }
+          : {
+              shippingAddress: {
+                name: form.name.trim(),
+                phone: '+251' + form.phone.trim(),
+                city: form.city.trim(),
+                address: form.address.trim(),
+              },
+            }),
         paymentMethod,
       });
 
@@ -142,7 +175,76 @@ export default function Checkout() {
         <div className="space-y-6">
           {/* Address */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-soft p-5 md:p-6">
-            <h2 className="font-extrabold text-lg mb-4">{t('checkout.addressTitle')}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-extrabold text-lg">{t('checkout.addressTitle')}</h2>
+              <Link to="/profile/addresses" className="text-sm font-semibold text-forest hover:underline">
+                {t('checkout.manageAddresses')}
+              </Link>
+            </div>
+
+            {savedAddresses.length > 0 && (
+              <div className="space-y-3 mb-5">
+                <p className="text-xs font-semibold text-ink/60 dark:text-slate-400">
+                  {t('checkout.savedAddresses')}
+                </p>
+                {savedAddresses.map((address) => (
+                  <label
+                    key={address._id}
+                    className={`flex items-start gap-3 p-4 rounded-2xl cursor-pointer transition ${
+                      selectedAddressId === address._id
+                        ? 'ring-2 ring-forest'
+                        : 'ring-1 ring-black/10 dark:ring-white/15'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="savedAddress"
+                      checked={selectedAddressId === address._id}
+                      onChange={() => setSelectedAddressId(address._id)}
+                      className="mt-1 accent-forest"
+                    />
+                    <div className="flex-1 text-sm">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold">
+                          {{ Home: t('account.labelHome'), Office: t('account.labelOffice') }[
+                            address.label
+                          ] ??
+                            address.label ??
+                            t('account.labelOther')}
+                        </span>
+                        {address.isDefault && (
+                          <span className="px-2 py-0.5 rounded-full bg-forest/10 text-forest text-[10px] font-bold">
+                            {t('checkout.defaultBadge')}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-ink/70 dark:text-slate-300 mt-0.5">
+                        {address.recipient} · {address.phone}
+                      </p>
+                      <p className="text-ink/50 dark:text-slate-400">
+                        {[address.line, address.subcity, address.city].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+                <label
+                  className={`flex items-center gap-3 p-4 rounded-2xl cursor-pointer transition ${
+                    selectedAddressId === 'new' ? 'ring-2 ring-forest' : 'ring-1 ring-black/10 dark:ring-white/15'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="savedAddress"
+                    checked={selectedAddressId === 'new'}
+                    onChange={() => setSelectedAddressId('new')}
+                    className="accent-forest"
+                  />
+                  <span className="text-sm font-semibold">{t('checkout.useNewAddress')}</span>
+                </label>
+              </div>
+            )}
+
+            {!usingSavedAddress && (
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -196,6 +298,7 @@ export default function Checkout() {
                 {fieldErrors.address && <p className="mt-1 text-xs text-crimson">{fieldErrors.address}</p>}
               </div>
             </div>
+            )}
           </div>
 
           {/* Payment method */}

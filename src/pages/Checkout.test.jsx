@@ -27,6 +27,9 @@ beforeEach(() => {
   api.get.mockReset();
   api.post.mockReset();
   api.delete.mockReset();
+  // Checkout fetches saved addresses on mount; default to none so existing
+  // manual-entry tests are unaffected unless a test overrides this.
+  api.get.mockResolvedValue({ data: { addresses: [] } });
 });
 
 describe('Checkout', () => {
@@ -114,6 +117,62 @@ describe('Checkout', () => {
 
     expect(await screen.findByText('Your cart is empty.')).toBeInTheDocument();
     expect(useCartStore.getState().items).toHaveLength(1);
+  });
+
+  it('preselects the default saved address and places the order with savedAddressId', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+
+    api.get.mockResolvedValue({
+      data: {
+        addresses: [
+          { _id: 'addr-1', label: 'Home', recipient: 'Abebe Kebede', phone: '+251911234567', city: 'Addis Ababa', line: 'Bole', isDefault: false },
+          { _id: 'addr-2', label: 'Office', recipient: 'Abebe Kebede', phone: '+251911234567', city: 'Addis Ababa', line: 'Kirkos', isDefault: true },
+        ],
+      },
+    });
+    api.delete.mockResolvedValue({});
+    api.post.mockImplementation((url) => {
+      if (url === '/cart/items') return Promise.resolve({ data: {} });
+      if (url === '/orders') {
+        return Promise.resolve({
+          data: { success: true, order: { _id: 'order-2', orderNumber: 'ORD-000002', total: 100, subOrders: [] } },
+        });
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    renderWithProviders(<Checkout />);
+
+    // The default address (Office) should be preselected, and the manual form hidden.
+    expect(await screen.findByText(/Kirkos/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Full name/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Place order/i }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/orders', expect.objectContaining({ savedAddressId: 'addr-2' }))
+    );
+  });
+
+  it('switches to manual entry when "Enter a new address" is chosen', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+
+    api.get.mockResolvedValue({
+      data: {
+        addresses: [
+          { _id: 'addr-1', label: 'Home', recipient: 'Abebe Kebede', phone: '+251911234567', city: 'Addis Ababa', line: 'Bole', isDefault: true },
+        ],
+      },
+    });
+
+    renderWithProviders(<Checkout />);
+
+    await screen.findByText(/Bole/);
+    await user.click(screen.getByRole('radio', { name: /Enter a new address/i }));
+
+    expect(screen.getByLabelText(/Full name/i)).toBeInTheDocument();
   });
 });
 

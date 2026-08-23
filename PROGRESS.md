@@ -125,3 +125,47 @@ One line per merged PR: what you did.
   `/orders`, opened its detail page, re-ordered (cart badge went to 3, `/cart` showed the
   re-added items), and re-checked both the list and detail pages in Amharic and Arabic (confirmed
   `dir="rtl"` and correctly mirrored layout in Arabic) — zero console errors throughout.
+- Story — Buyer Account Pages + Forgot/Reset Password (feat/buyer-account-pages): built the real
+  account section and the password-reset UX. `API_CONTRACT.md` documents `forgot-password`/
+  `reset-password` but not a buyer profile/addresses resource; `marketplace-api/src/routes/buyer.routes.js`
+  (mounted at `/api/me`, not in the contract doc) already has it — `GET/PATCH /me/profile`,
+  `PATCH /me/change-password`, `GET/POST/PATCH/DELETE /me/addresses` — so built directly against
+  that. New `AccountLayout` (`src/pages/account/`) gives buyers a tabbed account section — Profile,
+  Addresses, Security, and an Orders tab that links out to the existing `/orders` page rather than
+  duplicating it — nested under `/profile` (`ProtectedRoute role="buyer"`, replacing the old
+  placeholder `Profile.jsx`). `AccountProfile` edits name/phone (`PATCH /me/profile`);
+  `AccountAddresses` + a shared `AddressForm` (used for both Add and Edit, in a `Modal`) do
+  list/add/edit/delete/set-default against `/me/addresses`, matching the `User.addresses` schema
+  exactly (`label/recipient/phone/region/city/subcity/line/isDefault`); `AccountSecurity` adds
+  change-password (current/new/confirm) via `PATCH /me/change-password`, the natural content for
+  that tab. Correction — no buyer avatar-upload endpoint: `POST /api/uploads` is vendor/admin-only
+  and product-scoped, and `User.avatar` is just a plain string field, so the avatar picker reads
+  the file client-side (`FileReader` → data URL, capped at 2MB / jpeg+png only) and sends it
+  straight in `PATCH /me/profile` rather than inventing a backend upload route — fine for this
+  scope, but a real object-storage upload would be needed before this ships past a demo. Added
+  `ForgotPassword`/`ResetPassword` pages (`/forgot-password`, `/reset-password`, standalone like
+  `/login`) wired to `POST /auth/forgot-password` → `POST /auth/reset-password`; the backend echoes
+  the reset code in the response when `NODE_ENV=development` + `SMS_PROVIDER=console` (true in this
+  env) since there's no real SMS to receive it from — the reset page surfaces that dev-stub code so
+  the flow is testable end-to-end without a phone. Extracted `AuthShell` (topbar + hero panel)
+  out of Login/Register once a third and fourth page needed the identical wrapper markup; Login's
+  dead `#` forgot-password link now points to `/forgot-password`, and Login shows a success banner
+  after a reset. Checkout now fetches saved addresses and preselects the buyer's default one
+  (submitting `savedAddressId`), falling back to the existing manual `shippingAddress` form via an
+  "Enter a new address" option — `POST /api/orders` already accepted `savedAddressId` server-side
+  (resolves it from `User.addresses`), so no backend change was needed there. Added `account.*` and
+  extended `auth.*`/`checkout.*` i18n keys to en/am/ar (verified identical key sets across all
+  three). Verified: lint/test/build all pass (28 new tests across AccountLayout/AccountProfile/
+  AccountAddresses/AccountSecurity/ForgotPassword/ResetPassword plus new Checkout saved-address
+  cases, incl. an Arabic-RTL assertion per new screen); also live-tested end-to-end with a
+  headless-browser driver against a running `marketplace-api` + the seeded Atlas buyer
+  (`+251914444444`) — since the token is memory-only (by design) a hard page reload logs the SPA
+  out, so the driver used in-app link clicks throughout instead of re-navigating, and reached
+  `/checkout` (which nothing currently links to, since `Cart.jsx` is still an unbuilt stub) via a
+  scripted client-side route push rather than a real click. Ran the full loop for real: reset the
+  seeded buyer's password via the dev-stub code, logged in, edited name + uploaded a real avatar
+  image (persisted via `/me/profile`), added/edited/set-default/deleted addresses (persisted via
+  `/me/addresses`), added a product to cart and placed a real order at checkout using the saved
+  address — confirmed via the `POST /orders` response that the backend resolved `savedAddressId`
+  to the correct `shippingAddress` (`ORD-000061`) — and re-checked checkout, addresses, and profile
+  in Arabic (confirmed `dir="rtl"` and correctly mirrored layout) — zero console errors throughout.

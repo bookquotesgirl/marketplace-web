@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
@@ -43,6 +43,7 @@ const FEATURES = [
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
   const cycleLanguage = useUiStore((s) => s.cycleLanguage);
   const toggleDark = useUiStore((s) => s.toggleDark);
@@ -177,6 +178,12 @@ export default function Login() {
             <h2 className="text-2xl font-extrabold">{t('auth.welcomeBack')}</h2>
             <p className="text-sm text-ink/60 dark:text-slate-400 mt-1">{t('auth.continueWithPhone')}</p>
 
+            {location.state?.resetSuccess && (
+              <p className="mt-3 text-sm font-medium text-forest bg-forest/10 rounded-xl px-3 py-2" role="status">
+                {t('auth.resetSuccess')}
+              </p>
+            )}
+
             <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
               {/* Phone with +251 prefix */}
               <label className="block">
@@ -213,12 +220,12 @@ export default function Login() {
                   required
                   className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
                 />
-                <a
-                  href="#"
+                <Link
+                  to="/forgot-password"
                   className="block text-xs text-forest font-semibold mt-1.5 text-end hover:underline"
                 >
                   {t('auth.forgotPassword')}
-                </a>
+                </Link>
               </label>
 
               {error && (
