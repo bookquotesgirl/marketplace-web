@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Rating from './Rating';
+import ProductImage from './ProductImage';
 import { useCart } from '../../hooks/useCart';
 
 // Matches the mockup card. Extend to pixel-match kitman-html.
@@ -23,11 +24,7 @@ export default function ProductCard({ product, onAdd, currency = 'ETB' }) {
   return (
     <div className="group bg-white dark:bg-slate-800 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-soft overflow-hidden hover:shadow-card transition">
       <Link to={`/product/${slug}`} className="block aspect-square overflow-hidden">
-        <img
-          src={images[0]}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition"
-        />
+        <ProductImage src={images[0]} alt={title} className="group-hover:scale-105 transition" />
       </Link>
       <div className="p-3">
         {vendorName && (
