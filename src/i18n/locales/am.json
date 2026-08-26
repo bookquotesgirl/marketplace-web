@@ -1,6 +1,15 @@
 {
   "brand": "ኪትማን",
-  "nav": { "home": "መነሻ", "browse": "አስስ", "categories": "ምድቦች", "cart": "ጋሪ", "login": "ግባ", "orders": "ትዕዛዞች", "account": "መለያ", "wishlist": "ተመራጮች" },
+  "nav": {
+    "home": "መነሻ",
+    "browse": "አስስ",
+    "categories": "ምድቦች",
+    "cart": "ጋሪ",
+    "login": "ግባ",
+    "orders": "ትዕዛዞች",
+    "account": "መለያ",
+    "wishlist": "ተመራጮች"
+  },
   "common": {
     "search": "እቃዎችን፣ ብራንዶችን ይፈልጉ…",
     "addToCart": "ወደ ጋሪ ጨምር",
@@ -15,6 +24,8 @@
     "total": "ጠቅላላ",
     "status": "ሁኔታ",
     "comingSoon": "በቅርቡ ይመጣል",
+    "addToWishlist": "ወደ ተመራጮች ጨምር",
+    "removeFromWishlist": "ከተመራጮች አስወግድ",
     "retry": "ዳግም ሞክር"
   },
   "topbar": {
@@ -171,19 +182,43 @@
     "columns": {
       "shop": {
         "heading": "ግብይት",
-        "links": ["Electronics", "Habesha Kemis", "Coffee & Spice", "Home & Kitchen", "Fashion"]
+        "links": [
+          "Electronics",
+          "Habesha Kemis",
+          "Coffee & Spice",
+          "Home & Kitchen",
+          "Fashion"
+        ]
       },
       "customerService": {
         "heading": "የደንበኛ አገልግሎት",
-        "links": ["Help Center", "Track Order", "Returns & Refunds", "Shipping Info", "Contact Us"]
+        "links": [
+          "Help Center",
+          "Track Order",
+          "Returns & Refunds",
+          "Shipping Info",
+          "Contact Us"
+        ]
       },
       "sell": {
         "heading": "ሽያጭ",
-        "links": ["Become a Vendor", "Vendor Dashboard", "Seller Policies", "Payouts", "Success Stories"]
+        "links": [
+          "Become a Vendor",
+          "Vendor Dashboard",
+          "Seller Policies",
+          "Payouts",
+          "Success Stories"
+        ]
       },
       "about": {
         "heading": "ስለ እኛ",
-        "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
+        "links": [
+          "About Kitman",
+          "Careers",
+          "Press",
+          "Privacy Policy",
+          "Terms of Service"
+        ]
       }
     }
   },
@@ -538,5 +573,35 @@
       "saveSuccess": "ምድቡ ተቀምጧል።",
       "actionError": "ድርጊቱ አልተሳካም። እንደገና ይሞክሩ።"
     }
+  },
+  "product": {
+    "notFoundTitle": "ምርቱ አልተገኘም",
+    "notFoundBody": "የሚፈልጉት ምርት የለም ወይም አሁን አይገኝም።",
+    "backToBrowse": "ወደ ማሰሻ ተመለስ",
+    "quantity": "ብዛት",
+    "related": "ተመሳሳይ ምርቶች",
+    "outOfStock": "አልቋል",
+    "inStock": "{{count}} በስቶክ ውስጥ"
+  },
+  "reviews": {
+    "title": "ግምገማዎች",
+    "verified": "የተረጋገጠ",
+    "yourRating": "የእርስዎ ደረጃ",
+    "commentPlaceholder": "ስለ ምርቱ ያለዎትን ተሞክሮ ያካፍሉ…",
+    "submit": "ግምገማ ላክ",
+    "empty": "እስካሁን ምንም ግምገማ የለም።",
+    "loginToReview": "ግምገማ ለመጻፍ ይግቡ",
+    "buyersOnly": "ገዢዎች ብቻ ግምገማ መጻፍ ይችላሉ።",
+    "purchaseHint": "ግምገማ ለመጻፍ ይህን ምርት ይግዙና ይቀበሉ።",
+    "thanks": "አመሰግናለሁ — ግምገማዎ ተለጥፏል።",
+    "anonymous": "ገዢ",
+    "starLabel": "{{count}} ኮከብ"
+  },
+  "wishlist": {
+    "title": "ተመራጮች",
+    "emptyTitle": "ተመራጮችዎ ባዶ ናቸው",
+    "emptyBody": "የሚያስቀምጧቸው ዕቃዎች እዚህ ይታያሉ።",
+    "moveAll": "ሁሉንም ወደ ጋሪ",
+    "moveToCart": "ወደ ጋሪ ውሰድ"
   }
 }

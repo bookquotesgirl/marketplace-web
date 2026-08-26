@@ -1,6 +1,15 @@
 {
   "brand": "Kitman",
-  "nav": { "home": "Home", "browse": "Browse", "categories": "Categories", "cart": "Cart", "login": "Sign in", "orders": "Orders", "account": "Account", "wishlist": "Wishlist" },
+  "nav": {
+    "home": "Home",
+    "browse": "Browse",
+    "categories": "Categories",
+    "cart": "Cart",
+    "login": "Sign in",
+    "orders": "Orders",
+    "account": "Account",
+    "wishlist": "Wishlist"
+  },
   "common": {
     "search": "Search products, brands & vendors…",
     "addToCart": "Add to cart",
@@ -17,7 +26,9 @@
     "comingSoon": "Coming soon",
     "retry": "Try again",
     "cancel": "Cancel",
-    "addedToCart": "Added to cart!"
+    "addedToCart": "Added to cart!",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist"
   },
   "topbar": {
     "deliverTo": "Deliver to",
@@ -173,19 +184,43 @@
     "columns": {
       "shop": {
         "heading": "Shop",
-        "links": ["Electronics", "Habesha Kemis", "Coffee & Spice", "Home & Kitchen", "Fashion"]
+        "links": [
+          "Electronics",
+          "Habesha Kemis",
+          "Coffee & Spice",
+          "Home & Kitchen",
+          "Fashion"
+        ]
       },
       "customerService": {
         "heading": "Customer Service",
-        "links": ["Help Center", "Track Order", "Returns & Refunds", "Shipping Info", "Contact Us"]
+        "links": [
+          "Help Center",
+          "Track Order",
+          "Returns & Refunds",
+          "Shipping Info",
+          "Contact Us"
+        ]
       },
       "sell": {
         "heading": "Sell",
-        "links": ["Become a Vendor", "Vendor Dashboard", "Seller Policies", "Payouts", "Success Stories"]
+        "links": [
+          "Become a Vendor",
+          "Vendor Dashboard",
+          "Seller Policies",
+          "Payouts",
+          "Success Stories"
+        ]
       },
       "about": {
         "heading": "About",
-        "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
+        "links": [
+          "About Kitman",
+          "Careers",
+          "Press",
+          "Privacy Policy",
+          "Terms of Service"
+        ]
       }
     }
   },
@@ -540,5 +575,35 @@
       "saveSuccess": "Category saved.",
       "actionError": "Action failed. Please try again."
     }
+  },
+  "product": {
+    "notFoundTitle": "Product not found",
+    "notFoundBody": "The product you're looking for doesn't exist or is no longer available.",
+    "backToBrowse": "Back to browsing",
+    "quantity": "Qty",
+    "related": "You may also like",
+    "outOfStock": "Out of stock",
+    "inStock": "{{count}} in stock"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "verified": "Verified",
+    "yourRating": "Your rating",
+    "commentPlaceholder": "Share your experience with this product…",
+    "submit": "Submit review",
+    "empty": "No reviews yet.",
+    "loginToReview": "Log in to write a review",
+    "buyersOnly": "Only buyers can write a review.",
+    "purchaseHint": "Purchase and receive this product to write a review.",
+    "thanks": "Thanks — your review has been posted.",
+    "anonymous": "A buyer",
+    "starLabel": "{{count}} star"
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "emptyTitle": "Your wishlist is empty",
+    "emptyBody": "Items you save will show up here.",
+    "moveAll": "Move all to cart",
+    "moveToCart": "Move to cart"
   }
 }
