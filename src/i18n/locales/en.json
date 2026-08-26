@@ -25,7 +25,8 @@
     "status": "Status",
     "comingSoon": "Coming soon",
     "addToWishlist": "Add to wishlist",
-    "removeFromWishlist": "Remove from wishlist"
+    "removeFromWishlist": "Remove from wishlist",
+    "retry": "Try again"
   },
   "topbar": {
     "deliverTo": "Deliver to",
@@ -221,6 +222,34 @@
       }
     }
   },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "emptyHint": "Browse products and add items to your cart.",
+    "continueShopping": "Continue shopping",
+    "qty": "Qty",
+    "unitPrice": "Unit price",
+    "variant": "Variant",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "grandTotal": "Grand total",
+    "checkout": "Proceed to checkout",
+    "unknownVendor": "Other"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "emptyHint": "Browse products and add items to your cart.",
+    "continueShopping": "Continue shopping",
+    "qty": "Qty",
+    "unitPrice": "Unit price",
+    "variant": "Variant",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "grandTotal": "Grand total",
+    "checkout": "Proceed to checkout",
+    "unknownVendor": "Other"
+  },
   "auth": {
     "signIn": "Sign in",
     "createAccount": "Create account",
@@ -412,6 +441,48 @@
       "f_p3": "Homepage feature spots",
       "f_p4": "Dedicated account manager",
       "f_p5": "24/7 support"
+    },
+    "products": {
+      "title": "My Products",
+      "subtitle": "Manage your catalogue",
+      "name": "Name",
+      "empty": "No products yet",
+      "emptyHint": "Your products will appear here once added.",
+      "noResults": "No products found",
+      "image": "Image",
+      "price": "Price",
+      "stock": "Stock",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "errorLoad": "Failed to load products. Please try again.",
+      "addProduct": "Add",
+      "addProductLong": "Add product",
+      "searchPlaceholder": "Search product or SKU…",
+      "colProduct": "Product",
+      "colCategory": "Category",
+      "colSales": "Sales",
+      "tabAll": "All",
+      "tabActive": "Active",
+      "tabOut": "Out of stock",
+      "tabDraft": "Draft",
+      "sortNewest": "Newest",
+      "sortPrice": "Price",
+      "sortSales": "Best selling",
+      "sortStock": "Low stock",
+      "chipTotal": "Total products",
+      "chipActive": "Active",
+      "chipOut": "Out of stock",
+      "chipDraft": "Drafts",
+      "statusActive": "Active",
+      "statusDraft": "Draft",
+      "statusOut": "Out of stock",
+      "statusLow": "Low stock",
+      "countProducts": "products",
+      "actionDuplicate": "Duplicate",
+      "actionPublish": "Publish",
+      "actionUnpublish": "Unpublish",
+      "selected": "selected"
     }
   },
   "admin": {

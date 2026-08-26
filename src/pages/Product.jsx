@@ -7,7 +7,7 @@ import { mapProductCard, unwrapProductDetail, productImageUrl } from '../lib/map
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useWishlist } from '../hooks/useWishlist';
-import { ProductCard, Rating, Spinner } from '../components/ui';
+import { ProductCard, ProductImage, Rating, Spinner } from '../components/ui';
 
 function variantLabel(variant) {
   return Object.values(variant.attributes || {}).join(' / ') || variant.sku;
@@ -327,13 +327,7 @@ export default function Product() {
             return (
               <>
                 <div className="aspect-square rounded-2xl overflow-hidden bg-black/5">
-                  {images[activeImage] ? (
-                    <img src={images[activeImage]} alt={product.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full grid place-items-center text-ink/20 text-6xl font-bold select-none">
-                      {product.title?.[0]?.toUpperCase() ?? '?'}
-                    </div>
-                  )}
+                  <ProductImage src={images[activeImage]} alt={product.title} className="text-6xl" />
                 </div>
                 {images.length > 1 && (
                   <div className="mt-3 flex gap-2">
