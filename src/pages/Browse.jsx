@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../lib/api';
 import { mapProductCard } from '../lib/mapProduct';
 import { ProductCard, Spinner } from '../components/ui';
 import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
+import { useWishlist } from '../hooks/useWishlist';
 
 export default function Browse() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const wishlist = useWishlist();
+
+  const handleToggleWishlist = (productId) => {
+    if (!wishlist.isBuyer) {
+      navigate('/login');
+      return;
+    }
+    wishlist.toggle(productId).catch(() => {});
+  };
   // The API supports filtering by `category` (slug or id) — we pass whatever is
   // present in the `category` query param (slug is supported by the backend).
   const category = searchParams.get('category') || '';
@@ -183,7 +194,12 @@ export default function Browse() {
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {result.items.map((p) => (
-                  <ProductCard key={p._id} product={mapProductCard(p)} />
+                  <ProductCard
+                    key={p._id}
+                    product={mapProductCard(p)}
+                    wishlisted={wishlist.has(p._id)}
+                    onToggleWishlist={() => handleToggleWishlist(p._id)}
+                  />
                 ))}
               </div>
 

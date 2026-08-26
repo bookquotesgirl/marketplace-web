@@ -86,7 +86,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/wishlist" element={<Wishlist />} />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute role="buyer">
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/profile"
           element={

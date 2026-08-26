@@ -1,6 +1,15 @@
 {
   "brand": "كِتمان",
-  "nav": { "home": "الرئيسية", "browse": "تصفّح", "categories": "الفئات", "cart": "السلة", "login": "تسجيل الدخول", "orders": "الطلبات", "account": "الحساب", "wishlist": "المفضلة" },
+  "nav": {
+    "home": "الرئيسية",
+    "browse": "تصفّح",
+    "categories": "الفئات",
+    "cart": "السلة",
+    "login": "تسجيل الدخول",
+    "orders": "الطلبات",
+    "account": "الحساب",
+    "wishlist": "المفضلة"
+  },
   "common": {
     "search": "ابحث عن المنتجات والبائعين…",
     "addToCart": "أضف إلى السلة",
@@ -14,7 +23,9 @@
     "order": "طلب",
     "total": "الإجمالي",
     "status": "الحالة",
-    "comingSoon": "قريباً"
+    "comingSoon": "قريباً",
+    "addToWishlist": "أضف إلى المفضلة",
+    "removeFromWishlist": "إزالة من المفضلة"
   },
   "topbar": {
     "deliverTo": "التوصيل إلى",
@@ -170,19 +181,43 @@
     "columns": {
       "shop": {
         "heading": "تسوّق",
-        "links": ["Electronics", "Habesha Kemis", "Coffee & Spice", "Home & Kitchen", "Fashion"]
+        "links": [
+          "Electronics",
+          "Habesha Kemis",
+          "Coffee & Spice",
+          "Home & Kitchen",
+          "Fashion"
+        ]
       },
       "customerService": {
         "heading": "خدمة العملاء",
-        "links": ["Help Center", "Track Order", "Returns & Refunds", "Shipping Info", "Contact Us"]
+        "links": [
+          "Help Center",
+          "Track Order",
+          "Returns & Refunds",
+          "Shipping Info",
+          "Contact Us"
+        ]
       },
       "sell": {
         "heading": "البيع",
-        "links": ["Become a Vendor", "Vendor Dashboard", "Seller Policies", "Payouts", "Success Stories"]
+        "links": [
+          "Become a Vendor",
+          "Vendor Dashboard",
+          "Seller Policies",
+          "Payouts",
+          "Success Stories"
+        ]
       },
       "about": {
         "heading": "عن كِتمان",
-        "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
+        "links": [
+          "About Kitman",
+          "Careers",
+          "Press",
+          "Privacy Policy",
+          "Terms of Service"
+        ]
       }
     }
   },
@@ -402,5 +437,35 @@
       "topVendors": "أفضل البائعين",
       "store": "متجر"
     }
+  },
+  "product": {
+    "notFoundTitle": "المنتج غير موجود",
+    "notFoundBody": "المنتج الذي تبحث عنه غير موجود أو لم يعد متوفراً.",
+    "backToBrowse": "العودة للتصفح",
+    "quantity": "الكمية",
+    "related": "قد يعجبك أيضاً",
+    "outOfStock": "نفدت الكمية",
+    "inStock": "{{count}} متوفر"
+  },
+  "reviews": {
+    "title": "التقييمات",
+    "verified": "موثّق",
+    "yourRating": "تقييمك",
+    "commentPlaceholder": "شاركنا تجربتك مع المنتج…",
+    "submit": "إرسال التقييم",
+    "empty": "لا توجد تقييمات بعد.",
+    "loginToReview": "سجّل الدخول لكتابة تقييم",
+    "buyersOnly": "المشترون فقط يمكنهم كتابة تقييم.",
+    "purchaseHint": "اشترِ هذا المنتج واستلمه لتتمكن من كتابة تقييم.",
+    "thanks": "شكراً — تم نشر تقييمك.",
+    "anonymous": "مشترٍ",
+    "starLabel": "{{count}} نجوم"
+  },
+  "wishlist": {
+    "title": "المفضلة",
+    "emptyTitle": "قائمة المفضلة فارغة",
+    "emptyBody": "العناصر التي تحفظها ستظهر هنا.",
+    "moveAll": "أضف الكل للسلة",
+    "moveToCart": "أضف للسلة"
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ShieldCheck,
@@ -15,6 +15,7 @@ import api, { resolveAssetUrl } from '../lib/api';
 import { mapProductCard } from '../lib/mapProduct';
 import { ProductCard, Spinner, Card } from '../components/ui';
 import { CATEGORY_ICONS, DEFAULT_CATEGORY_ICON } from '../lib/categoryIcons';
+import { useWishlist } from '../hooks/useWishlist';
 
 const PAYMENT_BADGES = [
   { name: 'Telebirr', className: 'bg-telebirr' },
@@ -180,9 +181,19 @@ function VendorCtaBanner() {
 
 export default function Home() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState('loading'); // loading | ready | error
   const [externalSlides, setExternalSlides] = useState([]);
+  const wishlist = useWishlist();
+
+  const handleToggleWishlist = (productId) => {
+    if (!wishlist.isBuyer) {
+      navigate('/login');
+      return;
+    }
+    wishlist.toggle(productId).catch(() => {});
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -312,7 +323,12 @@ export default function Home() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {featured.map((p) => (
-                  <ProductCard key={p._id} product={mapProductCard(p)} />
+                  <ProductCard
+                    key={p._id}
+                    product={mapProductCard(p)}
+                    wishlisted={wishlist.has(p._id)}
+                    onToggleWishlist={() => handleToggleWishlist(p._id)}
+                  />
                 ))}
               </div>
             )}
