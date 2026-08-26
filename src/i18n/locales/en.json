@@ -236,20 +236,6 @@
     "checkout": "Proceed to checkout",
     "unknownVendor": "Other"
   },
-  "cart": {
-    "title": "Cart",
-    "empty": "Your cart is empty",
-    "emptyHint": "Browse products and add items to your cart.",
-    "continueShopping": "Continue shopping",
-    "qty": "Qty",
-    "unitPrice": "Unit price",
-    "variant": "Variant",
-    "remove": "Remove",
-    "subtotal": "Subtotal",
-    "grandTotal": "Grand total",
-    "checkout": "Proceed to checkout",
-    "unknownVendor": "Other"
-  },
   "auth": {
     "signIn": "Sign in",
     "createAccount": "Create account",

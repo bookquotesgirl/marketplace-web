@@ -28,10 +28,10 @@ export default function ProductCard({ product, onAdd, currency = 'ETB', wishlist
     <div className="group bg-white dark:bg-slate-800 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-soft overflow-hidden hover:shadow-card transition">
       <div className="relative">
         <Link to={`/product/${slug}`} className="block aspect-square overflow-hidden">
-          <img
+          <ProductImage
             src={images[0]}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition"
+            className="group-hover:scale-105 transition"
           />
         </Link>
         {onToggleWishlist && (
