@@ -14,7 +14,8 @@
     "order": "ትዕዛዝ",
     "total": "ጠቅላላ",
     "status": "ሁኔታ",
-    "comingSoon": "በቅርቡ ይመጣል"
+    "comingSoon": "በቅርቡ ይመጣል",
+    "retry": "ዳግም ሞክር"
   },
   "topbar": {
     "deliverTo": "መድረሻ",
@@ -185,6 +186,20 @@
         "links": ["About Kitman", "Careers", "Press", "Privacy Policy", "Terms of Service"]
       }
     }
+  },
+  "cart": {
+    "title": "ጋሪ",
+    "empty": "ጋሪዎ ባዶ ነው",
+    "emptyHint": "ምርቶችን ፈልጉና ወደ ጋሪ ይጨምሩ።",
+    "continueShopping": "ግዢ ቀጥሉ",
+    "qty": "ብዛት",
+    "unitPrice": "የአሃድ ዋጋ",
+    "variant": "ዓይነት",
+    "remove": "አስወግድ",
+    "subtotal": "ንዑስ ድምር",
+    "grandTotal": "ጠቅላላ ድምር",
+    "checkout": "ወደ ክፍያ ቀጥሉ",
+    "unknownVendor": "ሌሎች"
   },
   "auth": {
     "signIn": "ግባ",
@@ -377,6 +392,48 @@
       "f_p3": "በዋና ገጽ ቅድሚያ ቦታ",
       "f_p4": "የተሰጠ አካውንት አስተዳዳሪ",
       "f_p5": "24/7 ድጋፍ"
+    },
+    "products": {
+      "title": "ምርቶቼ",
+      "subtitle": "ካታሎጋቸዎን ያስተዳድሩ",
+      "name": "ስም",
+      "empty": "ገና ምርት የለም",
+      "emptyHint": "ምርቶቼ ከጨመርኩ በኋላ እዚህ ይታያሉ።",
+      "noResults": "ምንም ምርት አልተገኘም",
+      "image": "ምስል",
+      "price": "ዋጋ",
+      "stock": "ክምችት",
+      "actions": "ድርጊቶች",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "errorLoad": "ምርቶችን መጫን አልተቻለም። ዳግም ይሞክሩ።",
+      "addProduct": "ምርት",
+      "addProductLong": "ምርት ጨምር",
+      "searchPlaceholder": "ምርት ወይም SKU ፈልግ…",
+      "colProduct": "ምርት",
+      "colCategory": "ምድብ",
+      "colSales": "ሽያጭ",
+      "tabAll": "ሁሉም",
+      "tabActive": "ንቁ",
+      "tabOut": "ያለቀ",
+      "tabDraft": "ረቂቅ",
+      "sortNewest": "አዲስ",
+      "sortPrice": "ዋጋ",
+      "sortSales": "ምርጥ ሽያጭ",
+      "sortStock": "ዝቅተኛ ክምችት",
+      "chipTotal": "ጠቅላላ ምርቶች",
+      "chipActive": "ንቁ",
+      "chipOut": "ያለቀ",
+      "chipDraft": "ረቂቆች",
+      "statusActive": "ንቁ",
+      "statusDraft": "ረቂቅ",
+      "statusOut": "አልቋል",
+      "statusLow": "ጥቂት",
+      "countProducts": "ምርቶች",
+      "actionDuplicate": "ቅጂ",
+      "actionPublish": "አትም",
+      "actionUnpublish": "ወደ ረቂቅ",
+      "selected": "ተመርጠዋል"
     }
   },
   "admin": {
