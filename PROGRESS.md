@@ -180,3 +180,50 @@ Tracks completed stories and notable fixes, newest at the bottom.
 - All action buttons are stubs showing "Coming soon" toast until backend endpoints exist
 
 All new strings added to en / am / ar; lint and build passing.
+
+---
+
+## Story — Admin Vendors + Categories (`feat/vendor-admin-shells`)
+
+**Full admin console pages for vendor management and category management**
+
+### AdminVendors (`/admin/vendors`)
+
+- Fetches vendor list from `GET /admin/vendors` (`items`, `total`, `page`, `pages`); paginates with 20/page
+- Status chips (All / Approved / Pending / Suspended) with live counts from 4 parallel requests; each chip filters the table
+- Toolbar: search input + status `<select>` filter; both are server-side params
+- Table: store logo/initial · store name/slug · owner name · phone · plan (—) · status badge · KYC arrow
+- **Status badges**: `pending`→amber, `approved`→emerald, `rejected`→crimson, `suspended`→gray
+- **KYC drawer** slides from the `end` side (RTL-correct); shows owner name/phone, region, TIN, business name/type, doc type+number, join date
+- **Confirm modal** for approve / reject / suspend / unsuspend actions; updates status immediately after `PATCH /admin/vendors/:id/status`
+- API field mapping: `v.userId` (not `v.owner`), `kyc.docType` / `kyc.docNumber` (not `documentType`)
+- **Status update fix**: after PATCH, uses `String(v._id) === String(vendor._id)` to normalize ObjectId comparison; spreads partial response with explicit `_id: v._id, status: mergedStatus`; filters list immediately when a status-specific tab is active so vendor disappears from the wrong filter
+
+### AdminCategories (`/admin/categories`)
+
+- Fetches categories from `GET /categories`; supports nested children via `flattenTree()` (depth-based indentation)
+- 3 stat chips: Total / Active / Inactive derived from the flat list
+- Table: depth-indented name (inline-start padding + ChevronRight for children) · slug · parent · active badge
+- Row actions: + Add Sub (pre-fills `parentId`) · Pencil Edit · Trash Delete
+- `CategoryFormModal`: create or edit; auto-generates slug from name; parent dropdown with depth indentation; image URL field; active toggle; `POST /admin/categories` or `PATCH /admin/categories/:id`
+- `DeleteModal`: optional reassign-to select so products survive category deletion; `DELETE /admin/categories/:id?reassignTo=`
+- Inline error from `err.response.data.message`
+
+### AdminShell overhaul
+
+- Added **shared top bar** (rendered in shell, not per-page): mobile hamburger, dynamic page title + subtitle derived from `useLocation()` matched against NAV array, Globe language toggle, dark mode, Bell, profile initial
+- Nav entries have optional `subtitleKey` — vendors and categories show subtitles automatically
+- Added `overflow-x-hidden` to the main wrapper to prevent horizontal bleed on mobile
+- **Auth persistence**: `authStore` now uses Zustand `persist` with `sessionStorage` — admin login survives page refresh without storing the JWT in `localStorage`; cleared when tab closes
+
+### i18n
+
+- Added full `admin.vendors.*` and `admin.categories.*` key sets (title, subtitle, chips, columns, actions, confirmations, toasts) to all three locale files (EN / አማርኛ / العربية)
+
+### Bug fixes
+
+- **Toast props**: admin pages were passing `message`/`onClose` but `Toast` expects `show`/`children`; fixed to `<Toast show={!!toast}>{toast}</Toast>` with auto-dismiss `useEffect`
+- Removed duplicate page headers (hamburger, globe, moon, bell, profile) from `AdminVendors` and `AdminCategories` — now sourced from `AdminShell`
+- Removed unused `categories` state from `AdminCategories` (only `flat` is passed to children)
+
+Lint and build passing.
