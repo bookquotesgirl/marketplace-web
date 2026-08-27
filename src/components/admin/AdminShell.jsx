@@ -16,10 +16,10 @@ const NAV = [
   { id: 'overview',      to: '/admin',                end: true,  Icon: LayoutDashboard },
   { id: 'vendors',       to: '/admin/vendors',                    Icon: Store,       subtitleKey: 'admin.vendors.subtitle' },
   { id: 'approvals',     to: '/admin/approvals',                  Icon: UserCheck },
-  { id: 'orders',        to: '/admin/orders',                     Icon: ShoppingBag },
+  { id: 'orders',        to: '/admin/orders',                     Icon: ShoppingBag, subtitleKey: 'admin.orders.subtitle' },
   { id: 'payouts',       to: '/admin/payouts',                    Icon: Wallet },
   { id: 'customers',     to: '/admin/customers',                  Icon: Users },
-  { id: 'subscriptions', to: '/admin/subscriptions',              Icon: BadgePercent },
+  { id: 'subscriptions', to: '/admin/subscriptions',              Icon: BadgePercent, subtitleKey: 'admin.subscriptions.subtitle' },
   { id: 'settings',      to: '/admin/settings',                   Icon: Settings },
   { id: 'categories',    to: '/admin/categories',                 Icon: Tag,         subtitleKey: 'admin.categories.subtitle' },
 ];

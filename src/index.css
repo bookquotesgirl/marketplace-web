@@ -8,6 +8,10 @@ html[lang='am'] { font-family: 'Noto Sans Ethiopic', sans-serif; }
 html[lang='ar'] { font-family: 'Cairo', sans-serif; }
 body { @apply bg-cream text-ink antialiased dark:bg-ink dark:text-slate-100 transition-colors; }
 
+/* Hide scrollbar while keeping scrollability */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Subtle Ethiopian-inspired geometric motif — used on auth hero panels. */
 .motif {
   background-image:

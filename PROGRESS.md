@@ -227,3 +227,40 @@ All new strings added to en / am / ar; lint and build passing.
 - Removed unused `categories` state from `AdminCategories` (only `flat` is passed to children)
 
 Lint and build passing.
+
+---
+
+## Story — Admin Orders + Subscription Plans (`feat/vendor-admin-shells`)
+
+**Full admin console pages for platform orders and subscription management**
+
+### AdminOrders (`/admin/orders`)
+
+- Fetches orders from `GET /admin/orders` (`items`, `total`, `page`, `pages`); paginates with 20/page
+- 4 stat chips (Total, In Progress, Delivered, Disputed) — 5 parallel `limit=1` requests on mount
+- Status tab pills: All / New / Processing / Shipped / Delivered / Cancelled / Disputed — scroll-snapped with `no-scrollbar` on mobile
+- API status mapping: `placed`→"New" (amber), `confirmed`→"Processing" (blue), `shipped`→"Shipped" (sky), `delivered`→"Delivered" (emerald), `cancelled`→"Cancelled" (slate), `disputed`→"Disputed" (rose)
+- Table: Order#, Customer, Vendor, Total (ETB), Payment, Date, Status badge, ChevronRight
+- **Order detail drawer** from `end` side (RTL-correct): status badge, customer/vendor/payment/qty, total, Invoice stub + Mark Disputed button
+- **Mark Disputed**: confirm modal → `PATCH /admin/orders/:id { status: "disputed" }` → immediate row update + tab-filter
+- ID handling: `String(o.id ?? o._id)` normalization for ObjectId comparison (orders API uses `id` not `_id`)
+
+### AdminSubscriptions (`/admin/subscriptions`)
+
+- Fetches plans from `GET /admin/plans`; handles `Array | { items } | { data }` envelope shapes
+- 4 stat chips: MRR (computed from plan prices × subscriber counts), Active subscriptions, Avg per vendor, Monthly churn (—, not in API)
+- 3 plan cards per `kitman-html/admin-subscriptions.html`: plan name + color dot, price, subscriber count, progress bar (% of MRR), editable price `<input type="number">`
+- **Save plan pricing**: `PATCH /admin/plans/:id { price }` in parallel for each modified plan; only sends requests where price actually changed; success shows slide-up "Saved" toast
+- Vendor subscriptions table: renders with search + status filter, shows empty state (no GET endpoint in API contract)
+- `no-scrollbar` CSS class added to `index.css`
+
+### AdminShell NAV
+
+- Added `subtitleKey: 'admin.orders.subtitle'` to orders entry
+- Added `subtitleKey: 'admin.subscriptions.subtitle'` to subscriptions entry — both now show subtitle in the shared top bar
+
+### i18n
+
+- Added full `admin.orders.*` (~30 keys) and `admin.subscriptions.*` (~25 keys) to EN / አማርኛ / العربية
+
+Lint and build passing.
