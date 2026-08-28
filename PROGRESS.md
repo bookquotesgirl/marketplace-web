@@ -264,3 +264,53 @@ Lint and build passing.
 - Added full `admin.orders.*` (~30 keys) and `admin.subscriptions.*` (~25 keys) to EN / አማርኛ / العربية
 
 Lint and build passing.
+
+---
+
+## Story — Admin Analytics, Banners & Payouts (`feat/vendor-admin-shells`)
+
+**Admin console completed with analytics dashboard, banner management, and vendor payouts.**
+
+### AdminDashboard (`/admin`)
+
+- **Fixed broken endpoint**: was calling `GET /admin/dashboard` (404); now calls `GET /admin/analytics`
+- **Fixed field mapping**: `data.revenue` → GMV display, `data.ordersCount` → orders, `v.sales`/`v.orders` for top vendors (old code used non-existent `v.gmv`/`v.ordersCount`)
+- **KPI chips**: added Lucide icon badge per chip (BarChart3, Repeat, Store, UserCheck, ShoppingBag, Users, Receipt, Undo2)
+- **Revenue trend card**: SVG area chart (two lines: revenue + orders) built from `growthOverTime[]` — no external library; descriptive empty state shown when array is empty (backend placeholder)
+- No invented delta fields — API does not return them
+
+### AdminBanners (`/admin/banners`) — new file
+
+- `GET /admin/banners` → table: thumbnail, title/subtitle, link, display order, isActive badge, edit/delete actions
+- `POST /admin/banners` — create modal with all fields: title* (required), image* (required), subtitle, buttonText, link, order, isActive toggle
+- `PATCH /admin/banners/:id` — same modal pre-filled for edit; only changed fields sent
+- `DELETE /admin/banners/:id` — confirm modal, 204 on success
+- `ImageOff` fallback for broken/missing image thumbnails
+- Optimistic UI: list updates immediately on save/delete; no reload needed
+- Route `/admin/banners` added to `App.jsx`; `ImagePlay` nav entry added to `AdminShell` with subtitle
+
+### AdminPayouts (`/admin/payouts`) — full rewrite from stub
+
+- Fetches two endpoints in parallel on mount:
+  - `GET /admin/payouts/pending` → vendor balance cards (totalPending, vendors[])
+  - `GET /admin/payouts` → payout history table (items[], total)
+- **3 stat chips**: Total pending ETB, Vendors with balance, Total paid (all time)
+- **Pending balances section**: card per vendor with store initial, balance, "Pay out" button
+- **Payout modal**: confirm + amount input (pre-filled, editable, bounded 1–balance), optional reference + notes; `POST /admin/payouts { vendorId, amount, reference?, notes? }`
+- Balance deduction confirmed live: API returns `vendor.newBalance`, list updates optimistically
+- **Payout history table**: vendor (handles `vendorId: null` → "Unknown vendor"), amount, status badge (paid=emerald, pending=amber), period range, reference, date
+- All errors surface from `err.response?.data?.error?.message` chain
+
+### AdminShell
+
+- Added `subtitleKey` to payouts and banners NAV entries
+- `ImagePlay` icon imported for banners
+
+### i18n
+
+- Added `admin.nav.banners` key to all three locales
+- Added `admin.dashboard.growth` + `admin.dashboard.growthEmpty` to all three locales
+- Added full `admin.banners.*` section (~20 keys) to EN / አማርኛ / العربية
+- Added full `admin.payouts.*` section (~20 keys) to EN / አማርኛ / العربية
+
+Lint and build passing.

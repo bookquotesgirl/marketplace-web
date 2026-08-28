@@ -43,6 +43,7 @@ import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminCategories from './pages/admin/AdminCategories';
+import AdminBanners from './pages/admin/AdminBanners';
 
 export default function App() {
   useApplyLanguage();
@@ -139,6 +140,7 @@ export default function App() {
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/categories" element={<AdminCategories />} />
+        <Route path="/admin/banners" element={<AdminBanners />} />
       </Route>
     </Routes>
   ); 
