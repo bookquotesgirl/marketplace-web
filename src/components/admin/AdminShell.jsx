@@ -3,7 +3,7 @@ import { NavLink, Outlet, Link, useNavigate, useLocation } from 'react-router-do
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Store, UserCheck, ShoppingBag, Wallet,
-  Users, BadgePercent, Settings, Tag, ArrowLeft, LogOut, X,
+  Users, BadgePercent, Settings, Tag, ImagePlay, ArrowLeft, LogOut, X,
   Globe, Bell, Moon, Sun, Menu,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
@@ -17,7 +17,8 @@ const NAV = [
   { id: 'vendors',       to: '/admin/vendors',                    Icon: Store,       subtitleKey: 'admin.vendors.subtitle' },
   { id: 'approvals',     to: '/admin/approvals',                  Icon: UserCheck },
   { id: 'orders',        to: '/admin/orders',                     Icon: ShoppingBag, subtitleKey: 'admin.orders.subtitle' },
-  { id: 'payouts',       to: '/admin/payouts',                    Icon: Wallet },
+  { id: 'payouts',       to: '/admin/payouts',                    Icon: Wallet,      subtitleKey: 'admin.payouts.subtitle' },
+  { id: 'banners',       to: '/admin/banners',                    Icon: ImagePlay,   subtitleKey: 'admin.banners.subtitle' },
   { id: 'customers',     to: '/admin/customers',                  Icon: Users },
   { id: 'subscriptions', to: '/admin/subscriptions',              Icon: BadgePercent, subtitleKey: 'admin.subscriptions.subtitle' },
   { id: 'settings',      to: '/admin/settings',                   Icon: Settings },
