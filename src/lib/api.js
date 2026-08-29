@@ -12,7 +12,9 @@ export const API_ORIGIN = API_URL.replace(/\/api\/?$/, '');
 
 export function resolveAssetUrl(path) {
   if (!path) return path;
-  return /^https?:\/\//.test(path) ? path : `${API_ORIGIN}${path.startsWith('/') ? '' : '/'}${path}`;
+  // Already usable as-is: absolute URLs, inline data URIs, and object URLs.
+  if (/^(https?:|data:|blob:)/.test(path)) return path;
+  return `${API_ORIGIN}${path.startsWith('/') ? '' : '/'}${path}`;
 }
 
 // Attach the auth token (kept in memory in the auth store).

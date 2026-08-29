@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '../components/ui';
+import { Button, PasswordInput } from '../components/ui';
 import AuthShell from '../components/auth/AuthShell';
 import api from '../lib/api';
 
@@ -135,35 +135,23 @@ export default function ResetPassword() {
           />
         </label>
 
-        <label className="block">
-          <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
-            {t('auth.newPassword')}
-          </span>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            autoComplete="new-password"
-            placeholder="••••••••"
-            required
-            className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
-          />
-        </label>
+        <PasswordInput
+          label={t('auth.newPassword')}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          autoComplete="new-password"
+          placeholder="••••••••"
+          required
+        />
 
-        <label className="block">
-          <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
-            {t('auth.confirmNewPassword')}
-          </span>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-            placeholder="••••••••"
-            required
-            className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
-          />
-        </label>
+        <PasswordInput
+          label={t('auth.confirmNewPassword')}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          autoComplete="new-password"
+          placeholder="••••••••"
+          required
+        />
 
         {error && (
           <p className="text-sm text-crimson font-medium" role="alert">

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '../components/ui';
+import { Button, PasswordInput } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
 import api from '../lib/api';
@@ -207,18 +207,14 @@ export default function Login() {
               </label>
 
               {/* Password */}
-              <label className="block">
-                <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
-                  {t('auth.password')}
-                </span>
-                <input
-                  type="password"
+              <div>
+                <PasswordInput
+                  label={t('auth.password')}
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                   autoComplete="current-password"
                   placeholder="••••••••"
                   required
-                  className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
                 />
                 <Link
                   to="/forgot-password"
@@ -226,7 +222,7 @@ export default function Login() {
                 >
                   {t('auth.forgotPassword')}
                 </Link>
-              </label>
+              </div>
 
               {error && (
                 <p className="text-sm text-crimson font-medium" role="alert">
