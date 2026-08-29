@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Tag, X } from 'lucide-react';
 import api from '../lib/api';
 import { useCart } from '../hooks/useCart';
 import { Button, Input, Toast } from '../components/ui';
@@ -18,6 +19,9 @@ function errorMessage(err, t) {
       return t('checkout.errorPaymentFailed');
     case 'INVALID_PAYMENT_METHOD':
       return t('checkout.errorInvalidPayment');
+    case 'COUPON_INVALID':
+    case 'COUPON_EXPIRED':
+      return t('checkout.couponRejected');
     default:
       return msg ?? t('common.error');
   }
@@ -33,6 +37,13 @@ export default function Checkout() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Coupon: validated against POST /api/coupons/validate before the order is placed;
+  // the server re-validates on POST /api/orders and is the source of truth for the total.
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState(null); // { code, discount, newTotal }
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
 
   // Saved addresses — checkout's buyer-only route means we're always authed here.
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -74,6 +85,52 @@ export default function Checkout() {
   }, [items, t]);
 
   const total = groups.reduce((sum, g) => sum + g.subtotal, 0);
+  const discount = coupon ? Math.min(coupon.discount, total) : 0;
+  const payable = Math.max(0, total - discount);
+
+  // Any change to the cart contents invalidates a previously validated coupon.
+  useEffect(() => {
+    setCoupon(null);
+    setCouponError('');
+  }, [items]);
+
+  const applyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCouponError('');
+    setCouponLoading(true);
+    try {
+      const cart = {
+        items: items.map((i) => ({
+          productId: i.productId,
+          variantId: i.variantId ?? null,
+          title: i.title,
+          price: i.price,
+          qty: i.qty,
+          vendorId: i.vendorId ?? null,
+          vendorName: i.vendor ?? null,
+          subtotal: i.price * i.qty,
+        })),
+        total,
+      };
+      const { data } = await api.post('/coupons/validate', { code, cart });
+      setCoupon({ code: data.coupon?.code ?? code.toUpperCase(), discount: data.discount ?? 0 });
+    } catch (err) {
+      setCoupon(null);
+      const code2 = err.response?.data?.error?.code;
+      setCouponError(
+        code2 === 'MISSING_FIELD' ? t('common.error') : t('checkout.couponInvalid')
+      );
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+  };
 
   const handlePhoneChange = (e) => {
     let val = e.target.value.trim();
@@ -128,6 +185,7 @@ export default function Checkout() {
               },
             }),
         paymentMethod,
+        ...(coupon ? { couponCode: coupon.code } : {}),
       });
 
       // The order API doesn't echo the item title in subOrders (schema has the field, the
@@ -386,9 +444,64 @@ export default function Checkout() {
             <span className="text-ink/60 dark:text-slate-400">{t('checkout.subtotal')}</span>
             <span className="font-semibold">{total.toLocaleString()}</span>
           </div>
+
+          {/* Coupon */}
+          <div className="mt-4">
+            {coupon ? (
+              <div className="flex items-center justify-between gap-2 rounded-xl bg-forest/5 dark:bg-forest/10 px-3 py-2">
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest min-w-0">
+                  <Tag className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{coupon.code}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={removeCoupon}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-ink/60 dark:text-slate-400 hover:text-crimson"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  {t('checkout.couponRemove')}
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      applyCoupon();
+                    }
+                  }}
+                  placeholder={t('checkout.couponPlaceholder')}
+                  aria-label={t('checkout.couponLabel')}
+                  aria-invalid={Boolean(couponError)}
+                  className="flex-1 min-w-0 px-3 py-2 text-sm rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest uppercase placeholder:normal-case"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={couponLoading || !couponInput.trim()}
+                  className="shrink-0 px-3 py-2 text-sm font-semibold rounded-xl bg-forest text-white hover:bg-forest-dark disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  {couponLoading ? t('checkout.couponApplying') : t('checkout.couponApply')}
+                </button>
+              </div>
+            )}
+            {couponError && <p className="mt-1.5 text-xs text-crimson">{couponError}</p>}
+          </div>
+
+          {discount > 0 && (
+            <div className="flex justify-between text-sm mt-3 text-forest">
+              <span>{t('checkout.discount')}</span>
+              <span className="font-semibold">−{discount.toLocaleString()}</span>
+            </div>
+          )}
+
           <div className="flex justify-between text-base font-extrabold mt-3 pt-3 border-t border-black/10 dark:border-white/10">
             <span>{t('checkout.total')}</span>
-            <span>{total.toLocaleString()}</span>
+            <span>{payable.toLocaleString()}</span>
           </div>
           <Button type="submit" variant="gold" disabled={submitting} className="w-full mt-5">
             {submitting ? t('checkout.placingOrder') : t('checkout.placeOrder')}
@@ -396,7 +509,9 @@ export default function Checkout() {
         </div>
       </form>
 
-      <Toast show={Boolean(error)}>{error}</Toast>
+      <Toast show={Boolean(error)} variant="error">
+        {error}
+      </Toast>
     </section>
   );
 }

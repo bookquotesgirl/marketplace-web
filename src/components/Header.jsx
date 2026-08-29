@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,6 +9,7 @@ import {
   Moon,
   Sun,
   Bell,
+  BellOff,
   UserRound,
   Heart,
   ShoppingBag,
@@ -30,6 +31,7 @@ import { useUiStore } from '../store/uiStore';
 import { useLanguage } from '../hooks/useLanguage';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
+import { resolveAssetUrl } from '../lib/api';
 import { Modal } from './ui';
 
 const LANG_NAME = { en: 'English', am: 'አማርኛ', ar: 'العربية' };
@@ -55,6 +57,34 @@ const MOBILE_NAV_ITEMS = [
   { key: 'sell', to: '/vendor', labelKey: 'topbar.sellOnKitman', Icon: Store },
 ];
 
+// First letter of the user's name, for the fallback avatar.
+function initial(name) {
+  return (name || '?').trim().charAt(0).toUpperCase() || '?';
+}
+
+// Round avatar: the user's photo when set, otherwise a forest disc with their initial.
+// Falls back to the disc if the image fails to load (dead URL, offline uploads host).
+function AccountAvatar({ user }) {
+  const [broken, setBroken] = useState(false);
+  const src = user?.avatar && !broken ? resolveAssetUrl(user.avatar) : null;
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        onError={() => setBroken(true)}
+        className="w-7 h-7 rounded-full object-cover bg-forest/10 shrink-0"
+      />
+    );
+  }
+  return (
+    <span className="grid place-items-center w-7 h-7 rounded-full bg-forest text-white text-xs font-bold shrink-0">
+      {initial(user?.name)}
+    </span>
+  );
+}
+
 export default function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -62,11 +92,31 @@ export default function Header() {
   const dark = useUiStore((s) => s.dark);
   const toggleDark = useUiStore((s) => s.toggleDark);
   const { count: cartCount } = useCart();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const isAuthed = Boolean(token);
 
   const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const notifRef = useRef(null);
+
+  // Close the notifications popover on outside click or Escape.
+  useEffect(() => {
+    if (!notifOpen) return undefined;
+    const onClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setNotifOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [notifOpen]);
 
   const submitSearch = (e) => {
     e.preventDefault();
@@ -151,18 +201,51 @@ export default function Header() {
           >
             {dark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5" />}
           </button>
-          <button
-            className="relative p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
-            aria-label={t('header.notifications')}
-          >
-            <Bell className="w-5 h-5" />
-          </button>
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="relative p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+              aria-label={t('header.notifications')}
+              aria-haspopup="true"
+              aria-expanded={notifOpen}
+            >
+              <Bell className="w-5 h-5" />
+            </button>
+            {notifOpen && (
+              <div
+                role="menu"
+                aria-label={t('header.notifications')}
+                className="absolute top-full mt-2 end-0 w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-card ring-1 ring-black/5 dark:ring-white/10 z-50 overflow-hidden"
+              >
+                <div className="px-4 py-3 border-b border-black/5 dark:border-white/10">
+                  <span className="text-sm font-bold">{t('header.notifications')}</span>
+                </div>
+                <div className="px-4 py-8 text-center">
+                  <BellOff className="w-6 h-6 mx-auto text-ink/30 dark:text-slate-500" />
+                  <p className="mt-2 text-sm text-ink/60 dark:text-slate-400">
+                    {t('header.noNotifications')}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
           <Link
-            to={token ? '/profile' : '/login'}
-            className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+            to={isAuthed ? '/profile' : '/login'}
+            className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
           >
-            <UserRound className="w-5 h-5" />
-            <span className="text-sm font-medium">{t('nav.account')}</span>
+            {isAuthed ? (
+              <>
+                <AccountAvatar user={user} />
+                <span className="text-sm font-medium truncate min-w-0">
+                  {user?.name || t('nav.account')}
+                </span>
+              </>
+            ) : (
+              <>
+                <UserRound className="w-5 h-5" />
+                <span className="text-sm font-medium">{t('nav.login')}</span>
+              </>
+            )}
           </Link>
           <Link
             to="/wishlist"
@@ -233,12 +316,22 @@ export default function Header() {
           {MOBILE_NAV_ITEMS.map(({ key, to, labelKey, Icon }) => (
             <Link
               key={key}
-              to={key === 'account' ? (token ? '/profile' : '/login') : to}
+              to={key === 'account' ? (isAuthed ? '/profile' : '/login') : to}
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
             >
-              <Icon className="w-5 h-5 text-forest shrink-0" />
-              <span>{t(labelKey)}</span>
+              {key === 'account' && isAuthed ? (
+                <AccountAvatar user={user} />
+              ) : (
+                <Icon className="w-5 h-5 text-forest shrink-0" />
+              )}
+              <span className="truncate">
+                {key === 'account'
+                  ? isAuthed
+                    ? user?.name || t('nav.account')
+                    : t('nav.login')
+                  : t(labelKey)}
+              </span>
             </Link>
           ))}
         </nav>

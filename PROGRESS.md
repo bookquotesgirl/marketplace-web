@@ -314,3 +314,56 @@ Lint and build passing.
 - Added full `admin.payouts.*` section (~20 keys) to EN / አማርኛ / العربية
 
 Lint and build passing.
+
+---
+
+## Story — Search, Coupons & Buyer Polish (`feat/search-coupons-polish`)
+
+**Header search → results page**
+
+- `Browse.jsx` now handles a `?q=` term: fetches `GET /api/search?q=` and renders a "Results
+  for …" page. The live `/api/search` only accepts `q` (no server-side filters/pagination and it
+  does not populate `categoryId`), so sort (relevance / price / rating) and 12-per-page pagination
+  are done client-side over the returned set; the category sidebar is hidden in search mode with a
+  "Clear search" chip. Non-search browsing (`/products` + `category` + server pages) is unchanged.
+- Loading now shows `ProductCardSkeleton` grid; error state gained a retry button; empty state is
+  query-aware (`browse.noSearchResults`).
+
+**Checkout coupons**
+
+- `Checkout.jsx`: coupon code field in the order summary. Apply → `POST /api/coupons/validate`
+  with the mapped cart `{ items:[{productId,variantId,title,price,qty,subtotal,vendorId?}], total }`.
+  Valid → discount row + reduced total; invalid (`COUPON_INVALID`) → inline error. `couponCode` is
+  passed to `POST /api/orders` so the server stays the source of truth for the charged total.
+  Changing the cart clears an applied coupon. Vendor-scoped coupons aren't matchable client-side
+  (the local cart has no `vendorId`) — platform coupons work end to end.
+
+**Nav / account**
+
+- `Header.jsx`: signed-in state shows the user's avatar (`user.avatar` or an initial disc) + name
+  linking to `/profile`; signed-out shows "Sign in" (`nav.login`) linking to `/login` — same in the
+  mobile drawer. Previously it always read "Account".
+- Fixed the broken nav avatar: `resolveAssetUrl` was prepending the API origin to `data:`/`blob:`
+  URIs (buyer photos are stored as data URLs by `AccountProfile`). It now passes those through, and
+  `AccountAvatar` degrades to the initial disc via `onError`. `AccountProfile` now also mirrors the
+  saved name/avatar into `authStore.user` so the header updates without a re-login.
+- Notification bell is now a working popover (outside-click + Escape to close, `aria-expanded`),
+  showing an empty state — there is no notifications endpoint in `marketplace-api`.
+
+**Polish**
+
+- New `ui/PasswordInput` (show/hide eye toggle, `aria-pressed`, localised label) used on Login,
+  Register and Reset Password.
+- New `ui/Skeleton` + `ui/ProductCardSkeleton`.
+- `ui/Toast` gained `variant` ('default' | 'error' | 'success') + optional auto-dismiss, backward
+  compatible with existing call sites.
+
+**i18n** — `header.noNotifications`, `browse.searchTitle/clearSearch/noSearchResults/sortBy` +
+4 sort labels, `checkout.discount/coupon*` (8 keys), `auth.showPassword/hidePassword` added to
+EN / አማርኛ / العربية.
+
+**Tests** — 81 pass (15 new): `Browse.test.jsx` (search fetch, empty state, client pagination,
+non-search fallback), `Checkout.test.jsx` (+valid coupon lowers total, invalid shows error,
+`couponCode` sent with order), `Header.test.jsx` (+guest vs signed-in nav, bell popover, avatar
+data-URL passthrough + `onError` fallback), `PasswordInput.test.jsx` (toggle, `aria-pressed`,
+Arabic RTL). Lint + build green.

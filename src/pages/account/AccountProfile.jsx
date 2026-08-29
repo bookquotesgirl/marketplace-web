@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../lib/api';
+import { useAuthStore } from '../../store/authStore';
 import { Button, Input, Toast } from '../../components/ui';
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024; // 2MB
@@ -69,6 +70,14 @@ export default function AccountProfile() {
         avatar,
       });
       setProfile(data.profile);
+      // Keep the in-memory auth user (used by the header avatar) in sync.
+      const authUser = useAuthStore.getState().user;
+      if (authUser) {
+        useAuthStore.getState().setAuth({
+          user: { ...authUser, name: data.profile.name, avatar: data.profile.avatar },
+          token: useAuthStore.getState().token,
+        });
+      }
       setSaved(true);
     } catch (err) {
       setError(err.response?.data?.error?.message ?? t('common.error'));
@@ -94,7 +103,12 @@ export default function AccountProfile() {
           )}
           <div>
             <div className="flex gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 {t('account.changePhoto')}
               </Button>
               {avatar && (
@@ -103,7 +117,9 @@ export default function AccountProfile() {
                 </Button>
               )}
             </div>
-            <p className="text-xs text-ink/50 dark:text-slate-400 mt-1.5">{t('account.avatarHint')}</p>
+            <p className="text-xs text-ink/50 dark:text-slate-400 mt-1.5">
+              {t('account.avatarHint')}
+            </p>
             <input
               ref={fileInputRef}
               type="file"
@@ -115,7 +131,12 @@ export default function AccountProfile() {
           </div>
         </div>
 
-        <Input label={t('auth.name')} value={name} onChange={(e) => setName(e.target.value)} required />
+        <Input
+          label={t('auth.name')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
         <label className="block">
           <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">

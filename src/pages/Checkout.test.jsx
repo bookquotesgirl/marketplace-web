@@ -155,6 +155,86 @@ describe('Checkout', () => {
     );
   });
 
+  it('applies a valid coupon: shows the discount and lowers the total', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem); // 100
+    useCartStore.getState().add(vendorBItem); // 100  -> total 200
+
+    api.post.mockImplementation((url) => {
+      if (url === '/coupons/validate') {
+        return Promise.resolve({
+          data: { valid: true, discount: 20, newTotal: 180, coupon: { code: 'SAVE20', type: 'fixed', value: 20 } },
+        });
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    renderWithProviders(<Checkout />);
+
+    await user.type(screen.getByLabelText(/Coupon code/i), 'save20');
+    await user.click(screen.getByRole('button', { name: /^Apply$/i }));
+
+    expect(await screen.findByText('Discount')).toBeInTheDocument();
+    expect(screen.getByText('SAVE20')).toBeInTheDocument();
+    // Total row now reads 180 (200 − 20 discount)
+    expect(screen.getByText('180')).toBeInTheDocument();
+  });
+
+  it('shows an error for an invalid coupon and leaves the total unchanged', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+
+    api.post.mockImplementation((url) => {
+      if (url === '/coupons/validate') {
+        const err = new Error('bad');
+        err.response = { data: { error: { code: 'COUPON_INVALID', message: 'nope' } } };
+        return Promise.reject(err);
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    renderWithProviders(<Checkout />);
+
+    await user.type(screen.getByLabelText(/Coupon code/i), 'BOGUS');
+    await user.click(screen.getByRole('button', { name: /^Apply$/i }));
+
+    expect(await screen.findByText(/Invalid or expired coupon/i)).toBeInTheDocument();
+    expect(screen.queryByText('Discount')).not.toBeInTheDocument();
+  });
+
+  it('sends couponCode with the order once a coupon is applied', async () => {
+    const user = userEvent.setup();
+    useCartStore.getState().add(vendorAItem);
+
+    api.delete.mockResolvedValue({});
+    api.post.mockImplementation((url) => {
+      if (url === '/coupons/validate') {
+        return Promise.resolve({
+          data: { valid: true, discount: 10, newTotal: 90, coupon: { code: 'TEN', type: 'fixed', value: 10 } },
+        });
+      }
+      if (url === '/cart/items') return Promise.resolve({ data: {} });
+      if (url === '/orders') {
+        return Promise.resolve({
+          data: { success: true, order: { _id: 'order-9', orderNumber: 'ORD-9', total: 90, subOrders: [] } },
+        });
+      }
+      return Promise.reject(new Error(`unexpected POST ${url}`));
+    });
+
+    renderWithProviders(<Checkout />);
+    await user.type(screen.getByLabelText(/Coupon code/i), 'ten');
+    await user.click(screen.getByRole('button', { name: /^Apply$/i }));
+    await screen.findByText('TEN');
+
+    await fillAddress(user);
+    await user.click(screen.getByRole('button', { name: /Place order/i }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/orders', expect.objectContaining({ couponCode: 'TEN' }))
+    );
+  });
+
   it('switches to manual entry when "Enter a new address" is chosen', async () => {
     const user = userEvent.setup();
     useCartStore.getState().add(vendorAItem);
