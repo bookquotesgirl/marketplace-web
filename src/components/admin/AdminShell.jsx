@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Store, UserCheck, ShoppingBag, Wallet,
   Users, BadgePercent, Settings, Tag, ImagePlay, ArrowLeft, LogOut, X,
-  Globe, Bell, Moon, Sun, Menu,
+  Bell, Moon, Sun, Menu,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useUiStore } from '../../store/uiStore';
-import { useLanguage } from '../../hooks/useLanguage';
+import LanguagePicker from '../LanguagePicker';
 
 export const AdminShellContext = createContext({ openDrawer: () => {} });
 
@@ -97,7 +97,6 @@ export default function AdminShell() {
   const user = useAuthStore((s) => s.user);
   const dark = useUiStore((s) => s.dark);
   const toggleDark = useUiStore((s) => s.toggleDark);
-  const { cycleLanguage } = useLanguage();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const profileInitial = (user?.name ?? 'A')[0].toUpperCase();
@@ -150,7 +149,7 @@ export default function AdminShell() {
           {/* Page content */}
           <div className="flex-1 min-w-0 space-y-5">
             {/* Shared top bar */}
-            <div className="flex items-center gap-3 rounded-[1.5rem] px-3 sm:px-4 h-16 bg-white/60 dark:bg-white/[0.055] backdrop-blur-[28px] [backdrop-filter:blur(28px)_saturate(180%)] border border-white/70 dark:border-white/10 shadow-[0_14px_44px_-14px_rgba(30,50,90,.12)]">
+            <div className="relative z-10 flex items-center gap-3 rounded-[1.5rem] px-3 sm:px-4 h-16 bg-white/60 dark:bg-white/[0.055] backdrop-blur-[28px] [backdrop-filter:blur(28px)_saturate(180%)] border border-white/70 dark:border-white/10 shadow-[0_14px_44px_-14px_rgba(30,50,90,.12)]">
               <button
                 onClick={() => setDrawerOpen(true)}
                 className="lg:hidden grid place-items-center w-10 h-10 -ms-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
@@ -167,13 +166,7 @@ export default function AdminShell() {
                 )}
               </div>
               <div className="ms-auto flex items-center gap-1">
-                <button
-                  onClick={cycleLanguage}
-                  className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10 transition"
-                  aria-label={t('header.language')}
-                >
-                  <Globe className="w-5 h-5" />
-                </button>
+                <LanguagePicker variant="shell" />
                 <button
                   onClick={toggleDark}
                   className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10 transition"

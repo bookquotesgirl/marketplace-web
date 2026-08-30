@@ -167,7 +167,7 @@ function VendorCtaBanner() {
             </div>
           </div>
           <Link
-            to="/vendor"
+            to="/vendor/register"
             className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gold hover:bg-gold-light text-ink font-bold shadow-glow transition"
           >
             <StoreIcon className="w-5 h-5" />
