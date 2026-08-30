@@ -367,3 +367,132 @@ non-search fallback), `Checkout.test.jsx` (+valid coupon lowers total, invalid s
 `couponCode` sent with order), `Header.test.jsx` (+guest vs signed-in nav, bell popover, avatar
 data-URL passthrough + `onError` fallback), `PasswordInput.test.jsx` (toggle, `aria-pressed`,
 Arabic RTL). Lint + build green.
+
+---
+
+## Day 11 — Vendor Product Editor + Store Settings (`feat/vendor-product-editor`)
+
+**Made the vendor product table fully functional (create/edit/delete, images, variants, full
+pricing/inventory/shipping fields) and built out Store Settings + the public vendor storefront,
+all against the real backend.**
+
+> Note: an interrupted session earlier in this branch's history left a stale index entry for this
+> file that briefly reverted it to a pre-merge, pre-Day-11 snapshot (missing this section and the
+> "Search, Coupons & Buyer Polish" story above). Restored from `HEAD` before re-adding this
+> section — nothing above this line was touched.
+
+### Backend gaps found and fixed (`marketplace-api`, same branch — see its own `PROGRESS.md`)
+
+Inspecting the live backend (not just `API_CONTRACT.md`, which had drifted) turned up several
+things that had to be fixed or added before this story could be real end-to-end:
+- `POST /vendor/products` threw on every call (missing required `basePrice`/`slug`).
+- An explicit `status: 'draft'` was silently ignored in favor of a stock-derived status.
+- Variants were write-only — created but never returned by any read endpoint, including the
+  public product page; no single-product GET; no way to edit an existing product's variants.
+- `GET/PATCH /vendor/me` (store profile) was documented but never implemented; `Vendor` had none
+  of the contact/policy/preference/delivery-zone fields the Settings design needs.
+- `/api/uploads` hard-required an existing `productId`, so a vendor logo/banner had nothing to
+  upload against.
+- `Variant.attributes` was a fixed `{ size, colour, material }` shape — too rigid for the actual
+  vendor UI, which lets a vendor name a variant option anything ("Color", "Size", ...). Widened to
+  a free-form option-name → value map.
+- A stale, self-inconsistent `package-lock.json` (pre-existing, not caused by this branch) blocked
+  building the project's Docker image at all — regenerated it from scratch.
+
+### Vendor Product Management
+
+- **`VendorProductForm.jsx`** (new, `/vendor/products/new` + `/vendor/products/:id/edit`) —
+  matches `kitman-html/vendor-add-product.html`'s full card layout:
+  - **Product details**: title, description.
+  - **Media**: real uploads via `POST /api/uploads` (field `file`, multipart). Since that
+    endpoint requires an existing `productId`, the form transparently creates a draft product on
+    the first photo if the vendor hasn't saved yet (`ensureProductId`), then keeps working
+    against that id for the rest of the session.
+  - **Pricing**: price, compare-at, cost per item, a live client-computed profit/margin display,
+    and a Charge VAT checkbox — all real `Product` fields now.
+  - **Inventory**: SKU (read-only, shows the server-generated slug — `Product` has no separate
+    top-level SKU field, same convention as the vendor table's subtitle), barcode, a Track
+    quantity toggle, and quantity available (visually disabled when not tracking, still submits
+    whatever value is there).
+  - **Variants** (`VariantEditor.jsx`, rewritten) — Shopify-style single option + value chips
+    (e.g. "Color" → Black, White chips), each value becoming one variant row with its own
+    price/stock, matching the real `Variant.attributes` map and the design reference precisely
+    rather than a fixed size/colour pair.
+  - **Shipping**: Physical product checkbox + weight.
+  - **Organization**: category select + a tag chip input, both real `Product` fields.
+  - Edit mode loads the existing product via `GET /vendor/products/:id`, including inferring the
+    variant option name from whichever attribute key its variants actually carry.
+- **`VendorProducts.jsx`** — wired Add (→ new route), Edit (→ edit route), Delete (confirm modal
+  showing the product's image/title, Cancel/Delete, optimistic remove with rollback + toast on
+  failure), and the publish/unpublish eye icon (optimistic `PATCH { status }`, rollback on
+  failure). Reads a `location.state.toast` set by the form on successful save/create so the table
+  shows success feedback after navigating back. Duplicate and the bulk action bar are still
+  "Coming soon" stubs — out of this story's acceptance criteria.
+
+### Store Settings (`VendorSettings.jsx`, full rewrite from stub)
+
+All of the design reference's fields, backed for real via an extended `Vendor` model +
+`GET/PATCH /vendor/me`:
+- **Store branding** — storeName, tagline, bio, store URL (read-only slug), logo/banner via the
+  same real `/api/uploads` (productId-less mode, added since the endpoint was product-only).
+- **Contact & location** — phone, email, region (`<select>`, same list as `VendorRegister.jsx`),
+  sub-city, address, business hours.
+- **Policies** — processing time / return window (`<select>`s with fixed common options — the
+  backend field is a plain string) + shipping/return policy free text.
+- **Delivery zones & fees** — repeatable zone-name + fee-in-ETB editor (add/remove), matching
+  `deliveryZones: [{ zone, fee }]`.
+- **Preferences** — four real toggle switches (`ToggleRow`): Vacation mode, Show stock levels,
+  Allow customer chat, Show ratings & reviews.
+  - **Vacation mode, Show stock levels, and Show ratings & reviews are wired to something real**:
+    turning vacation mode on makes `GET /vendors/:slug` 404 (storefront hidden, verified live);
+    `Product.jsx`'s remaining-quantity line and `Store.jsx`'s rating check the vendor's
+    preference before rendering.
+  - **Allow customer chat persists for real but has nothing to gate** — no buyer/vendor chat
+    feature exists anywhere in this app yet. Said so rather than pretending it does something.
+- **Danger zone** — Deactivate/Reactivate store behind its own confirm modal and its own
+  immediate `PATCH`, independent of whatever else is staged in the form above. Flips the same
+  `vacationMode` field as the Preferences toggle.
+- Discard reverts to the last-loaded server state; every successful save updates `authStore`'s
+  `user.vendor` so the sidebar picks up the new name/logo without a re-login.
+
+### Public storefront (`Store.jsx`, previously a one-line stub)
+
+Built for real off `GET /api/vendors/:slug`: banner/logo (letter-initial fallbacks), store name +
+Verified badge (from `status === 'approved'`), tagline, rating (gated by `showRatingsReviews`),
+bio, delivery-zone chips, and a paginated product grid reusing `ProductCard` + `mapProductCard` +
+the same pagination pattern as `Browse.jsx`. No follower/sales counters or follow/chat buttons —
+none of that exists on the backend.
+
+### Optimistic UI + error handling
+
+Delete and publish-toggle are optimistic with rollback on failure, per the existing project
+pattern (`AdminBanners`/`AdminVendors`). Create/update/settings-save are not optimistic since a
+real navigation + multi-field submit is involved, not a single list-row mutation. All API errors
+surface via `err.response?.data?.error?.message ?? err.response?.data?.message` fallback chains
+into inline form errors or the existing `Toast` component.
+
+### i18n
+
+Added `vendor.products.form.*` (~44 keys), `vendor.settings.*` (~54 keys), `store.*` (5 keys),
+and `common.remove` to EN / አማርኛ / العربية.
+
+### Verified live (real backend, real Cloudinary, no mocks)
+
+Ran the full spec'd flow end-to-end with a Playwright-driven headless browser against the live
+dev API: create a product with a real photo upload + 2 variants → Publish → visible in the vendor
+table → visible on `/store/vendor-one-store` → edit price → both reflect it → delete → confirm
+modal → removed from both. Then the full Store Settings page: filled every field, Saved, reloaded
+the page to confirm persistence from the backend (not local state), then Deactivated via the
+Danger zone → confirmed the storefront 404s while it's on → Reactivated → confirmed it's visible
+again. The Product/Variant schema extensions (compare-at, cost, barcode, track quantity, VAT,
+physical/weight, tags, the free-form variant option map) were verified directly against the Atlas
+dev database. Zero unexpected console errors. `npm run lint` / `npm run build` both green
+throughout (`npm test` has a pre-existing Windows/vitest worker-pool flake unrelated to this
+branch — 0 actual test failures on the files that do start).
+
+**Docker note**: the project's `marketplace-api` container (port 5001, what `.env`'s
+`VITE_API_URL` points at) needed rebuilding twice during this story to pick up the backend
+changes (`docker compose build api && docker compose up -d --force-recreate api`) — also found
+and fixed `.env`'s `PORT` having drifted to `5001` (breaking the container, which expects `5000`
+internally per `docker-compose.yml`'s `5001:5000` mapping) and a stale `package-lock.json`
+blocking `npm ci` inside the image build.

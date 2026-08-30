@@ -381,7 +381,9 @@ export default function Product() {
             {product.currency} {Number(price).toLocaleString()}
           </p>
 
-          {stock != null && (
+          {/* "Show stock levels" (Day 11 — Store Settings) only hides the remaining-quantity
+              count; out-of-stock still always shows since buyers need that either way. */}
+          {stock != null && (outOfStock || product.vendorId?.showStockLevels !== false) && (
             <p className="mt-1 text-sm">
               {outOfStock ? (
                 <span className="text-crimson font-semibold">{t('product.outOfStock')}</span>

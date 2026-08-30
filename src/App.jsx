@@ -29,6 +29,7 @@ import ComponentsDemo from './pages/ComponentsDemo';
 import VendorRegister from './pages/vendor/VendorRegister';
 import VendorDashboard from './pages/vendor/VendorDashboard';
 import VendorProducts from './pages/vendor/VendorProducts';
+import VendorProductForm from './pages/vendor/VendorProductForm';
 import VendorOrders from './pages/vendor/VendorOrders';
 import VendorPayouts from './pages/vendor/VendorPayouts';
 import VendorSubscription from './pages/vendor/VendorSubscription';
@@ -123,6 +124,8 @@ export default function App() {
       <Route element={<ProtectedRoute role="vendor"><VendorShell /></ProtectedRoute>}>
         <Route path="/vendor" element={<VendorDashboard />} />
         <Route path="/vendor/products" element={<VendorProducts />} />
+        <Route path="/vendor/products/new" element={<VendorProductForm />} />
+        <Route path="/vendor/products/:id/edit" element={<VendorProductForm />} />
         <Route path="/vendor/orders" element={<VendorOrders />} />
         <Route path="/vendor/payouts" element={<VendorPayouts />} />
         <Route path="/vendor/subscription" element={<VendorSubscription />} />

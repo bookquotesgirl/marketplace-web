@@ -94,6 +94,15 @@ export default function Header() {
   const { count: cartCount } = useCart();
   const { token, user } = useAuth();
   const isAuthed = Boolean(token);
+  // A vendor/admin browsing the public site (e.g. their own storefront) should land on their
+  // own dashboard when they click their account pill, not the buyer-only /profile section.
+  const accountHref = !isAuthed
+    ? '/login'
+    : user?.role === 'vendor'
+      ? '/vendor'
+      : user?.role === 'admin'
+        ? '/admin'
+        : '/profile';
 
   const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -230,7 +239,7 @@ export default function Header() {
             )}
           </div>
           <Link
-            to={isAuthed ? '/profile' : '/login'}
+            to={accountHref}
             className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
           >
             {isAuthed ? (
@@ -316,7 +325,7 @@ export default function Header() {
           {MOBILE_NAV_ITEMS.map(({ key, to, labelKey, Icon }) => (
             <Link
               key={key}
-              to={key === 'account' ? (isAuthed ? '/profile' : '/login') : to}
+              to={key === 'account' ? accountHref : to}
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
             >

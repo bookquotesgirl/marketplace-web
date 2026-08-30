@@ -1,10 +1,11 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Package, ShoppingBag, Wallet, BadgePercent,
   Settings, ExternalLink, LogOut, X, BadgeCheck,
 } from 'lucide-react';
+import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 
 // Exposed so child pages can open the mobile sidebar drawer.
@@ -19,7 +20,7 @@ const NAV = [
   { id: 'settings',     to: '/vendor/settings',                 Icon: Settings },
 ];
 
-function SidebarContents({ user, t, onLogout, onNavClick, onClose }) {
+function SidebarContents({ user, t, onLogout, onNavClick, onClose, counts }) {
   const vendor = user?.vendor;
   const initials = vendor?.storeName?.[0]?.toUpperCase() ?? 'V';
 
@@ -71,24 +72,40 @@ function SidebarContents({ user, t, onLogout, onNavClick, onClose }) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ id, to, end, Icon }) => (
-          <NavLink
-            key={id}
-            to={to}
-            end={end}
-            onClick={onNavClick}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition ${
-                isActive
-                  ? 'bg-forest text-white shadow-[0_6px_20px_-6px_rgba(11,122,75,0.6)]'
-                  : 'text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5'
-              }`
-            }
-          >
-            <Icon className="w-[18px] h-[18px] shrink-0" />
-            {t(`vendor.nav.${id}`)}
-          </NavLink>
-        ))}
+        {NAV.map(({ id, to, end, Icon }) => {
+          const count = counts?.[id];
+          return (
+            <NavLink
+              key={id}
+              to={to}
+              end={end}
+              onClick={onNavClick}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-forest text-white shadow-[0_6px_20px_-6px_rgba(11,122,75,0.6)]'
+                    : 'text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon className="w-[18px] h-[18px] shrink-0" />
+                  <span className="flex-1">{t(`vendor.nav.${id}`)}</span>
+                  {count > 0 && (
+                    <span
+                      className={`grid place-items-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-forest/10 text-forest'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Footer */}
@@ -120,6 +137,20 @@ export default function VendorShell() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [counts, setCounts] = useState({});
+
+  // Sidebar-level "needs attention" badge (orders awaiting fulfillment) — same field the
+  // dashboard's own "Needs attention" card uses (GET /vendor/dashboard).
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get('/vendor/dashboard')
+      .then(({ data }) => {
+        if (!cancelled) setCounts({ orders: data?.needsAttention?.ordersToFulfill ?? 0 });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -158,6 +189,7 @@ export default function VendorShell() {
               onLogout={handleLogout}
               onNavClick={() => setDrawerOpen(false)}
               onClose={() => setDrawerOpen(false)}
+              counts={counts}
             />
           </aside>
 

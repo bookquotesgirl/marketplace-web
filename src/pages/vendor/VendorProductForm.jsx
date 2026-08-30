@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Menu, Globe, Bell, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, Menu, Globe, Bell, Moon, Sun, X } from 'lucide-react';
 import api from '../../lib/api';
 import { Spinner } from '../../components/ui';
 import MediaUploader from '../../components/vendor/MediaUploader';
@@ -44,10 +44,21 @@ export default function VendorProductForm() {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
+  const [compareAtPrice, setCompareAtPrice] = useState('');
+  const [costPerItem, setCostPerItem] = useState('');
+  const [chargeVAT, setChargeVAT] = useState(true);
+  const [slug, setSlug] = useState('');
+  const [barcode, setBarcode] = useState('');
+  const [trackQuantity, setTrackQuantity] = useState(true);
   const [stock, setStock] = useState('0');
   const [status, setStatus] = useState('active');
   const [images, setImages] = useState([]);
-  const [variants, setVariants] = useState([]);
+  const [optionName, setOptionName] = useState('');
+  const [variantRows, setVariantRows] = useState([]);
+  const [isPhysical, setIsPhysical] = useState(true);
+  const [weight, setWeight] = useState('');
+  const [tags, setTags] = useState([]);
+  const [tagDraft, setTagDraft] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -83,13 +94,29 @@ export default function VendorProductForm() {
         setDescription(p.description ?? '');
         setCategoryId(p.categoryId?._id ?? p.categoryId ?? '');
         setPrice(String(p.basePrice ?? p.price ?? ''));
+        setCompareAtPrice(p.compareAtPrice != null ? String(p.compareAtPrice) : '');
+        setCostPerItem(p.costPerItem != null ? String(p.costPerItem) : '');
+        setChargeVAT(p.chargeVAT !== false);
+        setSlug(p.slug ?? '');
+        setBarcode(p.barcode ?? '');
+        setTrackQuantity(p.trackQuantity !== false);
         setStock(String(p.stock ?? 0));
         setStatus(p.status === 'draft' ? 'draft' : 'active');
         setImages(p.images ?? []);
-        setVariants(
-          (p.variants ?? []).map((v) => ({
+        setIsPhysical(p.isPhysical !== false);
+        setWeight(p.weight != null ? String(p.weight) : '');
+        setTags(Array.isArray(p.tags) ? p.tags : []);
+
+        // Variants → single option name + value rows. `attributes` is a free-form
+        // option-name -> value map (Day 11); take the key from the first variant that has one.
+        const loadedVariants = p.variants ?? [];
+        const firstAttrs = loadedVariants.find((v) => v.attributes && Object.keys(v.attributes).length > 0)?.attributes;
+        const inferredOption = firstAttrs ? Object.keys(firstAttrs)[0] : '';
+        setOptionName(inferredOption);
+        setVariantRows(
+          loadedVariants.map((v) => ({
             _id: v._id,
-            attributes: { size: v.attributes?.size ?? '', colour: v.attributes?.colour ?? '' },
+            value: inferredOption ? (v.attributes?.[inferredOption] ?? '') : '',
             price: v.price ?? '',
             stock: v.stock ?? '',
           }))
@@ -125,6 +152,7 @@ export default function VendorProductForm() {
   }
 
   function buildPayload(targetStatus) {
+    const optKey = optionName.trim();
     return {
       title: title.trim(),
       description,
@@ -133,15 +161,22 @@ export default function VendorProductForm() {
       stock: Number(stock) || 0,
       status: targetStatus,
       images,
-      variants: variants.map((v) => ({
-        _id: v._id,
-        attributes: {
-          size: v.attributes?.size?.trim() || undefined,
-          colour: v.attributes?.colour?.trim() || undefined,
-        },
-        price: Number(v.price) || 0,
-        stock: Number(v.stock) || 0,
-      })),
+      compareAtPrice: compareAtPrice !== '' ? Number(compareAtPrice) : undefined,
+      costPerItem: costPerItem !== '' ? Number(costPerItem) : undefined,
+      chargeVAT,
+      barcode: barcode.trim() || undefined,
+      trackQuantity,
+      isPhysical,
+      weight: weight !== '' ? Number(weight) : undefined,
+      tags,
+      variants: optKey
+        ? variantRows.map((v) => ({
+            _id: v._id,
+            attributes: { [optKey]: v.value },
+            price: Number(v.price) || 0,
+            stock: Number(v.stock) || 0,
+          }))
+        : [],
     };
   }
 
@@ -170,6 +205,23 @@ export default function VendorProductForm() {
       setSaving(false);
     }
   }
+
+  // Derived, display-only — not sent to the backend (Product has no profit/margin fields).
+  const priceNum = Number(price) || 0;
+  const costNum = Number(costPerItem) || 0;
+  const profit = priceNum - costNum;
+  const margin = priceNum > 0 ? Math.round((profit / priceNum) * 100) : 0;
+
+  const addTag = () => {
+    const value = tagDraft.trim();
+    if (!value || tags.includes(value)) {
+      setTagDraft('');
+      return;
+    }
+    setTags([...tags, value]);
+    setTagDraft('');
+  };
+  const removeTag = (value) => setTags(tags.filter((tag) => tag !== value));
 
   if (loading) {
     return (
@@ -305,23 +357,99 @@ export default function VendorProductForm() {
 
           <div className={cardCls}>
             <h2 className="text-lg font-extrabold mb-4">{t('vendor.products.form.pricingTitle')}</h2>
-            <div>
-              <label className={labelCls}>{t('vendor.products.form.priceLabel')}</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="0"
-                className={`${inputCls} max-w-xs`}
-              />
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className={labelCls}>{t('vendor.products.form.priceLabel')}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>{t('vendor.products.form.compareAtLabel')}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={compareAtPrice}
+                  onChange={(e) => setCompareAtPrice(e.target.value)}
+                  placeholder="0"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>{t('vendor.products.form.costPerItemLabel')}</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={costPerItem}
+                  onChange={(e) => setCostPerItem(e.target.value)}
+                  placeholder="0"
+                  className={inputCls}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between flex-wrap gap-3 mt-4">
+              <p className="text-xs text-ink/50 dark:text-slate-400">
+                {t('vendor.products.form.profitLabel')} <b className="text-ink dark:text-slate-100">ETB {profit.toLocaleString()}</b>
+                <span className="mx-1.5">·</span>
+                {t('vendor.products.form.marginLabel')} <b className="text-ink dark:text-slate-100">{margin}%</b>
+              </p>
+              <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={chargeVAT}
+                  onChange={(e) => setChargeVAT(e.target.checked)}
+                  className="w-4 h-4 rounded accent-forest"
+                />
+                {t('vendor.products.form.chargeVatLabel')}
+              </label>
             </div>
           </div>
 
           <div className={cardCls}>
             <h2 className="text-lg font-extrabold mb-4">{t('vendor.products.form.inventoryTitle')}</h2>
-            <div className="max-w-xs">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>{t('vendor.products.form.skuLabel')}</label>
+                <input
+                  value={slug}
+                  readOnly
+                  placeholder={t('vendor.products.form.skuPlaceholder')}
+                  className={`${inputCls} cursor-not-allowed opacity-70`}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>{t('vendor.products.form.barcodeLabel')}</label>
+                <input
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+
+            <label className="flex items-center justify-between gap-4 mt-4 cursor-pointer select-none">
+              <span className="text-sm font-semibold">{t('vendor.products.form.trackQuantityLabel')}</span>
+              <span className="relative shrink-0 inline-flex">
+                <input
+                  type="checkbox"
+                  checked={trackQuantity}
+                  onChange={(e) => setTrackQuantity(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <span className="w-[46px] h-[26px] rounded-full bg-slate-200 dark:bg-slate-700 ring-1 ring-black/10 dark:ring-white/10 peer-checked:bg-forest peer-checked:ring-forest transition-colors" />
+                <span className="absolute top-0.5 start-0.5 w-[22px] h-[22px] rounded-full bg-white shadow-md transition-transform peer-checked:translate-x-5 rtl:peer-checked:-translate-x-5" />
+              </span>
+            </label>
+
+            <div className="mt-4 max-w-xs">
               <label className={labelCls}>{t('vendor.products.form.quantityLabel')}</label>
               <input
                 type="number"
@@ -329,14 +457,47 @@ export default function VendorProductForm() {
                 step="1"
                 value={stock}
                 onChange={(e) => setStock(e.target.value)}
-                className={inputCls}
+                disabled={!trackQuantity}
+                className={`${inputCls} ${!trackQuantity ? 'opacity-50 cursor-not-allowed' : ''}`}
               />
             </div>
           </div>
 
           <div className={cardCls}>
             <h2 className="text-lg font-extrabold mb-4">{t('vendor.products.form.variantsTitle')}</h2>
-            <VariantEditor variants={variants} onChange={setVariants} />
+            <VariantEditor
+              optionName={optionName}
+              onOptionNameChange={setOptionName}
+              rows={variantRows}
+              onRowsChange={setVariantRows}
+            />
+          </div>
+
+          <div className={cardCls}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-extrabold">{t('vendor.products.form.shippingTitle')}</h2>
+              <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={isPhysical}
+                  onChange={(e) => setIsPhysical(e.target.checked)}
+                  className="w-4 h-4 rounded accent-forest"
+                />
+                {t('vendor.products.form.physicalProductLabel')}
+              </label>
+            </div>
+            <div className="max-w-xs">
+              <label className={labelCls}>{t('vendor.products.form.weightLabel')}</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                disabled={!isPhysical}
+                className={`${inputCls} ${!isPhysical ? 'opacity-50 cursor-not-allowed' : ''}`}
+              />
+            </div>
           </div>
         </div>
 
@@ -391,6 +552,39 @@ export default function VendorProductForm() {
                 </option>
               ))}
             </select>
+
+            <label className={`${labelCls} mt-4`}>{t('vendor.products.form.tagsLabel')}</label>
+            <div className="flex flex-wrap items-center gap-1.5 px-3 py-2.5 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-white dark:bg-slate-800">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-forest/10 text-forest text-xs font-semibold"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    aria-label={t('common.remove')}
+                    className="grid place-items-center w-3.5 h-3.5 rounded-full hover:bg-forest/20"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </span>
+              ))}
+              <input
+                value={tagDraft}
+                onChange={(e) => setTagDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+                onBlur={addTag}
+                placeholder={t('vendor.products.form.tagsPlaceholder')}
+                className="flex-1 min-w-[80px] text-sm bg-transparent outline-none placeholder:text-ink/40 dark:placeholder:text-slate-500"
+              />
+            </div>
           </div>
         </div>
       </div>

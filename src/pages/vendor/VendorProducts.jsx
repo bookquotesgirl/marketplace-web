@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Package, CheckCircle2, PackageX, FileEdit,
@@ -8,7 +9,7 @@ import {
 } from 'lucide-react';
 import api from '../../lib/api';
 import { productImageUrl } from '../../lib/mapProduct';
-import { Spinner, Toast } from '../../components/ui';
+import { Spinner, Toast, Modal } from '../../components/ui';
 import ProductImage from '../../components/ui/ProductImage';
 import { VendorShellContext } from '../../components/vendor/VendorShell';
 import { useLanguage } from '../../hooks/useLanguage';
@@ -53,6 +54,8 @@ const TABS = [
 
 export default function VendorProducts() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { openDrawer } = useContext(VendorShellContext);
   const { cycleLanguage } = useLanguage();
   const dark = useUiStore((s) => s.dark);
@@ -69,6 +72,18 @@ export default function VendorProducts() {
   const [tab, setTab]             = useState('all');
   const [sort, setSort]           = useState('newest');
   const [selected, setSelected]   = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting]   = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
+
+  // A create/edit navigated back here with a success message to show.
+  useEffect(() => {
+    if (location.state?.toast) {
+      setToast(location.state.toast);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -126,6 +141,41 @@ export default function VendorProducts() {
     setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
 
+  // Optimistic active/draft toggle — rolls back and surfaces the error on failure.
+  const handleTogglePublish = async (product) => {
+    const nextStatus = product.status === 'active' ? 'draft' : 'active';
+    setTogglingId(product._id);
+    setProducts(prev => prev.map(p => p._id === product._id ? { ...p, status: nextStatus } : p));
+    try {
+      await api.patch(`/vendor/products/${product._id}`, { status: nextStatus });
+    } catch (err) {
+      setProducts(prev => prev.map(p => p._id === product._id ? { ...p, status: product.status } : p));
+      setToast(err.response?.data?.error?.message ?? err.response?.data?.message ?? t('vendor.products.errorAction'));
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  // Optimistic delete — confirmed via modal below. Rolls back the list on failure.
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+    setDeleting(true);
+    setProducts(prev => prev.filter(p => p._id !== target._id));
+    try {
+      await api.delete(`/vendor/products/${target._id}`);
+      setDeleteTarget(null);
+      setSelected(prev => prev.filter(id => id !== target._id));
+      setToast(t('vendor.products.deleteSuccess'));
+    } catch (err) {
+      setProducts(prev => [target, ...prev]);
+      setDeleteTarget(null);
+      setToast(err.response?.data?.error?.message ?? err.response?.data?.message ?? t('vendor.products.errorAction'));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -169,7 +219,7 @@ export default function VendorProducts() {
         <div className="ms-auto flex items-center gap-1.5">
           {/* Add product */}
           <button
-            onClick={() => setToast(t('common.comingSoon'))}
+            onClick={() => navigate('/vendor/products/new')}
             className="inline-flex items-center gap-1.5 h-10 px-3 sm:px-4 rounded-2xl bg-forest text-white font-semibold text-sm shadow-[0_8px_20px_-8px_rgba(11,122,75,0.7)] hover:bg-forest-dark transition"
           >
             <Plus className="w-4 h-4" />
@@ -352,7 +402,7 @@ export default function VendorProducts() {
                     <td className="pe-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <button
-                          onClick={() => setToast(t('common.comingSoon'))}
+                          onClick={() => navigate(`/vendor/products/${p._id}/edit`)}
                           aria-label={t('vendor.products.edit')}
                           title={t('vendor.products.edit')}
                           className="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60"
@@ -368,15 +418,16 @@ export default function VendorProducts() {
                           <Copy className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => setToast(t('common.comingSoon'))}
+                          onClick={() => handleTogglePublish(p)}
+                          disabled={togglingId === p._id}
                           aria-label={p.status === 'active' ? t('vendor.products.actionUnpublish') : t('vendor.products.actionPublish')}
                           title={p.status === 'active' ? t('vendor.products.actionUnpublish') : t('vendor.products.actionPublish')}
-                          className="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60"
+                          className="grid place-items-center w-8 h-8 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-ink/60 disabled:opacity-40"
                         >
                           {p.status === 'active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                         <button
-                          onClick={() => setToast(t('common.comingSoon'))}
+                          onClick={() => setDeleteTarget(p)}
                           aria-label={t('vendor.products.delete')}
                           title={t('vendor.products.delete')}
                           className="grid place-items-center w-8 h-8 rounded-lg hover:bg-crimson/10 text-crimson"
@@ -405,7 +456,7 @@ export default function VendorProducts() {
               <p className="text-sm text-ink/50 dark:text-slate-400 mt-1">{t('vendor.products.emptyHint')}</p>
             )}
             <button
-              onClick={() => setToast(t('common.comingSoon'))}
+              onClick={() => navigate('/vendor/products/new')}
               className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-forest text-white text-sm font-semibold"
             >
               <Plus className="w-4 h-4" />
@@ -472,6 +523,36 @@ export default function VendorProducts() {
           </div>
         </div>
       )}
+
+      {/* Delete confirmation */}
+      <Modal open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} title={t('vendor.products.confirmDeleteTitle')}>
+        {deleteTarget && (
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0">
+              <ProductImage src={productImageUrl(deleteTarget.images?.[0])} alt={deleteTarget.title} />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold truncate">{deleteTarget.title}</p>
+              <p className="text-xs text-ink/45 dark:text-slate-500">{t('vendor.products.confirmDeleteBody')}</p>
+            </div>
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => setDeleteTarget(null)}
+            className="h-10 px-4 rounded-2xl ring-1 ring-black/10 dark:ring-white/15 text-sm font-semibold hover:bg-black/5 dark:hover:bg-white/10 transition"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="h-10 px-4 rounded-2xl bg-crimson text-white text-sm font-semibold hover:bg-crimson-dark transition disabled:opacity-50"
+          >
+            {deleting ? '…' : t('vendor.products.delete')}
+          </button>
+        </div>
+      </Modal>
 
       <Toast show={Boolean(toast)}>{toast}</Toast>
     </>
