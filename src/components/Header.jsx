@@ -25,16 +25,14 @@ import {
   LayoutGrid,
   PackageSearch,
   Store,
-  Globe,
+  LogOut,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
-import { useLanguage } from '../hooks/useLanguage';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { resolveAssetUrl } from '../lib/api';
 import { Modal } from './ui';
-
-const LANG_NAME = { en: 'English', am: 'አማርኛ', ar: 'العربية' };
+import LanguagePicker from './LanguagePicker';
 
 const CATEGORIES = [
   { slug: 'electronics', key: 'categories.electronics', Icon: Smartphone },
@@ -88,11 +86,10 @@ function AccountAvatar({ user }) {
 export default function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { language, cycleLanguage } = useLanguage();
   const dark = useUiStore((s) => s.dark);
   const toggleDark = useUiStore((s) => s.toggleDark);
   const { count: cartCount } = useCart();
-  const { token, user } = useAuth();
+  const { token, user, logout } = useAuth();
   const isAuthed = Boolean(token);
 
   const [catOpen, setCatOpen] = useState(false);
@@ -100,6 +97,11 @@ export default function Header() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [query, setQuery] = useState('');
   const notifRef = useRef(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   // Close the notifications popover on outside click or Escape.
   useEffect(() => {
@@ -201,6 +203,7 @@ export default function Header() {
           >
             {dark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5" />}
           </button>
+          <LanguagePicker variant="header" />
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setNotifOpen((v) => !v)}
@@ -303,13 +306,7 @@ export default function Header() {
         </div>
 
         <div className="px-5 pb-4">
-          <button
-            onClick={cycleLanguage}
-            className="w-full flex items-center gap-2.5 px-4 py-3 rounded-full bg-white dark:bg-slate-800 ring-1 ring-black/5 dark:ring-white/10 shadow-soft text-sm font-medium hover:bg-black/5 dark:hover:bg-white/5 transition"
-          >
-            <Globe className="w-4 h-4 text-forest shrink-0" />
-            <span>{LANG_NAME[language]}</span>
-          </button>
+          <LanguagePicker variant="header" />
         </div>
 
         <nav className="flex flex-col px-2 pb-5" aria-label={t('header.menu')}>
@@ -335,6 +332,18 @@ export default function Header() {
             </Link>
           ))}
         </nav>
+
+        {isAuthed && (
+          <div className="px-2 pb-5 border-t border-black/5 dark:border-white/10 pt-2">
+            <button
+              onClick={() => { setMenuOpen(false); handleLogout(); }}
+              className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium text-crimson hover:bg-crimson/10 transition"
+            >
+              <LogOut className="w-5 h-5 shrink-0" />
+              <span>{t('common.logout')}</span>
+            </button>
+          </div>
+        )}
       </Modal>
     </header>
   );
