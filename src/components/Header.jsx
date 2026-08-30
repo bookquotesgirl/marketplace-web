@@ -26,6 +26,8 @@ import {
   PackageSearch,
   Store,
   LogOut,
+  LayoutDashboard,
+  Shield,
 } from 'lucide-react';
 import { useUiStore } from '../store/uiStore';
 import { useCart } from '../hooks/useCart';
@@ -46,41 +48,34 @@ const CATEGORIES = [
   { slug: 'supermarket', key: 'categories.supermarket', Icon: ShoppingCart },
 ];
 
+// Static mobile nav items — role-sensitive destinations resolved at render time.
 const MOBILE_NAV_ITEMS = [
-  { key: 'home', to: '/', labelKey: 'nav.home', Icon: HomeIcon },
-  { key: 'categories', to: '/browse', labelKey: 'nav.categories', Icon: LayoutGrid },
-  { key: 'trackOrder', to: '/orders', labelKey: 'topbar.trackOrder', Icon: PackageSearch },
-  { key: 'wishlist', to: '/wishlist', labelKey: 'nav.wishlist', Icon: Heart },
-  { key: 'account', to: null, labelKey: 'nav.account', Icon: UserRound },
-  { key: 'sell', to: '/vendor', labelKey: 'topbar.sellOnKitman', Icon: Store },
+  { key: 'home',       to: '/',       labelKey: 'nav.home',           Icon: HomeIcon },
+  { key: 'categories', to: '/browse', labelKey: 'nav.categories',     Icon: LayoutGrid },
+  { key: 'trackOrder', to: '/orders', labelKey: 'topbar.trackOrder',  Icon: PackageSearch },
+  { key: 'wishlist',   to: '/wishlist', labelKey: 'nav.wishlist',     Icon: Heart },
+  { key: 'account',   to: null,       labelKey: 'nav.account',        Icon: UserRound },
+  { key: 'sell',      to: null,       labelKey: 'topbar.sellOnKitman', Icon: Store },
 ];
 
-// First letter of the user's name, for the fallback avatar.
 function initial(name) {
   return (name || '?').trim().charAt(0).toUpperCase() || '?';
 }
 
-// Round avatar: the user's photo when set, otherwise a forest disc with their initial.
-// Falls back to the disc if the image fails to load (dead URL, offline uploads host).
-function AccountAvatar({ user }) {
+function AccountAvatar({ user, size = 'sm' }) {
   const [broken, setBroken] = useState(false);
   const src = user?.avatar && !broken ? resolveAssetUrl(user.avatar) : null;
+  const cls = size === 'lg'
+    ? 'w-9 h-9 rounded-full object-cover bg-forest/10 shrink-0'
+    : 'w-7 h-7 rounded-full object-cover bg-forest/10 shrink-0';
+  const spanCls = size === 'lg'
+    ? 'grid place-items-center w-9 h-9 rounded-full bg-forest text-white text-sm font-bold shrink-0'
+    : 'grid place-items-center w-7 h-7 rounded-full bg-forest text-white text-xs font-bold shrink-0';
 
   if (src) {
-    return (
-      <img
-        src={src}
-        alt=""
-        onError={() => setBroken(true)}
-        className="w-7 h-7 rounded-full object-cover bg-forest/10 shrink-0"
-      />
-    );
+    return <img src={src} alt="" onError={() => setBroken(true)} className={cls} />;
   }
-  return (
-    <span className="grid place-items-center w-7 h-7 rounded-full bg-forest text-white text-xs font-bold shrink-0">
-      {initial(user?.name)}
-    </span>
-  );
+  return <span className={spanCls}>{initial(user?.name)}</span>;
 }
 
 export default function Header() {
@@ -91,27 +86,28 @@ export default function Header() {
   const { count: cartCount } = useCart();
   const { token, user, logout } = useAuth();
   const isAuthed = Boolean(token);
+  const role = user?.role; // 'buyer' | 'vendor' | 'admin'
 
   const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [query, setQuery] = useState('');
   const notifRef = useRef(null);
+  const accountRef = useRef(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
 
-  // Close the notifications popover on outside click or Escape.
+  // Close notifications popover on outside click or Escape.
   useEffect(() => {
     if (!notifOpen) return undefined;
     const onClick = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
     };
-    const onKey = (e) => {
-      if (e.key === 'Escape') setNotifOpen(false);
-    };
+    const onKey = (e) => { if (e.key === 'Escape') setNotifOpen(false); };
     document.addEventListener('mousedown', onClick);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -120,10 +116,39 @@ export default function Header() {
     };
   }, [notifOpen]);
 
+  // Close account dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!accountOpen) return undefined;
+    const onClick = (e) => {
+      if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setAccountOpen(false); };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [accountOpen]);
+
   const submitSearch = (e) => {
     e.preventDefault();
     navigate(query.trim() ? `/browse?q=${encodeURIComponent(query.trim())}` : '/browse');
   };
+
+  // Resolve the mobile nav destination for each item.
+  function mobileNavDest(key) {
+    if (key === 'account') {
+      if (!isAuthed) return '/login';
+      if (role === 'vendor') return '/vendor';
+      if (role === 'admin') return '/admin';
+      return '/profile';
+    }
+    if (key === 'sell') {
+      return role === 'vendor' ? '/vendor' : '/vendor/register';
+    }
+    return MOBILE_NAV_ITEMS.find((i) => i.key === key)?.to ?? '/';
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-cream/95 dark:bg-ink/95 backdrop-blur border-b border-black/5 dark:border-white/10">
@@ -204,6 +229,8 @@ export default function Header() {
             {dark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5" />}
           </button>
           <LanguagePicker variant="header" />
+
+          {/* Notifications */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setNotifOpen((v) => !v)}
@@ -232,24 +259,98 @@ export default function Header() {
               </div>
             )}
           </div>
-          <Link
-            to={isAuthed ? '/profile' : '/login'}
-            className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
-          >
-            {isAuthed ? (
-              <>
+
+          {/* Desktop account — dropdown when authed, plain link when not */}
+          {isAuthed ? (
+            <div className="relative hidden md:block" ref={accountRef}>
+              <button
+                onClick={() => setAccountOpen((v) => !v)}
+                aria-haspopup="true"
+                aria-expanded={accountOpen}
+                className="flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
+              >
                 <AccountAvatar user={user} />
                 <span className="text-sm font-medium truncate min-w-0">
                   {user?.name || t('nav.account')}
                 </span>
-              </>
-            ) : (
-              <>
-                <UserRound className="w-5 h-5" />
-                <span className="text-sm font-medium">{t('nav.login')}</span>
-              </>
-            )}
-          </Link>
+                <ChevronDown className="w-3.5 h-3.5 text-ink/40 dark:text-slate-500 shrink-0" />
+              </button>
+
+              {accountOpen && (
+                <div
+                  role="menu"
+                  className="absolute top-full mt-2 end-0 w-52 bg-white dark:bg-slate-800 rounded-2xl shadow-card ring-1 ring-black/5 dark:ring-white/10 py-1.5 z-50 overflow-hidden"
+                >
+                  {/* Identity header */}
+                  <div className="flex items-center gap-2.5 px-4 py-3 border-b border-black/5 dark:border-white/10">
+                    <AccountAvatar user={user} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold truncate">{user?.name}</p>
+                      <p className="text-[11px] text-ink/45 dark:text-slate-500 capitalize">{role}</p>
+                    </div>
+                  </div>
+
+                  {/* Profile — buyer only (/profile is buyer-protected) */}
+                  {role === 'buyer' && (
+                    <Link
+                      to="/profile"
+                      role="menuitem"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition"
+                    >
+                      <UserRound className="w-4 h-4 text-forest shrink-0" />
+                      {t('account.nav.profile')}
+                    </Link>
+                  )}
+
+                  {/* Vendor Dashboard */}
+                  {role === 'vendor' && (
+                    <Link
+                      to="/vendor"
+                      role="menuitem"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-forest shrink-0" />
+                      {t('nav.vendorDashboard')}
+                    </Link>
+                  )}
+
+                  {/* Admin Console */}
+                  {role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      role="menuitem"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition"
+                    >
+                      <Shield className="w-4 h-4 text-forest shrink-0" />
+                      {t('nav.adminConsole')}
+                    </Link>
+                  )}
+
+                  {/* Logout */}
+                  <button
+                    role="menuitem"
+                    onClick={() => { setAccountOpen(false); handleLogout(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-crimson hover:bg-crimson/10 transition border-t border-black/5 dark:border-white/10 mt-1 pt-2"
+                  >
+                    <LogOut className="w-4 h-4 shrink-0" />
+                    {t('common.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+            >
+              <UserRound className="w-5 h-5" />
+              <span className="text-sm font-medium">{t('nav.login')}</span>
+            </Link>
+          )}
+
           <Link
             to="/wishlist"
             className="relative p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
@@ -272,6 +373,7 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Mobile search bar */}
       <form onSubmit={submitSearch} className="md:hidden px-4 pb-3">
         <div className="flex w-full rounded-2xl ring-1 ring-black/10 dark:ring-white/15 bg-white dark:bg-slate-800 overflow-hidden">
           <input
@@ -291,6 +393,7 @@ export default function Header() {
         </div>
       </form>
 
+      {/* Mobile drawer */}
       <Modal open={menuOpen} onClose={() => setMenuOpen(false)} variant="drawer">
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <span className="text-xl font-extrabold text-forest dark:text-forest-light">
@@ -310,29 +413,58 @@ export default function Header() {
         </div>
 
         <nav className="flex flex-col px-2 pb-5" aria-label={t('header.menu')}>
-          {MOBILE_NAV_ITEMS.map(({ key, to, labelKey, Icon }) => (
+          {MOBILE_NAV_ITEMS.map(({ key, labelKey, Icon }) => {
+            // Hide "Sell on Kitman" for admins (irrelevant role).
+            if (key === 'sell' && role === 'admin') return null;
+
+            const dest = mobileNavDest(key);
+            const isAccount = key === 'account';
+
+            return (
+              <Link
+                key={key}
+                to={dest}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
+              >
+                {isAccount && isAuthed ? (
+                  <AccountAvatar user={user} size="sm" />
+                ) : (
+                  <Icon className="w-5 h-5 text-forest shrink-0" />
+                )}
+                <span className="truncate">
+                  {isAccount
+                    ? isAuthed ? user?.name || t('nav.account') : t('nav.login')
+                    : t(labelKey)}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* Role-specific dashboard shortcut */}
+          {role === 'vendor' && (
             <Link
-              key={key}
-              to={key === 'account' ? (isAuthed ? '/profile' : '/login') : to}
+              to="/vendor"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
             >
-              {key === 'account' && isAuthed ? (
-                <AccountAvatar user={user} />
-              ) : (
-                <Icon className="w-5 h-5 text-forest shrink-0" />
-              )}
-              <span className="truncate">
-                {key === 'account'
-                  ? isAuthed
-                    ? user?.name || t('nav.account')
-                    : t('nav.login')
-                  : t(labelKey)}
-              </span>
+              <LayoutDashboard className="w-5 h-5 text-forest shrink-0" />
+              <span>{t('nav.vendorDashboard')}</span>
             </Link>
-          ))}
+          )}
+          {role === 'admin' && (
+            <Link
+              to="/admin"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
+            >
+              <Shield className="w-5 h-5 text-forest shrink-0" />
+              <span>{t('nav.adminConsole')}</span>
+            </Link>
+          )}
         </nav>
 
+        {/* Mobile logout — authed users only */}
         {isAuthed && (
           <div className="px-2 pb-5 border-t border-black/5 dark:border-white/10 pt-2">
             <button
