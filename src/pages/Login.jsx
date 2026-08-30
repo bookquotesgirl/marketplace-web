@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '../components/ui';
+import { Button, PasswordInput } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
 import api from '../lib/api';
-
-// Language label shown on the toggle button — mirrors Header.jsx.
-const LANG_LABEL = { en: 'EN', am: 'አማ', ar: 'ع' };
+import LanguagePicker from '../components/LanguagePicker';
 
 // Hero feature list — inline SVG icons (Lucide shapes; no icon library needed).
 const FEATURES = [
@@ -43,11 +41,10 @@ const FEATURES = [
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
   const toggleDark = useUiStore((s) => s.toggleDark);
   const dark = useUiStore((s) => s.dark);
-  const language = useUiStore((s) => s.language);
 
   const [form, setForm] = useState({ phone: '', password: '' });
   const [error, setError] = useState('');
@@ -92,18 +89,7 @@ export default function Login() {
           <span className="text-xl font-extrabold tracking-tight text-forest">{t('brand')}</span>
         </Link>
         <div className="flex items-center gap-1">
-          {/* Language cycle */}
-          <button
-            onClick={cycleLanguage}
-            aria-label={t('auth.toggleLanguage')}
-            className="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-medium transition"
-          >
-            {/* globe icon */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span>{LANG_LABEL[language]}</span>
-          </button>
+          <LanguagePicker variant="header" />
           {/* Dark mode toggle */}
           <button
             onClick={toggleDark}
@@ -177,6 +163,12 @@ export default function Login() {
             <h2 className="text-2xl font-extrabold">{t('auth.welcomeBack')}</h2>
             <p className="text-sm text-ink/60 dark:text-slate-400 mt-1">{t('auth.continueWithPhone')}</p>
 
+            {location.state?.resetSuccess && (
+              <p className="mt-3 text-sm font-medium text-forest bg-forest/10 rounded-xl px-3 py-2" role="status">
+                {t('auth.resetSuccess')}
+              </p>
+            )}
+
             <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
               {/* Phone with +251 prefix */}
               <label className="block">
@@ -200,26 +192,22 @@ export default function Login() {
               </label>
 
               {/* Password */}
-              <label className="block">
-                <span className="block text-xs font-semibold text-ink/60 dark:text-slate-400 mb-1.5">
-                  {t('auth.password')}
-                </span>
-                <input
-                  type="password"
+              <div>
+                <PasswordInput
+                  label={t('auth.password')}
                   value={form.password}
                   onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                   autoComplete="current-password"
                   placeholder="••••••••"
                   required
-                  className="w-full px-3.5 py-3 rounded-xl ring-1 ring-black/10 dark:ring-white/15 bg-cream/40 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-forest"
                 />
-                <a
-                  href="#"
+                <Link
+                  to="/forgot-password"
                   className="block text-xs text-forest font-semibold mt-1.5 text-end hover:underline"
                 >
                   {t('auth.forgotPassword')}
-                </a>
-              </label>
+                </Link>
+              </div>
 
               {error && (
                 <p className="text-sm text-crimson font-medium" role="alert">

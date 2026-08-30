@@ -11,11 +11,18 @@ import Product from './pages/Product';
 import Store from './pages/Store';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
 import Wishlist from './pages/Wishlist';
-import Profile from './pages/Profile';
+import AccountLayout from './pages/account/AccountLayout';
+import AccountProfile from './pages/account/AccountProfile';
+import AccountAddresses from './pages/account/AccountAddresses';
+import AccountSecurity from './pages/account/AccountSecurity';
 import NotFound from './pages/NotFound';
 import ComponentsDemo from './pages/ComponentsDemo';
 
@@ -35,6 +42,8 @@ import AdminPayouts from './pages/admin/AdminPayouts';
 import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminBanners from './pages/admin/AdminBanners';
 
 export default function App() {
   useApplyLanguage();
@@ -47,10 +56,58 @@ export default function App() {
         <Route path="/product/:slug" element={<Product />} />
         <Route path="/store/:slug" element={<Store />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute role="buyer">
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/order-confirmation/:id"
+          element={
+            <ProtectedRoute role="buyer">
+              <OrderConfirmation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute role="buyer">
+              <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute role="buyer">
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute role="buyer">
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute role="buyer">
+              <AccountLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AccountProfile />} />
+          <Route path="addresses" element={<AccountAddresses />} />
+          <Route path="security" element={<AccountSecurity />} />
+        </Route>
         <Route path="/vendor/register" element={<VendorRegister />} />
         <Route path="/components-demo" element={<ComponentsDemo />} />
         <Route path="*" element={<NotFound />} />
@@ -59,6 +116,8 @@ export default function App() {
       {/* Standalone auth pages */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Vendor dashboard — shell provides sidebar + outlet */}
       <Route element={<ProtectedRoute role="vendor"><VendorShell /></ProtectedRoute>}>
@@ -80,6 +139,8 @@ export default function App() {
         <Route path="/admin/customers" element={<AdminCustomers />} />
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/categories" element={<AdminCategories />} />
+        <Route path="/admin/banners" element={<AdminBanners />} />
       </Route>
     </Routes>
   ); 
