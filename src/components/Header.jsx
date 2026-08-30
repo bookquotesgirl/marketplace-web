@@ -86,19 +86,7 @@ export default function Header() {
   const { count: cartCount } = useCart();
   const { token, user, logout } = useAuth();
   const isAuthed = Boolean(token);
-<<<<<<< HEAD
-  // A vendor/admin browsing the public site (e.g. their own storefront) should land on their
-  // own dashboard when they click their account pill, not the buyer-only /profile section.
-  const accountHref = !isAuthed
-    ? '/login'
-    : user?.role === 'vendor'
-      ? '/vendor'
-      : user?.role === 'admin'
-        ? '/admin'
-        : '/profile';
-=======
   const role = user?.role; // 'buyer' | 'vendor' | 'admin'
->>>>>>> origin/main
 
   const [catOpen, setCatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -271,14 +259,6 @@ export default function Header() {
               </div>
             )}
           </div>
-<<<<<<< HEAD
-          <Link
-            to={accountHref}
-            className="hidden md:flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
-          >
-            {isAuthed ? (
-              <>
-=======
 
           {/* Desktop account — dropdown when authed, plain link when not */}
           {isAuthed ? (
@@ -289,7 +269,6 @@ export default function Header() {
                 aria-expanded={accountOpen}
                 className="flex items-center gap-2 p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition max-w-[12rem]"
               >
->>>>>>> origin/main
                 <AccountAvatar user={user} />
                 <span className="text-sm font-medium truncate min-w-0">
                   {user?.name || t('nav.account')}
@@ -465,12 +444,7 @@ export default function Header() {
           {/* Role-specific dashboard shortcut */}
           {role === 'vendor' && (
             <Link
-<<<<<<< HEAD
-              key={key}
-              to={key === 'account' ? accountHref : to}
-=======
               to="/vendor"
->>>>>>> origin/main
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[15px] font-medium hover:bg-black/5 dark:hover:bg-white/10 transition"
             >

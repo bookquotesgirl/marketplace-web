@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { createContext, useEffect, useState } from 'react';
-import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
-=======
-import { createContext, useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
->>>>>>> origin/main
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Package, ShoppingBag, Wallet, BadgePercent,
