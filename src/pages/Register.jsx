@@ -5,8 +5,7 @@ import { Button, PasswordInput } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
 import api from '../lib/api';
-
-const LANG_LABEL = { en: 'EN', am: 'አማ', ar: 'ع' };
+import LanguagePicker from '../components/LanguagePicker';
 
 const FEATURES = [
   {
@@ -53,11 +52,8 @@ export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
   const toggleDark = useUiStore((s) => s.toggleDark);
   const dark = useUiStore((s) => s.dark);
-  const language = useUiStore((s) => s.language);
-
   // step: 'phone' → 'otp' → 'complete'
   const [step, setStep] = useState('phone');
 
@@ -199,17 +195,7 @@ export default function Register() {
           <span className="text-xl font-extrabold tracking-tight text-forest">{t('brand')}</span>
         </Link>
         <div className="flex items-center gap-1">
-          <button
-            onClick={cycleLanguage}
-            aria-label={t('auth.toggleLanguage')}
-            className="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-medium transition"
-          >
-            {/* globe */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span>{LANG_LABEL[language]}</span>
-          </button>
+          <LanguagePicker variant="header" />
           <button
             onClick={toggleDark}
             aria-label={t('auth.toggleDark')}

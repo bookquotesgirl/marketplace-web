@@ -5,9 +5,7 @@ import { Button, PasswordInput } from '../components/ui';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
 import api from '../lib/api';
-
-// Language label shown on the toggle button — mirrors Header.jsx.
-const LANG_LABEL = { en: 'EN', am: 'አማ', ar: 'ع' };
+import LanguagePicker from '../components/LanguagePicker';
 
 // Hero feature list — inline SVG icons (Lucide shapes; no icon library needed).
 const FEATURES = [
@@ -45,10 +43,8 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const cycleLanguage = useUiStore((s) => s.cycleLanguage);
   const toggleDark = useUiStore((s) => s.toggleDark);
   const dark = useUiStore((s) => s.dark);
-  const language = useUiStore((s) => s.language);
 
   const [form, setForm] = useState({ phone: '', password: '' });
   const [error, setError] = useState('');
@@ -93,18 +89,7 @@ export default function Login() {
           <span className="text-xl font-extrabold tracking-tight text-forest">{t('brand')}</span>
         </Link>
         <div className="flex items-center gap-1">
-          {/* Language cycle */}
-          <button
-            onClick={cycleLanguage}
-            aria-label={t('auth.toggleLanguage')}
-            className="inline-flex items-center gap-1.5 px-3 h-10 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 text-sm font-medium transition"
-          >
-            {/* globe icon */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span>{LANG_LABEL[language]}</span>
-          </button>
+          <LanguagePicker variant="header" />
           {/* Dark mode toggle */}
           <button
             onClick={toggleDark}

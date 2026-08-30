@@ -8,7 +8,9 @@
     "login": "Sign in",
     "orders": "Orders",
     "account": "Account",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "vendorDashboard": "Vendor Dashboard",
+    "adminConsole": "Admin Console"
   },
   "common": {
     "search": "Search products, brands & vendors…",

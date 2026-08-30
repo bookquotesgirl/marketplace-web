@@ -1,12 +1,20 @@
+<<<<<<< HEAD
 import { createContext, useEffect, useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
+=======
+import { createContext, useState } from 'react';
+import { NavLink, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+>>>>>>> origin/main
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Package, ShoppingBag, Wallet, BadgePercent,
   Settings, ExternalLink, LogOut, X, BadgeCheck,
+  Menu, Bell, Moon, Sun, ArrowLeft,
 } from 'lucide-react';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import { useUiStore } from '../../store/uiStore';
+import LanguagePicker from '../LanguagePicker';
 
 // Exposed so child pages can open the mobile sidebar drawer.
 export const VendorShellContext = createContext({ openDrawer: () => {} });
@@ -119,6 +127,13 @@ function SidebarContents({ user, t, onLogout, onNavClick, onClose, counts }) {
             {t('common.viewStore')}
           </Link>
         )}
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition"
+        >
+          <ArrowLeft className="w-[18px] h-[18px] rtl:rotate-180 shrink-0" />
+          {t('common.backToSite')}
+        </Link>
         <button
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-crimson hover:bg-crimson/10 transition"
@@ -134,8 +149,11 @@ function SidebarContents({ user, t, onLogout, onNavClick, onClose, counts }) {
 export default function VendorShell() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const dark = useUiStore((s) => s.dark);
+  const toggleDark = useUiStore((s) => s.toggleDark);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [counts, setCounts] = useState({});
 
@@ -151,6 +169,13 @@ export default function VendorShell() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  const activeNav = [...NAV]
+    .sort((a, b) => b.to.length - a.to.length)
+    .find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to)))
+    ?? NAV[0];
+
+  const profileInitial = (user?.name ?? 'V')[0].toUpperCase();
 
   const handleLogout = () => {
     logout();
@@ -193,8 +218,41 @@ export default function VendorShell() {
             />
           </aside>
 
-          {/* Page content — each page renders its own header + body */}
+          {/* Page content */}
           <div className="flex-1 min-w-0 space-y-5">
+            {/* Shared top bar */}
+            <div className="relative z-10 flex items-center gap-3 rounded-[1.5rem] px-3 sm:px-4 h-16 bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.15)]">
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="lg:hidden grid place-items-center w-10 h-10 -ms-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+                aria-label={t('common.menu')}
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+              <h1 className="text-base sm:text-lg font-extrabold leading-none truncate">
+                {t(`vendor.nav.${activeNav.id}`)}
+              </h1>
+              <div className="ms-auto flex items-center gap-1">
+                <LanguagePicker variant="shell" />
+                <button
+                  onClick={toggleDark}
+                  className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+                  aria-label={t('header.theme')}
+                >
+                  {dark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5" />}
+                </button>
+                <button
+                  className="relative grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10 transition"
+                  aria-label={t('header.notifications')}
+                >
+                  <Bell className="w-5 h-5" />
+                </button>
+                <span className="grid place-items-center w-9 h-9 rounded-full bg-forest text-white text-sm font-extrabold ms-0.5 select-none">
+                  {profileInitial}
+                </span>
+              </div>
+            </div>
+
             <Outlet />
           </div>
         </div>

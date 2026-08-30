@@ -8,7 +8,9 @@
     "login": "تسجيل الدخول",
     "orders": "الطلبات",
     "account": "الحساب",
-    "wishlist": "المفضلة"
+    "wishlist": "المفضلة",
+    "vendorDashboard": "لوحة تحكم البائع",
+    "adminConsole": "وحدة تحكم المشرف"
   },
   "common": {
     "search": "ابحث عن المنتجات والبائعين…",

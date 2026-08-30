@@ -8,7 +8,9 @@
     "login": "ግባ",
     "orders": "ትዕዛዞች",
     "account": "መለያ",
-    "wishlist": "ተመራጮች"
+    "wishlist": "ተመራጮች",
+    "vendorDashboard": "የሻጭ ዳሽቦርድ",
+    "adminConsole": "የአስተዳዳሪ ኮንሶል"
   },
   "common": {
     "search": "እቃዎችን፣ ብራንዶችን ይፈልጉ…",
