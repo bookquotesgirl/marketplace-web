@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Package, ShoppingBag, Wallet, BadgePercent,
   Settings, ExternalLink, LogOut, X, BadgeCheck,
-  Menu, Bell, Moon, Sun, ArrowLeft,
+  Menu, Bell, Moon, Sun,
 } from 'lucide-react';
 import api from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
@@ -122,13 +122,6 @@ function SidebarContents({ user, t, onLogout, onNavClick, onClose, counts }) {
             {t('common.viewStore')}
           </Link>
         )}
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-ink/60 dark:text-slate-300 hover:bg-black/[0.04] dark:hover:bg-white/5 transition"
-        >
-          <ArrowLeft className="w-[18px] h-[18px] rtl:rotate-180 shrink-0" />
-          {t('common.backToSite')}
-        </Link>
         <button
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold text-crimson hover:bg-crimson/10 transition"
