@@ -1,20 +1,15 @@
-import { useState, useEffect, useMemo, useContext } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Package, CheckCircle2, PackageX, FileEdit,
   Search, Plus, Pencil, Copy, Eye, EyeOff, Trash2,
-  PackageSearch, ChevronLeft, ChevronRight,
-  Menu, Globe, Bell, Moon, Sun, X,
+  PackageSearch, ChevronLeft, ChevronRight, X,
 } from 'lucide-react';
 import api from '../../lib/api';
 import { productImageUrl } from '../../lib/mapProduct';
 import { Spinner, Toast, Modal } from '../../components/ui';
 import ProductImage from '../../components/ui/ProductImage';
-import { VendorShellContext } from '../../components/vendor/VendorShell';
-import { useLanguage } from '../../hooks/useLanguage';
-import { useUiStore } from '../../store/uiStore';
-import { useAuthStore } from '../../store/authStore';
 
 // Derives display status from backend status field + stock quantity.
 // Draft → gray; stock 0 → crimson "Out of stock"; stock < 10 → amber "Low stock"; else → forest "Active".
@@ -56,12 +51,6 @@ export default function VendorProducts() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { openDrawer } = useContext(VendorShellContext);
-  const { cycleLanguage } = useLanguage();
-  const dark = useUiStore((s) => s.dark);
-  const toggleDark = useUiStore((s) => s.toggleDark);
-  const user = useAuthStore((s) => s.user);
-  const profileInitial = (user?.vendor?.storeName ?? user?.name ?? 'V')[0].toUpperCase();
 
   const [products, setProducts]   = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -200,64 +189,16 @@ export default function VendorProducts() {
 
   return (
     <>
-      {/* Page header */}
-      <div className="flex items-center gap-3 rounded-[1.5rem] bg-white/70 dark:bg-white/[0.06] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-[0_10px_40px_-20px_rgba(0,0,0,0.2)] px-3 sm:px-4 h-16 mb-5">
-        {/* Mobile hamburger — opens the sidebar */}
+      {/* Page intro — subtitle + Add button (shell already renders the top bar) */}
+      <div className="flex items-center justify-between gap-3 mb-5">
+        <p className="text-sm text-ink/45 dark:text-slate-500">{t('vendor.products.subtitle')}</p>
         <button
-          onClick={openDrawer}
-          className="lg:hidden grid place-items-center w-10 h-10 -ms-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/10"
-          aria-label={t('common.menu')}
+          onClick={() => navigate('/vendor/products/new')}
+          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-2xl bg-forest text-white font-semibold text-sm shadow-[0_8px_20px_-8px_rgba(11,122,75,0.7)] hover:bg-forest-dark transition shrink-0"
         >
-          <Menu className="w-6 h-6" />
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">{t('vendor.products.addProduct')}</span>
         </button>
-
-        <div className="min-w-0">
-          <h1 className="text-base sm:text-lg font-extrabold leading-none truncate">{t('vendor.products.title')}</h1>
-          <p className="text-[11px] text-ink/45 dark:text-slate-500 mt-1">{t('vendor.products.subtitle')}</p>
-        </div>
-
-        <div className="ms-auto flex items-center gap-1.5">
-          {/* Add product */}
-          <button
-            onClick={() => navigate('/vendor/products/new')}
-            className="inline-flex items-center gap-1.5 h-10 px-3 sm:px-4 rounded-2xl bg-forest text-white font-semibold text-sm shadow-[0_8px_20px_-8px_rgba(11,122,75,0.7)] hover:bg-forest-dark transition"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('vendor.products.addProduct')}</span>
-          </button>
-
-          {/* Language cycle */}
-          <button
-            onClick={cycleLanguage}
-            aria-label={t('header.language')}
-            className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
-          >
-            <Globe className="w-5 h-5" />
-          </button>
-
-          {/* Notifications stub */}
-          <button
-            onClick={() => setToast(t('common.comingSoon'))}
-            aria-label="Notifications"
-            className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
-          >
-            <Bell className="w-5 h-5" />
-          </button>
-
-          {/* Dark mode toggle */}
-          <button
-            onClick={toggleDark}
-            aria-label={t('header.theme')}
-            className="grid place-items-center w-10 h-10 rounded-2xl hover:bg-black/5 dark:hover:bg-white/10"
-          >
-            {dark ? <Sun className="w-5 h-5 text-gold" /> : <Moon className="w-5 h-5" />}
-          </button>
-
-          {/* Profile circle */}
-          <span className="grid place-items-center w-9 h-9 rounded-full bg-forest text-white text-sm font-extrabold ms-0.5 shrink-0 select-none">
-            {profileInitial}
-          </span>
-        </div>
       </div>
 
       {/* Summary chips */}
