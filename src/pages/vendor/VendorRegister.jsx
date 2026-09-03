@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/authStore';
@@ -147,8 +147,18 @@ export default function VendorRegister() {
 
   const [step, setStep]           = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [otpStep, setOtpStep]     = useState(false);
+  const [otp, setOtp]             = useState('');
+  const [resend, setResend]       = useState(0);
   const [error, setError]         = useState('');
   const [loading, setLoading]     = useState(false);
+
+  // Resend countdown
+  useEffect(() => {
+    if (resend <= 0) return;
+    const id = setTimeout(() => setResend((n) => n - 1), 1000);
+    return () => clearTimeout(id);
+  }, [resend]);
 
   const [form, setForm] = useState({
     // Step 1 — API-submitted
@@ -182,31 +192,66 @@ export default function VendorRegister() {
   const prev = () => { if (step > 1) setStep((s) => s - 1); };
   const goto = (s) => { if (s < step) setStep(s); };
 
-  const submit = async () => {
+  // ── Step 1: initiate — POST /auth/register-vendor/initiate ──────────────
+  const handleInitiate = async () => {
     if (!form.agree || loading) return;
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.post('/auth/register-vendor', {
+      await api.post('/auth/register-vendor/initiate', { phone: '+251' + form.phone });
+      setOtpStep(true);
+      setOtp('');
+      setResend(60);
+      window.scrollTo({ top: 0 });
+    } catch (err) {
+      setError(err.response?.data?.error?.message ?? t('common.error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Step 2: verify + complete ─────────────────────────────────────────────
+  const handleVerify = async () => {
+    if (otp.length < 6 || loading) return;
+    setError('');
+    setLoading(true);
+    try {
+      await api.post('/auth/register-vendor/verify', { phone: '+251' + form.phone, code: otp });
+      const body = {
+        phone: '+251' + form.phone,
         name: form.name,
-        email: form.email,
-        phone: form.phone,
         password: form.password,
         storeName: form.storeName,
         kyc: {
           businessName: form.businessName,
-          docType: 'TIN Certificate', // TIN is the document collected; docUrl is a future story
+          docType: 'TIN Certificate',
           docNumber: form.tin,
           docUrl: '',
         },
-      });
+      };
+      if (form.email.trim()) body.email = form.email.trim();
+      const { data } = await api.post('/auth/register-vendor/complete', body);
       setAuth({ user: data.user, token: data.token });
+      setOtpStep(false);
       setSubmitted(true);
       window.scrollTo({ top: 0 });
     } catch (err) {
       setError(err.response?.data?.error?.message ?? t('common.error'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ── Resend — POST /auth/register-vendor/resend-otp ───────────────────────
+  const handleResend = async () => {
+    if (resend > 0 || loading) return;
+    setError('');
+    try {
+      await api.post('/auth/register-vendor/resend-otp', { phone: '+251' + form.phone });
+      setResend(60);
+      setOtp('');
+    } catch (err) {
+      setError(err.response?.data?.error?.message ?? t('common.error'));
     }
   };
 
@@ -259,6 +304,60 @@ export default function VendorRegister() {
           >
             {t('common.backToSite')}
           </Link>
+        </div>
+      </section>
+    );
+  }
+
+  // ── OTP verification screen ──────────────────────────────────────────────
+  if (otpStep) {
+    return (
+      <section className="max-w-md mx-auto px-4 py-12 text-center">
+        <h1 className="text-2xl font-extrabold">{t('auth.verifyPhone')}</h1>
+        <p className="text-ink/60 mt-2">
+          {t('auth.otpSentTo')}{' '}
+          <span className="font-semibold">+251{form.phone}</span>
+        </p>
+        <div className="mt-6 bg-white rounded-3xl ring-1 ring-black/5 shadow-soft p-6 text-start">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="000000"
+            aria-label={t('auth.verifyPhone')}
+            className="w-full text-center text-3xl font-bold tracking-[0.5em] px-4 py-4 rounded-xl ring-1 ring-black/10 bg-cream/40 outline-none focus:ring-2 focus:ring-forest"
+          />
+          {error && (
+            <p className="text-sm text-crimson font-medium mt-3" role="alert">{error}</p>
+          )}
+          <button
+            onClick={handleVerify}
+            disabled={otp.length < 6 || loading}
+            className={`w-full mt-4 h-12 rounded-2xl bg-forest text-white font-bold shadow-glow transition ${
+              otp.length < 6 || loading ? 'opacity-40 cursor-not-allowed' : 'hover:bg-forest-dark'
+            }`}
+          >
+            {loading ? t('common.loading') : t('auth.verifyBtn')}
+          </button>
+          <div className="mt-3 text-center text-sm text-ink/60">
+            {resend > 0 ? (
+              <span>{t('auth.resendIn')} {resend}s</span>
+            ) : (
+              <button onClick={handleResend} className="text-forest font-semibold hover:underline">
+                {t('auth.resendCode')}
+              </button>
+            )}
+          </div>
+          <div className="mt-2 text-center">
+            <button
+              onClick={() => { setOtpStep(false); setOtp(''); setError(''); }}
+              className="text-sm text-ink/50 hover:text-ink transition"
+            >
+              {t('auth.back')}
+            </button>
+          </div>
         </div>
       </section>
     );
@@ -561,7 +660,7 @@ export default function VendorRegister() {
               </button>
             ) : (
               <button
-                onClick={submit}
+                onClick={handleInitiate}
                 disabled={!form.agree || loading}
                 className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gold hover:bg-gold-light text-ink font-bold shadow-glow transition ${(!form.agree || loading) ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
@@ -628,7 +727,7 @@ export default function VendorRegister() {
             </button>
           ) : (
             <button
-              onClick={submit}
+              onClick={handleInitiate}
               disabled={!form.agree || loading}
               className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-2xl bg-gold text-ink font-bold transition active:scale-95 ${(!form.agree || loading) ? 'opacity-40' : ''}`}
             >

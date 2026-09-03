@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Search,
   Store, CheckCircle2, Clock, Ban,
-  CheckCircle, XCircle, PauseCircle, PlayCircle,
+  PauseCircle, PlayCircle,
   ChevronLeft, ChevronRight, User, Phone, Hash, MapPin, Calendar, BadgePercent, X,
 } from 'lucide-react';
 import api, { resolveAssetUrl } from '../../lib/api';
@@ -130,26 +130,8 @@ function VendorDrawer({ vendor, onClose, onAction }) {
           )}
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons — approval happens in /admin/approvals; here only suspend/unsuspend */}
         <div className="space-y-2">
-          {vendor.status === 'pending' && (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => onAction('approve', vendor)}
-                className="h-11 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition inline-flex items-center justify-center gap-1.5"
-              >
-                <CheckCircle className="w-4 h-4" />
-                {t('admin.vendors.actionApprove')}
-              </button>
-              <button
-                onClick={() => onAction('reject', vendor)}
-                className="h-11 rounded-xl ring-1 ring-rose-400/40 text-rose-600 text-sm font-semibold hover:bg-rose-500/10 transition inline-flex items-center justify-center gap-1.5"
-              >
-                <XCircle className="w-4 h-4" />
-                {t('admin.vendors.actionReject')}
-              </button>
-            </div>
-          )}
           {vendor.status === 'approved' && (
             <button
               onClick={() => onAction('suspend', vendor)}
@@ -181,20 +163,16 @@ function ConfirmModal({ action, vendor, onConfirm, onClose, loading }) {
   if (!action || !vendor) return null;
 
   const titleKey = {
-    approve:   'admin.vendors.confirmApprove',
-    reject:    'admin.vendors.confirmReject',
     suspend:   'admin.vendors.confirmSuspend',
     unsuspend: 'admin.vendors.confirmUnsuspend',
   }[action];
 
   const actionLabelKey = {
-    approve:   'admin.vendors.actionApprove',
-    reject:    'admin.vendors.actionReject',
     suspend:   'admin.vendors.actionSuspend',
     unsuspend: 'admin.vendors.actionUnsuspend',
   }[action];
 
-  const isDanger = action === 'reject' || action === 'suspend';
+  const isDanger = action === 'suspend';
 
   return (
     <Modal open onClose={onClose} title={t(titleKey)}>
@@ -250,28 +228,27 @@ export default function AdminVendors() {
   const [confirm, setConfirm]         = useState({ action: null, vendor: null });
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Load per-status counts on mount
-  useEffect(() => {
-    const loadCounts = async () => {
-      try {
-        const [all, approved, pending, suspended] = await Promise.all([
-          api.get('/admin/vendors', { params: { limit: 1 } }),
-          api.get('/admin/vendors', { params: { limit: 1, status: 'approved' } }),
-          api.get('/admin/vendors', { params: { limit: 1, status: 'pending' } }),
-          api.get('/admin/vendors', { params: { limit: 1, status: 'suspended' } }),
-        ]);
-        setCounts({
-          all:       all.data.total       ?? 0,
-          approved:  approved.data.total  ?? 0,
-          pending:   pending.data.total   ?? 0,
-          suspended: suspended.data.total ?? 0,
-        });
-      } catch {
-        // Counts are decorative — fail silently
-      }
-    };
-    loadCounts();
+  // Load per-status counts (called on mount and after each successful mutation)
+  const loadCounts = useCallback(async () => {
+    try {
+      const [all, approved, pending, suspended] = await Promise.all([
+        api.get('/admin/vendors', { params: { limit: 1 } }),
+        api.get('/admin/vendors', { params: { limit: 1, status: 'approved' } }),
+        api.get('/admin/vendors', { params: { limit: 1, status: 'pending' } }),
+        api.get('/admin/vendors', { params: { limit: 1, status: 'suspended' } }),
+      ]);
+      setCounts({
+        all:       all.data.total       ?? 0,
+        approved:  approved.data.total  ?? 0,
+        pending:   pending.data.total   ?? 0,
+        suspended: suspended.data.total ?? 0,
+      });
+    } catch (_) {
+      // Counts are decorative — fail silently
+    }
   }, []);
+
+  useEffect(() => { loadCounts(); }, [loadCounts]);
 
   const fetchVendors = useCallback(async () => {
     setLoading(true);
@@ -283,7 +260,7 @@ export default function AdminVendors() {
       setVendors(res.data.items ?? []);
       setTotal(res.data.total ?? 0);
       setPages(res.data.pages ?? 1);
-    } catch {
+    } catch (_) {
       setToast(t('admin.vendors.actionError'));
     } finally {
       setLoading(false);
@@ -296,41 +273,26 @@ export default function AdminVendors() {
   const handleAction = async () => {
     const { action, vendor } = confirm;
     if (!action || !vendor) return;
-    const statusMap = { approve: 'approved', reject: 'rejected', suspend: 'suspended', unsuspend: 'approved' };
+    const statusMap = { suspend: 'suspended', unsuspend: 'approved' };
     const newStatus = statusMap[action];
+    const successKey = {
+      suspend:   'admin.vendors.suspendSuccess',
+      unsuspend: 'admin.vendors.unsuspendSuccess',
+    }[action];
+
+    // Optimistic: update badge immediately and close modal
+    setVendors((prev) => prev.map((v) => v._id === vendor._id ? { ...v, status: newStatus } : v));
+    setConfirm({ action: null, vendor: null });
     setActionLoading(true);
     try {
-      const res = await api.patch(`/admin/vendors/${vendor._id}/status`, { status: newStatus });
-      const partial = res.data.vendor ?? res.data;
-      // Use status from response (authoritative); fall back to local statusMap if absent.
-      const mergedStatus = partial.status ?? newStatus;
-      // String() guards against ObjectId !== string false-negatives.
-      // Spread partial fields, but explicitly restore _id and status to avoid
-      // the response's "id" (not "_id") field ambiguity.
-      setVendors((prev) =>
-        prev
-          .map((v) =>
-            String(v._id) === String(vendor._id)
-              ? { ...v, ...partial, _id: v._id, status: mergedStatus }
-              : v
-          )
-          // Drop vendors that no longer match the active status filter.
-          .filter((v) => tab === 'all' || v.status === tab)
-      );
-      // Drawer is closed by openConfirm before this runs, but guard anyway.
-      if (kycVendor && String(kycVendor._id) === String(vendor._id)) {
-        setKycVendor((v) => ({ ...v, ...partial, _id: v._id, status: mergedStatus }));
-      }
-      const successKey = {
-        approve:   'admin.vendors.approveSuccess',
-        reject:    'admin.vendors.rejectSuccess',
-        suspend:   'admin.vendors.suspendSuccess',
-        unsuspend: 'admin.vendors.unsuspendSuccess',
-      }[action];
+      await api.patch(`/admin/vendors/${vendor._id}/status`, { status: newStatus });
       setToast(t(successKey));
-      setConfirm({ action: null, vendor: null });
-    } catch {
-      setToast(t('admin.vendors.actionError'));
+      await fetchVendors();
+      await loadCounts();
+    } catch (err) {
+      setToast(err.response?.data?.error?.message ?? err.response?.data?.message ?? t('admin.vendors.actionError'));
+      await fetchVendors(); // restore server-correct state
+      await loadCounts();
     } finally {
       setActionLoading(false);
     }
