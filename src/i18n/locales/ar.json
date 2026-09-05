@@ -853,6 +853,7 @@
       "statusPastDue": "متأخر",
       "statusCancelled": "ملغى",
       "noSubscriptions": "لم يتم العثور على اشتراكات",
+      "noPlans": "لا توجد خطط اشتراك",
       "actionError": "فشل الحفظ. يرجى المحاولة مرة أخرى."
     },
     "banners": {

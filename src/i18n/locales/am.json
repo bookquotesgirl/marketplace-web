@@ -855,6 +855,7 @@
       "statusPastDue": "ጊዜ ያለፈ",
       "statusCancelled": "ተሰርዟል",
       "noSubscriptions": "ምንም ደንበኝነት አልተገኘም",
+      "noPlans": "ምንም የደንበኝነት ዕቅዶች አልተገኙም",
       "actionError": "ማስቀመጥ አልተሳካም። እንደገና ይሞክሩ።"
     },
     "banners": {
