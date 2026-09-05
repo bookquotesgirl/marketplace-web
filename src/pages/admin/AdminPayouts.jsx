@@ -180,7 +180,7 @@ export default function AdminPayouts() {
 
   return (
     <>
-      <Toast show={!!toast}>{toast}</Toast>
+      <Toast show={!!toast} onDismiss={() => setToast(null)}>{toast}</Toast>
 
       {/* Payout confirm modal */}
       <Modal
@@ -332,9 +332,9 @@ export default function AdminPayouts() {
                       </tr>
                     </thead>
                     <tbody>
-                      {history.map((item) => (
+                      {history.map((item, idx) => (
                         <tr
-                          key={item._id}
+                          key={item._id ?? item.id ?? String(idx)}
                           className="border-b border-black/[0.04] dark:border-white/[0.06] last:border-0"
                         >
                           <td className="py-3 ps-4 pe-4 font-medium">
