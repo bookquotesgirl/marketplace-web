@@ -77,17 +77,13 @@ function GrowthChart({ data, t }) {
   const n = data.length;
 
   const maxRev = Math.max(...data.map((d) => d.revenue), 1);
-  const maxOrd = Math.max(...data.map((d) => d.orders ?? 0), 1);
 
   const xAt = (i) => PX + (i / (n - 1)) * (W - 2 * PX);
   const yRev = (v) => H - PY - (v / maxRev) * (H - 2 * PY);
-  const yOrd = (v) => H - PY - (v / maxOrd) * (H - 2 * PY);
 
   const revPts = data.map((d, i) => `${xAt(i)},${yRev(d.revenue)}`).join(' ');
-  const ordPts = data.map((d, i) => `${xAt(i)},${yOrd(d.orders ?? 0)}`).join(' ');
 
   const revArea = `${xAt(0)},${H} ${revPts} ${xAt(n - 1)},${H}`;
-  const ordArea = `${xAt(0)},${H} ${ordPts} ${xAt(n - 1)},${H}`;
 
   return (
     <>
@@ -102,10 +98,6 @@ function GrowthChart({ data, t }) {
             <stop offset="0" stopColor="#2563eb" stopOpacity="0.28" />
             <stop offset="1" stopColor="#2563eb" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="ag-ord" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#38bdf8" stopOpacity="0.20" />
-            <stop offset="1" stopColor="#38bdf8" stopOpacity="0" />
-          </linearGradient>
         </defs>
         <polygon points={revArea} fill="url(#ag-rev)" />
         <polyline
@@ -113,15 +105,6 @@ function GrowthChart({ data, t }) {
           fill="none"
           stroke="#2563eb"
           strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <polygon points={ordArea} fill="url(#ag-ord)" />
-        <polyline
-          points={ordPts}
-          fill="none"
-          stroke="#38bdf8"
-          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -277,10 +260,6 @@ export default function AdminDashboard() {
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" aria-hidden="true" />
                 {t('admin.dashboard.chartRevenue')}
               </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0" aria-hidden="true" />
-                {t('admin.dashboard.chartOrders')}
-              </span>
             </div>
           )}
         </div>
@@ -300,7 +279,6 @@ export default function AdminDashboard() {
               <thead>
                 <tr className="text-slate-400 text-[11px] uppercase tracking-wide border-b border-black/[0.06] dark:border-white/10">
                   <th className="text-start py-2 pe-4 font-semibold">{t('admin.dashboard.store')}</th>
-                  <th className="text-start py-2 pe-4 font-semibold">{t('admin.dashboard.colOrders')}</th>
                   <th className="text-start py-2 font-semibold">{t('admin.dashboard.colSales')}</th>
                 </tr>
               </thead>
@@ -317,9 +295,6 @@ export default function AdminDashboard() {
                         </span>
                         <span className="font-medium truncate max-w-[140px]">{v.storeName}</span>
                       </div>
-                    </td>
-                    <td className="py-2.5 pe-4 text-slate-500 tabular-nums">
-                      {Number(v.orders ?? 0).toLocaleString()}
                     </td>
                     <td className="py-2.5 font-semibold tabular-nums">
                       ETB {Number(v.sales ?? 0).toLocaleString()}

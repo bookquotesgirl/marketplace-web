@@ -66,7 +66,8 @@ function BannerFormModal({ banner, onClose, onSaved, t }) {
     setSaving(true);
     setFormError('');
     try {
-      const payload = { ...form, order: Number(form.order) || 0 };
+      const { isActive, ...rest } = form;
+      const payload = { ...rest, order: Number(form.order) || 0, active: isActive };
       let saved;
       if (isEdit) {
         const res = await api.patch(`/admin/banners/${banner._id}`, payload);
