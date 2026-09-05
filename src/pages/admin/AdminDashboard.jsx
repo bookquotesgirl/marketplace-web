@@ -50,17 +50,6 @@ function GrowthChart({ data, t }) {
               ETB {Number(d.revenue).toLocaleString()}
             </p>
           </div>
-          {d.orders !== undefined && (
-            <div className="text-center">
-              <p className="text-[11px] text-slate-400 mb-1 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0" aria-hidden="true" />
-                {t('admin.dashboard.chartOrders')}
-              </p>
-              <p className="text-xl font-extrabold tracking-tight">
-                {Number(d.orders).toLocaleString()}
-              </p>
-            </div>
-          )}
         </div>
         <p className="text-[11px] text-slate-400">
           {t('admin.dashboard.growthSingle').replace('{month}', d.month)}

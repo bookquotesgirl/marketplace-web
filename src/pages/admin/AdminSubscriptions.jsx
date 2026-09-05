@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Repeat, Users, TrendingUp, UserMinus,
-  Search, Check, Store, CheckCircle2, XCircle,
+  Search, Check, Store, CheckCircle2, XCircle, BadgePercent,
 } from 'lucide-react';
 import api from '../../lib/api';
 import { Spinner, Toast } from '../../components/ui';
@@ -298,7 +298,12 @@ export default function AdminSubscriptions() {
             </button>
           </div>
         </>
-      ) : null}
+      ) : (
+        <div className="rounded-[1.75rem] bg-white/60 dark:bg-white/[0.055] backdrop-blur-[28px] border border-white/70 dark:border-white/10 shadow-[0_14px_44px_-14px_rgba(30,50,90,.12)] text-center py-14">
+          <BadgePercent className="w-8 h-8 text-slate-300 mx-auto" />
+          <p className="mt-2 font-semibold text-slate-500">{t('admin.subscriptions.noPlans')}</p>
+        </div>
+      )}
 
       {/* ── Vendor subscriptions table ── */}
       <div className="rounded-[1.75rem] bg-white/60 dark:bg-white/[0.055] backdrop-blur-[28px] [backdrop-filter:blur(28px)_saturate(180%)] border border-white/70 dark:border-white/10 shadow-[0_14px_44px_-14px_rgba(30,50,90,.12)] overflow-hidden">

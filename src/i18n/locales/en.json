@@ -855,6 +855,7 @@
       "statusPastDue": "Past due",
       "statusCancelled": "Cancelled",
       "noSubscriptions": "No subscriptions found",
+      "noPlans": "No subscription plans found",
       "actionError": "Failed to save. Please try again."
     },
     "banners": {
